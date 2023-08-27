@@ -1,52 +1,18 @@
-<html>
+<html lang="en">
+
+<head>
+  <title>Traffic lights</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
 
 <table>
   <tr>
-    <td><img id="light-0" src="img/red.png" style="width: 200px; height: auto; margin-right: 150px"/></td>
-    <td><img id="light-1" src="img/green.png" style="width: 200px; height: auto; margin-right: 150px"/></td>
-    <td><img id="light-2" src="img/red.png" style="width: 200px; height: auto"/></td>
+    <td><img class="traffic-light" id="light-0" src="img/none.png" alt="traffic light" /></td>
+    <td><img class="traffic-light" id="light-1" src="img/none.png" alt="traffic light" /></td>
+    <td><img class="traffic-light" id="light-2" src="img/none.png" alt="traffic light" /></td>
   </tr>
 </table>
 
-
-<script>
-
-
-  let files = {
-    0: "img/red.png",
-    1: "img/red-yellow.png",
-    2: "img/green.png",
-    3: "img/yellow.png"
-  };
-  
-  let intervals = {
-    0: [30, 2, 30, 2],
-    1: [30, 2, 30, 2],
-    2: [30, 2, 30, 2]
-  }
-  
-  let lights = [ 0, 2, 0 ];
-  
-  let tick = function(idx) {
-    let state = (lights[idx] + 1) % 4
-    lights[idx] = state;
-    
-    let file = files[state];    
-    document.getElementById("light-" + idx).src=file;
-    let extraDelay = 0;
-    if (state == 0 || state == 2) {
-      extraDelay = Math.floor(Math.random() * 4000);
-    }
-
-    setTimeout(function() { tick(idx); }, extraDelay + intervals[idx][state] * 1000)
-  };
-
-  
-  for (i = 0; i < 3; i++) {
-    let idx = i;
-    tick(idx);
-  }
-</script>
-
+<script src="js/main.js"></script>
 
 </html>
