@@ -2,9 +2,9 @@
 
 <table>
   <tr>
-    <td><img id="light-0" src="red.png" style="width: 200px; height: auto; margin-right: 150px"/></td>
-    <td><img id="light-1" src="green.png" style="width: 200px; height: auto; margin-right: 150px"/></td>
-    <td><img id="light-2" src="red.png" style="width: 200px; height: auto"/></td>
+    <td><img id="light-0" src="img/red.png" style="width: 200px; height: auto; margin-right: 150px"/></td>
+    <td><img id="light-1" src="img/green.png" style="width: 200px; height: auto; margin-right: 150px"/></td>
+    <td><img id="light-2" src="img/red.png" style="width: 200px; height: auto"/></td>
   </tr>
 </table>
 
@@ -13,10 +13,10 @@
 
 
   let files = {
-    0: "red.png",
-    1: "red-yellow.png",
-    2: "green.png",
-    3: "yellow.png"
+    0: "img/red.png",
+    1: "img/red-yellow.png",
+    2: "img/green.png",
+    3: "img/yellow.png"
   };
   
   let intervals = {
@@ -41,8 +41,6 @@
     setTimeout(function() { tick(idx); }, extraDelay + intervals[idx][state] * 1000)
   };
 
-
-  
   
   for (i = 0; i < 3; i++) {
     let idx = i;
