@@ -2,16 +2,19 @@ const files = {
   0: "img/red.png",
   1: "img/red-yellow.png",
   2: "img/green.png",
-  3: "img/yellow.png"
+  3: "img/yellow.png",
+  4: "img/none.png",
+  5: "img/yellow.png"
 };
 
-const DEFAULT_INTERVALS = [30, 2, 30, 2];
+const DEFAULT_INTERVALS = [30, 2, 30, 2, 1, 1];
 const INITIAL_STATE = 0;
 
 const newLight = function() {
   return {
     state: INITIAL_STATE,
-    intervals: DEFAULT_INTERVALS
+    intervals: DEFAULT_INTERVALS,
+    cycleLength: DEFAULT_INTERVALS[0] + DEFAULT_INTERVALS[1] + DEFAULT_INTERVALS[2] + DEFAULT_INTERVALS[3]
   };
 }
 
@@ -21,19 +24,37 @@ const count = function() {
   return Object.keys(trafficLights).length;
 }
 
-const tick = function(idx) {
-  if (idx <= count()) {
-    const light = trafficLights[idx];
+let failure = false;
+
+const startFailure = function() {
+  console.log("startFailure");
+  failure = true;
+  for (let i = 0; i < count(); i++) {
+    trafficLights[i].state = 4;
+  }
+}
+
+const stopFailure = function() {
+  console.log("stopFailure");
+  failure = false;
+  for (let i = 0; i < count(); i++) {
+    trafficLights[i].state = 0; //TODO revert back to what has been before
+  }
+}
+
+const redraw = function(idx) {
+  const light = trafficLights[idx];
+  if (light.state >= 4) {
+    light.state = 4 + (light.state + 1) % 2;
+  } else {
     light.state = (light.state + 1) % 4;
-    document.getElementById("light-" + idx).src = files[light.state];
+  }
+  document.getElementById("light-" + idx).src = files[light.state];
+}
 
-    let extraDelay = 0;
-    if (light.state == 0 || light.state == 2) {
-      extraDelay = Math.floor(Math.random() * 4000);
-    }
-
-    let delay = extraDelay + light.intervals[light.state] * 1000;
-    setTimeout(() => tick(idx), delay);
+const tick = function(idx) {
+  if (idx < count()) {
+    redraw(idx);
   }
 };
 
@@ -51,11 +72,10 @@ const addLight = function() {
   td.appendChild(img);
 
   document.getElementById("traffic-lights").appendChild(td);
-  tick(idx);
 }
 
 const removeLight = function() {
-  if (count() >= 0) {
+  if (count() > 1) {
     const idx = count() - 1;
     delete trafficLights[idx];
     document.getElementById("light-" + idx).remove();
@@ -68,14 +88,12 @@ const requestWakeLock = async () => {
   try {
     wakeLock = await navigator.wakeLock.request();
     wakeLock.addEventListener('release', () => {
-      console.log('Screen Wake Lock released:', wakeLock.released);
       document.getElementById("control-wakelock").checked = false;
     });
-    console.log('Screen Wake Lock released:', wakeLock.released);
+    document.getElementById("control-wakelock").checked = true;
   } catch (err) {
     console.error(`${err.name}, ${err.message}`);
   }
-  document.getElementById("control-wakelock").checked = true;
 };
 
 // Function that attempts to release the wake lock.
@@ -93,7 +111,6 @@ const releaseWakeLock = async () => {
 
 
 const toggleWakeLock = async (e) => {
-  console.log(e);
   if (e.srcElement.checked) {
     requestWakeLock();
   } else {
@@ -106,3 +123,48 @@ document.getElementById("control-remove").addEventListener("click", removeLight)
 document.getElementById("control-wakelock").addEventListener("click", toggleWakeLock);
 
 addLight();
+
+function globalTick() {
+//  console.log(new Date());
+
+  if (failure) {
+    if (Math.random() < 0.05) {
+      stopFailure();
+    }
+  } else {
+    if (Math.random() < 0.01) {
+      startFailure();
+    }
+  }
+
+  let timestampSeconds = Math.floor(Date.now() / 1000);
+
+  for (let i = 0; i < count(); i++) {
+    let light = trafficLights[i];
+    let currentState = trafficLights[i].state;
+    let cycleSecond = timestampSeconds % light.cycleLength;
+
+    for (let st = 0; st < 4; st++) {
+      cycleSecond -= light.intervals[st];
+      if (cycleSecond <= 0) {
+        if (currentState != st) {
+          tick(i);
+        }
+        break;
+      }
+
+    }
+  }
+}
+
+function runClock() {
+  let now = new Date();
+  let timeToNextTick = 1000 - now.getMilliseconds();
+  setTimeout(function() {
+    globalTick();
+    runClock();
+  }, timeToNextTick);
+}
+
+globalTick();
+runClock();
