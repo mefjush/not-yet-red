@@ -5,12 +5,16 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
+<div class="controls">
+  <h2>Controls</h2>
+  <a href="#" id="control-add">Add</a>
+  <a href="#" id="control-remove">Remove</a>
+  <input type="checkbox" id="control-wakelock" name="Wake-lock" value="wakelock">
+  <label for="control-wakelock">Wake-lock</label>
+</div>
+
 <table>
-  <tr>
-    <td><img class="traffic-light" id="light-0" src="img/none.png" alt="traffic light" /></td>
-    <td><img class="traffic-light" id="light-1" src="img/none.png" alt="traffic light" /></td>
-    <td><img class="traffic-light" id="light-2" src="img/none.png" alt="traffic light" /></td>
-  </tr>
+  <tr id="traffic-lights"></tr>
 </table>
 
 <script src="js/main.js"></script>
