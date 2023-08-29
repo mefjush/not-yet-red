@@ -63,7 +63,7 @@ class TrafficLight {
 
   redraw(currentTimestamp) {
     const state = this.currentState(currentTimestamp);
-    document.getElementById("light-" + this.id).src = files[this.phases[state].state];
+    document.getElementById(`light-${this.id}-img`).src = files[this.phases[state].state];
   }
 }
 
@@ -165,8 +165,10 @@ const addLight = function() {
   trafficLights[idx] = light;
 
   const td = document.createElement("td");
+  td.id = `light-${idx}`;
+
   const img = document.createElement("img");
-  img.id = "light-" + idx;
+  img.id = `light-${idx}-img`;
   img.alt = "traffic light";
   img.className = "traffic-light";
   img.src = files[trafficLights[idx].currentState(currentTimestamp)];
@@ -188,7 +190,7 @@ const removeLight = function() {
   if (count() > 1) {
     const idx = count() - 1;
     delete trafficLights[idx];
-    document.getElementById("light-" + idx).remove();
+    document.getElementById(`light-${idx}`).remove();
   }
 }
 
