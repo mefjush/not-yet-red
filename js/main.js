@@ -62,7 +62,7 @@ class TrafficLight {
   }
 
   redraw(currentTimestamp) {
-    let state = this.currentState(currentTimestamp);
+    const state = this.currentState(currentTimestamp);
     document.getElementById("light-" + this.id).src = files[this.phases[state].state];
   }
 }
@@ -107,7 +107,6 @@ class Failure {
 }
 
 const trafficLights = {};
-const failureTrafficLights = {};
 const failure = new Failure();
 
 const count = function() {
@@ -163,7 +162,6 @@ const addLight = function() {
 
   const light = new TrafficLight(idx, DEFAULT_PHASES, DEFAULT_OFFSET);
   trafficLights[idx] = light;
-  failureTrafficLights[idx] = new TrafficLight(idx, FAILURE_PHASES);
 
   const td = document.createElement("td");
   const img = document.createElement("img");
@@ -244,10 +242,14 @@ function forceClock() {
   runClock();
 }
 
+function failureTrafficLights(trafficLights) {
+  return Object.fromEntries(Object.keys(trafficLights).map((idx) => [idx, new TrafficLight(idx, FAILURE_PHASES)]));
+}
+
 function runClock() {
   const currentTimestamp = Date.now();
 
-  const currentTrafficLights = failure.currentState(currentTimestamp) ? failureTrafficLights : trafficLights;
+  const currentTrafficLights = failure.currentState(currentTimestamp) ? failureTrafficLights(trafficLights) : trafficLights;
 
   Object.values(currentTrafficLights).forEach(light => light.redraw(currentTimestamp));
 
