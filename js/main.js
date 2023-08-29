@@ -128,7 +128,8 @@ const createPhaseInput = function(lightIdx, phaseIdx, duration) {
   return createInput(id, value, labelText, (e) => {
     const light = trafficLights[lightIdx];
     const updatedPhases = [...light.phases];
-    updatedPhases[phaseIdx].duration = parseInt(e.target.value) * 1000;
+    const oldPhase = updatedPhases[phaseIdx];
+    updatedPhases[phaseIdx] = { ...oldPhase, duration: parseInt(e.target.value) * 1000 };
     trafficLights[lightIdx] = new TrafficLight(lightIdx, updatedPhases, light.offset);
   });
 }
