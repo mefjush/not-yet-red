@@ -7,21 +7,16 @@ const files = {
   5: "img/yellow.png"
 };
 
-const FAILURE_DURATION = 15000;
-const FAILURE_PROBABILITY = 0.05;
+const FAILURE_DURATION = 10000;
+const FAILURE_PROBABILITY = 0.1;
+
+const DEFAULT_OFFSET = 0;
 
 const DEFAULT_PHASES = [
   { state: 0, duration: 30000 },
   { state: 1, duration: 2000 },
   { state: 2, duration: 30000 },
   { state: 3, duration: 2000 }
-];
-
-const INVERTED_PHASES = [
-  { state: 2, duration: 30000 },
-  { state: 3, duration: 2000 },
-  { state: 0, duration: 30000 },
-  { state: 1, duration: 2000 }
 ];
 
 const FAILURE_PHASES = [
@@ -31,21 +26,26 @@ const FAILURE_PHASES = [
 
 const INITIAL_STATE = 0;
 
+function negativeSafeMod(n, m) {
+  return ((n % m) + m) % m;
+}
+
 class TrafficLight {
-  constructor(id, phases) {
+  constructor(id, phases, offset) {
     this.id = id;
     this.phases = phases;
+    this.offset = offset || DEFAULT_OFFSET;
     this.intervals = phases.map(phase => phase.duration);
     this.cycleLength = this.intervals.reduce((sum, a) => sum + a, 0);
   }
 
   nextTransition(currentTimestamp) {
-    let cycleStart = currentTimestamp - (currentTimestamp % this.cycleLength);
+    const cycleStart = Math.floor((currentTimestamp - this.offset) / this.cycleLength) * this.cycleLength + this.offset;
     let cycleTimestamp = cycleStart;
     let st = 0;
     while (cycleTimestamp < currentTimestamp) {
-      cycleTimestamp += this.intervals[st % this.intervals.length];
-      st++;
+      cycleTimestamp += this.intervals[st];
+      st = (st + 1) % this.intervals.length;
     }
     return {
       state: st,
@@ -58,7 +58,7 @@ class TrafficLight {
   }
 
   currentState(currentTimestamp) {
-    return (this.nextTransition(currentTimestamp).state - 1) % this.intervals.length;
+    return negativeSafeMod(this.nextTransition(currentTimestamp).state - 1, this.intervals.length);
   }
 
   redraw(currentTimestamp) {
@@ -86,51 +86,84 @@ class Failure {
       while (this.state(bucket) == currentState) {
          bucket += 1;
       }
-      console.log("bucket " + bucket);
-      this.nextFailure = bucket * this.duration;
-      console.log("Next failure in: " + (this.nextFailure - currentTimestamp) + " ms");
+      this.nextTransition = bucket * this.duration;
+      console.log("Next failure transition in: " + (this.nextTransition - currentTimestamp) + " ms");
     }
 
-    return this.nextFailure;
+    return this.nextTransition;
   }
 
   state(bucket) {
-    let rand = this.deterministicRand(bucket);
-    console.log("bucket " + bucket);
+    const rand = this.deterministicRand(bucket);
     console.log("rand " + rand);
     const state = (rand / 100) < FAILURE_PROBABILITY;
-    console.log(bucket + " -> " + state)
     return state;
   }
 
   currentState(currentTimestamp) {
-    let bucket = Math.floor(currentTimestamp / this.duration);
-    console.log("current failure state " + this.state(bucket));
+    const bucket = Math.floor(currentTimestamp / this.duration);
     return this.state(bucket);
   }
 }
 
-const newLight = function(id) {
-  return new TrafficLight(id, DEFAULT_PHASES);
-}
-
-let failure = false;
 const trafficLights = {};
-const invertedLights = {};
 const failureTrafficLights = {};
-const failureObj = new Failure();
+const failure = new Failure();
 
 const count = function() {
   return Object.keys(trafficLights).length;
+}
+
+const createOffsetInput = function(lightIdx, offset) {
+  return createInput(`offset-${lightIdx}`, offset, "Offset: ", (e) => {
+    const light = trafficLights[lightIdx];
+    const newOffset = parseInt(e.target.value) * 1000;
+    trafficLights[lightIdx] = new TrafficLight(lightIdx, light.phases, newOffset);
+  });
+}
+
+const createPhaseInput = function(lightIdx, phaseIdx, duration) {
+  const id = `phase-time-${lightIdx}-${phaseIdx}`;
+  const value = duration / 1000;
+  const labelText = `Phase ${phaseIdx} duration (s): `;
+  return createInput(id, value, labelText, (e) => {
+    const light = trafficLights[lightIdx];
+    const updatedPhases = [...light.phases];
+    updatedPhases[phaseIdx].duration = parseInt(e.target.value) * 1000;
+    trafficLights[lightIdx] = new TrafficLight(lightIdx, updatedPhases, light.offset);
+  });
+}
+
+const createInput = function(id, value, labelText, listener) {
+  const li = document.createElement("li");
+
+  const input = document.createElement("input");
+  input.type = "number";
+  input.id = id;
+  input.name = id;
+  input.value = value;
+  input.addEventListener("input", (e) => {
+    listener(e);
+    forceClock();
+  });
+
+  const label = document.createElement("label");
+  label.htmlFor = id;
+  label.textContent = labelText;
+
+  li.appendChild(label);
+  li.appendChild(input);
+
+  return li;
 }
 
 const addLight = function() {
   const currentTimestamp = Date.now();
   const idx = count();
 
-  trafficLights[idx] = newLight(idx);
+  const light = new TrafficLight(idx, DEFAULT_PHASES, DEFAULT_OFFSET);
+  trafficLights[idx] = light;
   failureTrafficLights[idx] = new TrafficLight(idx, FAILURE_PHASES);
-  invertedLights[idx] = new TrafficLight(idx, INVERTED_PHASES);
 
   const td = document.createElement("td");
   const img = document.createElement("img");
@@ -138,6 +171,15 @@ const addLight = function() {
   img.alt = "traffic light";
   img.className = "traffic-light";
   img.src = files[trafficLights[idx].currentState(currentTimestamp)];
+
+  const form = document.createElement("form");
+  const ul = document.createElement("ul");
+
+  ul.appendChild(createOffsetInput(idx, light.offset));
+  light.phases.map((phase, phaseIdx) => createPhaseInput(idx, phaseIdx, phase.duration)).forEach(el => ul.appendChild(el));
+
+  form.appendChild(ul);
+  td.appendChild(form);
   td.appendChild(img);
 
   document.getElementById("traffic-lights").appendChild(td);
@@ -186,41 +228,42 @@ const toggleWakeLock = async (e) => {
   }
 }
 
-let inverted = false;
-
-const toggleInvert = function(e) {
-  if (e.srcElement.checked) {
-    inverted = true;
-  } else {
-    inverted = false;
-  }
-  console.log(inverted);
-}
-
 document.getElementById("control-add").addEventListener("click", addLight);
 document.getElementById("control-remove").addEventListener("click", removeLight);
-document.getElementById("control-invert").addEventListener("click", toggleInvert);
 document.getElementById("control-wakelock").addEventListener("click", toggleWakeLock);
 
 addLight();
 
+let nextTimeout = null;
+
+function forceClock() {
+  console.log("Forcing clock!");
+  if (nextTimeout != null) {
+    clearTimeout(nextTimeout);
+  }
+  runClock();
+}
+
 function runClock() {
   const currentTimestamp = Date.now();
 
-  const normalLights = inverted ? invertedLights : trafficLights;
-  const currentTrafficLights = failureObj.currentState(currentTimestamp) ? failureTrafficLights : normalLights;
+  const currentTrafficLights = failure.currentState(currentTimestamp) ? failureTrafficLights : trafficLights;
 
   Object.values(currentTrafficLights).forEach(light => light.redraw(currentTimestamp));
 
   const lights = Object.values(currentTrafficLights);
 
-  const timestamps = [...lights, failureObj].map(light => light.nextStateTimestamp(currentTimestamp));
-  const timeToNextTick = Math.max(0, Math.min(...timestamps) - currentTimestamp);
+  const timestamps = [...lights, failure].map(light => light.nextStateTimestamp(currentTimestamp));
+
+  const loopEndTimestamp = Date.now();
+
+  const timeToNextTick = Math.max(0, Math.min(...timestamps) - loopEndTimestamp);
 
   console.log(`Current timestamp ${currentTimestamp}`);
+  console.log(`Loop time ${loopEndTimestamp - currentTimestamp} ms`);
   console.log(`Next tick in ${timeToNextTick} ms`);
 
-  setTimeout(function() {
+  nextTimeout = setTimeout(function() {
     runClock();
   }, timeToNextTick);
 }
