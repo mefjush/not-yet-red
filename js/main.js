@@ -7,8 +7,10 @@ const files = {
   5: "img/yellow.png"
 };
 
-const FAILURE_DURATION = 10000;
-const FAILURE_PROBABILITY = 0.1;
+const MAX_NEXT_TRANSITION_WAIT = 300000;
+
+let DEFAULT_FAILURE_DURATION = 10000;
+let DEFAULT_FAILURE_PROBABILITY = 0.1;
 
 const DEFAULT_OFFSET = 0;
 
@@ -68,9 +70,9 @@ class TrafficLight {
 }
 
 class Failure {
-  constructor() {
-    this.duration = FAILURE_DURATION;
-    this.probability = FAILURE_PROBABILITY;
+  constructor(duration, probability) {
+    this.duration = duration || DEFAULT_FAILURE_DURATION;
+    this.probability = probability || DEFAULT_FAILURE_PROBABILITY;
     this.nextTransition = 0;
   }
 
@@ -85,8 +87,13 @@ class Failure {
       let bucket = Math.floor(currentTimestamp / this.duration) + 1;
       while (this.state(bucket) == currentState) {
          bucket += 1;
+         this.nextTransition = bucket * this.duration;
+         if (this.nextTransition - currentTimestamp > MAX_NEXT_TRANSITION_WAIT) {
+           console.log(`No next transition found, will force-transit in ${MAX_NEXT_TRANSITION_WAIT / 1000} s`);
+           break;
+         }
       }
-      this.nextTransition = bucket * this.duration;
+
       console.log("Next failure transition in: " + (this.nextTransition - currentTimestamp) + " ms");
     }
 
@@ -96,7 +103,7 @@ class Failure {
   state(bucket) {
     const rand = this.deterministicRand(bucket);
     console.log("rand " + rand);
-    const state = (rand / 100) < FAILURE_PROBABILITY;
+    const state = (rand / 100) < this.probability;
     return state;
   }
 
@@ -107,14 +114,14 @@ class Failure {
 }
 
 const trafficLights = {};
-const failure = new Failure();
+let failure = new Failure();
 
 const count = function() {
   return Object.keys(trafficLights).length;
 }
 
 const createOffsetInput = function(lightIdx, offset) {
-  return createInput(`offset-${lightIdx}`, offset, "Offset: ", (e) => {
+  return createInput(`offset-${lightIdx}`, offset, "Offset", (e) => {
     const light = trafficLights[lightIdx];
     const newOffset = parseInt(e.target.value) * 1000;
     trafficLights[lightIdx] = new TrafficLight(lightIdx, light.phases, newOffset);
@@ -124,7 +131,7 @@ const createOffsetInput = function(lightIdx, offset) {
 const createPhaseInput = function(lightIdx, phaseIdx, duration) {
   const id = `phase-time-${lightIdx}-${phaseIdx}`;
   const value = duration / 1000;
-  const labelText = `Phase ${phaseIdx} duration (s): `;
+  const labelText = `Phase ${phaseIdx} duration`;
   return createInput(id, value, labelText, (e) => {
     const light = trafficLights[lightIdx];
     const updatedPhases = [...light.phases];
@@ -138,14 +145,23 @@ const createInput = function(id, value, labelText, listener) {
   const li = document.createElement("li");
 
   const input = document.createElement("input");
-  input.type = "number";
+  input.type = "range";
   input.id = id;
   input.name = id;
   input.value = value;
+  input.max = 90;
   input.addEventListener("input", (e) => {
+    document.getElementById(`${id}-value`).value = `${e.target.value} s`;
     listener(e);
     forceClock();
   });
+
+  const inputValue = document.createElement("input");
+  inputValue.type = "text";
+  inputValue.id = `${id}-value`;
+  inputValue.className = "input-value";
+  inputValue.value = `${value} s`;
+  inputValue.disabled = true;
 
   const label = document.createElement("label");
   label.htmlFor = id;
@@ -153,6 +169,7 @@ const createInput = function(id, value, labelText, listener) {
 
   li.appendChild(label);
   li.appendChild(input);
+  li.appendChild(inputValue);
 
   return li;
 }
@@ -175,6 +192,7 @@ const addLight = function() {
 
   const form = document.createElement("form");
   const ul = document.createElement("ul");
+  ul.className = "traffic-light-controls";
 
   ul.appendChild(createOffsetInput(idx, light.offset));
   light.phases.map((phase, phaseIdx) => createPhaseInput(idx, phaseIdx, phase.duration)).forEach(el => ul.appendChild(el));
@@ -229,8 +247,20 @@ const toggleWakeLock = async (e) => {
   }
 }
 
+const updateFailureDuration = (e) => {
+  failure = new Failure(e.target.value * 1000, failure.probability);
+  runClock();
+}
+
+const updateFailureProbability = (e) => {
+  failure = new Failure(failure.duration, e.target.value);
+  runClock();
+}
+
 document.getElementById("control-add").addEventListener("click", addLight);
 document.getElementById("control-remove").addEventListener("click", removeLight);
+document.getElementById("control-failure-duration").addEventListener("input", updateFailureDuration);
+document.getElementById("control-failure-probability").addEventListener("input", updateFailureProbability);
 document.getElementById("control-wakelock").addEventListener("click", toggleWakeLock);
 
 addLight();
