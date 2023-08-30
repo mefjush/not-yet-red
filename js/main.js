@@ -1,10 +1,9 @@
-const files = {
-  0: "img/red.png",
-  1: "img/red-yellow.png",
-  2: "img/green.png",
-  3: "img/yellow.png",
-  4: "img/none.png",
-  5: "img/yellow.png"
+const STATE = {
+  RED: { "name": "Red", "file": "img/red.png", "color": "#FF0000"},
+  RED_YELLOW: { "name": "Red-Yellow", "file": "img/red-yellow.png", "color": "#FFA500"},
+  GREEN: { "name": "Green", "file": "img/green.png", "color": "#008000"},
+  YELLOW: { "name": "Yellow", "file": "img/yellow.png", "color": "#FFFF00"},
+  NONE: { "name": "None", "file": "img/none.png", "color": "#D3D3D3"},
 };
 
 const MAX_NEXT_TRANSITION_WAIT = 300000;
@@ -15,15 +14,15 @@ let DEFAULT_FAILURE_PROBABILITY = 0.1;
 const DEFAULT_OFFSET = 0;
 
 const DEFAULT_PHASES = [
-  { state: 0, duration: 30000 },
-  { state: 1, duration: 2000 },
-  { state: 2, duration: 30000 },
-  { state: 3, duration: 2000 }
+  { state: STATE.RED, duration: 30000 },
+  { state: STATE.RED_YELLOW, duration: 2000 },
+  { state: STATE.GREEN, duration: 30000 },
+  { state: STATE.YELLOW, duration: 2000 }
 ];
 
 const FAILURE_PHASES = [
-  { state: 4, duration: 1000 },
-  { state: 5, duration: 1000 }
+  { state: STATE.YELLOW, duration: 1000 },
+  { state: STATE.NONE, duration: 1000 }
 ];
 
 const INITIAL_STATE = 0;
@@ -44,13 +43,13 @@ class TrafficLight {
   nextTransition(currentTimestamp) {
     const cycleStart = Math.floor((currentTimestamp - this.offset) / this.cycleLength) * this.cycleLength + this.offset;
     let cycleTimestamp = cycleStart;
-    let st = 0;
+    let phaseIdx = 0;
     while (cycleTimestamp < currentTimestamp) {
-      cycleTimestamp += this.intervals[st];
-      st = (st + 1) % this.intervals.length;
+      cycleTimestamp += this.intervals[phaseIdx];
+      phaseIdx = (phaseIdx + 1) % this.intervals.length;
     }
     return {
-      state: st,
+      phaseIdx: phaseIdx,
       timestamp: cycleTimestamp
     };
   }
@@ -59,13 +58,14 @@ class TrafficLight {
     return this.nextTransition(currentTimestamp).timestamp;
   }
 
-  currentState(currentTimestamp) {
-    return negativeSafeMod(this.nextTransition(currentTimestamp).state - 1, this.intervals.length);
+  currentPhase(currentTimestamp) {
+    const state = negativeSafeMod(this.nextTransition(currentTimestamp).phaseIdx - 1, this.intervals.length);
+    return this.phases[state];
   }
 
   redraw(currentTimestamp) {
-    const state = this.currentState(currentTimestamp);
-    document.getElementById(`light-${this.id}-img`).src = files[this.phases[state].state];
+    const state = this.currentPhase(currentTimestamp).state;
+    document.getElementById(`light-${this.id}-img`).src = state.file;
   }
 }
 
@@ -125,19 +125,21 @@ const createOffsetInput = function(lightIdx, offset) {
     const light = trafficLights[lightIdx];
     const newOffset = parseInt(e.target.value) * 1000;
     trafficLights[lightIdx] = new TrafficLight(lightIdx, light.phases, newOffset);
+    updateIndicator(lightIdx);
   });
 }
 
-const createPhaseInput = function(lightIdx, phaseIdx, duration) {
+const createPhaseInput = function(lightIdx, phaseIdx, phase) {
   const id = `phase-time-${lightIdx}-${phaseIdx}`;
-  const value = duration / 1000;
-  const labelText = `Phase ${phaseIdx} duration`;
+  const value = phase.duration / 1000;
+  const labelText = `${phase.state.name} duration`;
   return createInput(id, value, labelText, (e) => {
     const light = trafficLights[lightIdx];
     const updatedPhases = [...light.phases];
     const oldPhase = updatedPhases[phaseIdx];
     updatedPhases[phaseIdx] = { ...oldPhase, duration: parseInt(e.target.value) * 1000 };
     trafficLights[lightIdx] = new TrafficLight(lightIdx, updatedPhases, light.offset);
+    updateIndicator(lightIdx);
   });
 }
 
@@ -174,6 +176,36 @@ const createInput = function(id, value, labelText, listener) {
   return li;
 }
 
+const createSegment = function(phase, length) {
+  const cell = document.createElement("div");
+  cell.className = "indicator";
+  cell.style.width = "100px";
+  cell.style.height = `${3 * length / 1000}px`;
+  cell.style.backgroundColor = phase.state.color;
+  return cell;
+}
+
+const updateIndicator = function(lightIdx) {
+  const indicator = document.getElementById(`light-indicator-${lightIdx}`);
+
+  const light = trafficLights[lightIdx];
+  let offset = light.offset;
+  let phaseIdx = 0;
+  while (offset > 0) {
+    phaseIdx = negativeSafeMod(phaseIdx - 1, light.phases.length);
+    offset -= light.phases[phaseIdx].duration;
+  }
+
+  let cells = [];
+  cells.push(createSegment(light.phases[phaseIdx], light.phases[phaseIdx].duration + offset));
+  for (let segment = 0; segment < light.phases.length; segment++) {
+    let index = (phaseIdx + segment + 1) % light.phases.length;
+    let duration = (segment == light.phases.length - 1) ? (-offset) : light.phases[index].duration;
+    cells.push(createSegment(light.phases[index], duration));
+  }
+  indicator.replaceChildren(...cells);
+}
+
 const addLight = function() {
   const currentTimestamp = Date.now();
   const idx = count();
@@ -188,20 +220,29 @@ const addLight = function() {
   img.id = `light-${idx}-img`;
   img.alt = "traffic light";
   img.className = "traffic-light";
-  img.src = files[trafficLights[idx].currentState(currentTimestamp)];
+  img.src = trafficLights[idx].currentPhase(currentTimestamp).state.file;
 
   const form = document.createElement("form");
   const ul = document.createElement("ul");
   ul.className = "traffic-light-controls";
 
   ul.appendChild(createOffsetInput(idx, light.offset));
-  light.phases.map((phase, phaseIdx) => createPhaseInput(idx, phaseIdx, phase.duration)).forEach(el => ul.appendChild(el));
+  light.phases.map((phase, phaseIdx) => createPhaseInput(idx, phaseIdx, phase)).forEach(el => ul.appendChild(el));
 
   form.appendChild(ul);
+
+  const indicator = document.createElement("div");
+  indicator.id = `light-indicator-${idx}`;
+  indicator.style.margin = "auto";
+  indicator.style.width = "100px";
+
   td.appendChild(form);
+  td.appendChild(indicator);
   td.appendChild(img);
 
   document.getElementById("traffic-lights").appendChild(td);
+
+  updateIndicator(idx);
 }
 
 const removeLight = function() {
@@ -249,12 +290,12 @@ const toggleWakeLock = async (e) => {
 
 const updateFailureDuration = (e) => {
   failure = new Failure(e.target.value * 1000, failure.probability);
-  runClock();
+  forceClock();
 }
 
 const updateFailureProbability = (e) => {
   failure = new Failure(failure.duration, e.target.value);
-  runClock();
+  forceClock();
 }
 
 document.getElementById("control-add").addEventListener("click", addLight);
