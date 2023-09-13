@@ -1,0 +1,52 @@
+const DEFAULT_OFFSET = 0;
+
+const STATE = {
+  RED: { "name": "Red", "file": "img/red.png", "color": "#FF0000"},
+  RED_YELLOW: { "name": "Red-Yellow", "file": "img/red-yellow.png", "color": "#FFA500"},
+  GREEN: { "name": "Green", "file": "img/green.png", "color": "#008000"},
+  YELLOW: { "name": "Yellow", "file": "img/yellow.png", "color": "#FFFF00"},
+  NONE: { "name": "None", "file": "img/none.png", "color": "#D3D3D3"},
+};
+
+function negativeSafeMod(n, m) {
+  return ((n % m) + m) % m;
+}
+
+const DEFAULT_PHASES = [
+  { state: STATE.RED, duration: 5000 },
+  { state: STATE.RED_YELLOW, duration: 2000 },
+  { state: STATE.GREEN, duration: 5000 },
+  { state: STATE.YELLOW, duration: 2000 }
+];
+
+export default class TrafficLight {
+  constructor(phases, offset) {
+    this.phases = phases || DEFAULT_PHASES;
+    this.offset = offset || DEFAULT_OFFSET;
+    this.intervals = this.phases.map(phase => phase.duration);
+    this.cycleLength = this.intervals.reduce((sum, a) => sum + a, 0);
+  }
+
+  nextTransition(currentTimestamp) {
+    const cycleStart = Math.floor((currentTimestamp - this.offset) / this.cycleLength) * this.cycleLength + this.offset;
+    let cycleTimestamp = cycleStart;
+    let phaseIdx = 0;
+    while (cycleTimestamp < currentTimestamp) {
+      cycleTimestamp += this.intervals[phaseIdx];
+      phaseIdx = (phaseIdx + 1) % this.intervals.length;
+    }
+    return {
+      phaseIdx: phaseIdx,
+      timestamp: cycleTimestamp
+    };
+  }
+
+  nextStateTimestamp(currentTimestamp) {
+    return this.nextTransition(currentTimestamp).timestamp;
+  }
+
+  currentPhase(currentTimestamp) {
+    const state = negativeSafeMod(this.nextTransition(currentTimestamp).phaseIdx - 1, this.intervals.length);
+    return this.phases[state];
+  }
+}
