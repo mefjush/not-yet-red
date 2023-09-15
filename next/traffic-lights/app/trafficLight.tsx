@@ -19,6 +19,11 @@ const DEFAULT_PHASES = [
   { state: STATE.YELLOW, duration: 2000 }
 ];
 
+const FAILURE_PHASES = [
+  { state: STATE.YELLOW, duration: 2000 },
+  { state: STATE.NONE, duration: 2000 }
+];
+
 const defaultPhases = (cycleLength, lightSettings) => {
   const DEFAULT_YELLOW_LENGTH = 2000
   const timeLeft = cycleLength - 2 * DEFAULT_YELLOW_LENGTH
@@ -32,8 +37,8 @@ const defaultPhases = (cycleLength, lightSettings) => {
 }
 
 export default class TrafficLight {
-  constructor(crossingSettings, lightSettings, phases) {
-    this.phases = phases || defaultPhases(crossingSettings.cycleLength, lightSettings)
+  constructor(crossingSettings, lightSettings, failed) {
+    this.phases = failed ? FAILURE_PHASES : defaultPhases(crossingSettings.cycleLength, lightSettings)
     this.offset = lightSettings.offset || DEFAULT_OFFSET
     this.intervals = this.phases.map(phase => phase.duration)
     this.cycleLength = this.intervals.reduce((sum, a) => sum + a, 0)

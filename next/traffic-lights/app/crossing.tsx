@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import LightComponent from './light'
 import Clock from './clock'
 import TrafficLight from './trafficLight'
+import Failure from './failure'
 import Input from './input'
 
 const DEFAULT_FAILURE_DURATION = 10000
@@ -26,11 +27,15 @@ export default function CrossingComponent({time, replaceLight}) {
 
   const [lightSettings, setLightSettings] = useState([DEFAULT_LIGHT_SETTINGS])
 
-  const lights = () => lightSettings.map(lightSetting => new TrafficLight(crossingSettings, lightSetting))
+  const failure = new Failure(crossingSettings.failure.duration, crossingSettings.failure.probability)
+
+  const hasFailed = failure.currentState(currentTimestamp)
+
+  const lights = () => lightSettings.map(lightSetting => new TrafficLight(crossingSettings, lightSetting, hasFailed))
 
   useEffect(() => {
     const clock = new Clock()
-    clock.register(lights(), setCurrentTimestamp)
+    clock.register([...lights(), failure], setCurrentTimestamp)
     return () => {
       clock.unregister();
     };
@@ -53,6 +58,7 @@ export default function CrossingComponent({time, replaceLight}) {
     copy.splice(index, 1)
     setLightSettings(copy)
   }
+
 
   return (
     <div>
