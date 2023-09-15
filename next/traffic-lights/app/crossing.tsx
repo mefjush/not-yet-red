@@ -62,7 +62,7 @@ export default function CrossingComponent({time, replaceLight}) {
 
   return (
     <div>
-      <h1 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Crossing</h1>
+      <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Crossing</h2>
       <form className="space-y-4">
         <Input label="Cycle length" id="cycle-length" min={10} value={crossingSettings.cycleLength / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: e.target.value * 1000 }) } />
         <Input label="Failure duration" id="failure-duration" min={10} value={crossingSettings.failure.duration / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: e.target.value * 1000 } }) }/>
