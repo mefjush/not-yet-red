@@ -1,13 +1,15 @@
 const DEFAULT_FAILURE_DURATION = 10000;
 const DEFAULT_FAILURE_PROBABILITY = 0.1;
 
+interface ClockListener {
+  nextStateTimestamp(d: number): number;
+}
+
 export default class Clock {
 
-  register(listeners, tickCallback) {
-    if (this.listeners) {
-      console.log("Double register!!!");
-    }
+  nextTimeout: ReturnType<typeof setTimeout> | null = null
 
+  register(listeners: ClockListener[], tickCallback: any) {
     const currentTimestamp = Date.now()
     const timestamps = listeners.map(listener => listener.nextStateTimestamp(currentTimestamp))
     const timeToNextTick = Math.max(0, Math.min(...timestamps) - currentTimestamp)

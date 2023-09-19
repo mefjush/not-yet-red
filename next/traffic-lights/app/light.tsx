@@ -2,9 +2,12 @@
 
 import { useState } from 'react'
 
+import TrafficLight from './trafficLight'
+import LightSettings from './lightSettings'
+
 import Input from './input'
 
-export default function LightComponent({ index, currentTimestamp, light, lightSettings, onLightSettingsChange, onClone, onDelete }) {
+export default function LightComponent({ index, currentTimestamp, light, lightSettings, onLightSettingsChange, onClone, onDelete }: { index: number, currentTimestamp: number, light: TrafficLight, lightSettings: LightSettings, onLightSettingsChange: (lightSettings: LightSettings) => void, onClone: () => void, onDelete?: () => void}) {
 
   const offsetId =`light-${index}-offset`
   const redDurationId =`light-${index}-red-duration`

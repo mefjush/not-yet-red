@@ -1,17 +1,14 @@
 const MAX_NEXT_TRANSITION_WAIT = 300000;
 
 export default class Failure {
-  constructor(duration, probability) {
-    this.duration = duration
-    this.probability = probability
-    this.nextTransition = 0
+  constructor(private duration: number, private probability: number, private nextTransition = 0) {
   }
 
-  deterministicRand(number) {
+  deterministicRand(number: number) {
     return number % 100
   }
 
-  nextStateTimestamp(currentTimestamp) {
+  nextStateTimestamp(currentTimestamp: number) {
     let currentState = this.currentState(currentTimestamp)
 
     if (this.nextTransition < currentTimestamp) {
@@ -31,13 +28,13 @@ export default class Failure {
     return this.nextTransition
   }
 
-  state(bucket) {
+  state(bucket: number) {
     const rand = this.deterministicRand(bucket)
     const state = (rand / 100) < this.probability
     return state
   }
 
-  currentState(currentTimestamp) {
+  currentState(currentTimestamp: number) {
     const bucket = Math.floor(currentTimestamp / this.duration)
     return this.state(bucket)
   }
