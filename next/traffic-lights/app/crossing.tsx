@@ -12,6 +12,7 @@ const DEFAULT_FAILURE_DURATION = 10000
 const DEFAULT_FAILURE_PROBABILITY = 0.1
 const DEFAULT_CYCLE_LENGTH = 60000
 
+
 export default function CrossingComponent({time}: {time: number}) {
 
   const DEFAULT_LIGHT_SETTINGS: LightSettings = { offset: 0, duration: { red: 30000 } };

@@ -1,4 +1,18 @@
-const DEFAULT_OFFSET = 0;
+import CrossingSettings from "./crossingSettings";
+import LightSettings from "./lightSettings";
+
+const DEFAULT_OFFSET = 0
+
+interface State {
+  name: string
+  file: string
+  color: string
+}
+
+interface Phase {
+  state: State
+  duration: number
+}
 
 const STATE = {
   RED: { "name": "Red", "file": "img/red.png", "color": "#FF0000"},
@@ -8,8 +22,8 @@ const STATE = {
   NONE: { "name": "None", "file": "img/none.png", "color": "#D3D3D3"},
 };
 
-function negativeSafeMod(n, m) {
-  return ((n % m) + m) % m;
+function negativeSafeMod(n: number, m: number) {
+  return ((n % m) + m) % m
 }
 
 const DEFAULT_PHASES = [
@@ -24,10 +38,10 @@ const FAILURE_PHASES = [
   { state: STATE.NONE, duration: 2000 }
 ];
 
-const defaultPhases = (cycleLength, lightSettings) => {
+const defaultPhases = (cycleLength: number, lightSettings: LightSettings) => {
   const DEFAULT_YELLOW_LENGTH = 2000
   const timeLeft = cycleLength - 2 * DEFAULT_YELLOW_LENGTH
-  const red = Math.min(lightSettings.duration.red, timeLeft) || Math.floor(timeLeft / 2000) * 1000;
+  const red = Math.min(lightSettings.duration.red, timeLeft) || Math.floor(timeLeft / 2000) * 1000
   return [
     { state: STATE.RED, duration: red },
     { state: STATE.RED_YELLOW, duration: DEFAULT_YELLOW_LENGTH },
@@ -36,21 +50,28 @@ const defaultPhases = (cycleLength, lightSettings) => {
   ];
 }
 
+
+
 export default class TrafficLight {
-  constructor(crossingSettings, lightSettings, failed) {
+  phases: Phase[]
+  offset: number
+  intervals: number[]
+  cycleLength: number
+
+  constructor(crossingSettings: CrossingSettings, lightSettings: LightSettings, failed: boolean) {
     this.phases = failed ? FAILURE_PHASES : defaultPhases(crossingSettings.cycleLength, lightSettings)
     this.offset = lightSettings.offset || DEFAULT_OFFSET
     this.intervals = this.phases.map(phase => phase.duration)
     this.cycleLength = this.intervals.reduce((sum, a) => sum + a, 0)
   }
 
-  nextTransition(currentTimestamp) {
-    const cycleStart = Math.floor((currentTimestamp - this.offset) / this.cycleLength) * this.cycleLength + this.offset;
-    let cycleTimestamp = cycleStart;
-    let phaseIdx = 0;
+  nextTransition(currentTimestamp: number) {
+    const cycleStart = Math.floor((currentTimestamp - this.offset) / this.cycleLength) * this.cycleLength + this.offset
+    let cycleTimestamp = cycleStart
+    let phaseIdx = 0
     while (cycleTimestamp < currentTimestamp) {
-      cycleTimestamp += this.intervals[phaseIdx];
-      phaseIdx = (phaseIdx + 1) % this.intervals.length;
+      cycleTimestamp += this.intervals[phaseIdx]
+      phaseIdx = (phaseIdx + 1) % this.intervals.length
     }
     return {
       phaseIdx: phaseIdx,
@@ -58,12 +79,12 @@ export default class TrafficLight {
     };
   }
 
-  nextStateTimestamp(currentTimestamp) {
-    return this.nextTransition(currentTimestamp).timestamp;
+  nextStateTimestamp(currentTimestamp: number) {
+    return this.nextTransition(currentTimestamp).timestamp
   }
 
-  currentPhase(currentTimestamp) {
-    const state = negativeSafeMod(this.nextTransition(currentTimestamp).phaseIdx - 1, this.intervals.length);
-    return this.phases[state];
+  currentPhase(currentTimestamp: number) {
+    const state = negativeSafeMod(this.nextTransition(currentTimestamp).phaseIdx - 1, this.intervals.length)
+    return this.phases[state]
   }
 }
