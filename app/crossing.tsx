@@ -7,13 +7,15 @@ import TrafficLight from './trafficLight'
 import LightSettings from './lightSettings'
 import Failure from './failure'
 import Input from './input'
+import { Card, CardContent, Collapse, IconButton, Stack } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
 
 const DEFAULT_FAILURE_DURATION = 10000
 const DEFAULT_FAILURE_PROBABILITY = 0.1
 const DEFAULT_CYCLE_LENGTH = 60000
 
 
-export default function CrossingComponent({time}: {time: number}) {
+export default function CrossingComponent({time, expanded}: {time: number, expanded: boolean}) {
 
   const DEFAULT_LIGHT_SETTINGS: LightSettings = { offset: 0, duration: { red: 30000 } };
 
@@ -63,24 +65,40 @@ export default function CrossingComponent({time}: {time: number}) {
 
   return (
     <div>
-      <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Crossing</h2>
-      <form className="space-y-4">
-        <Input label="Cycle length" id="cycle-length" min={10} value={crossingSettings.cycleLength / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } />
-        <Input label="Failure duration" id="failure-duration" min={10} value={crossingSettings.failure.duration / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) }/>
-        <Input label="Failure probability" id="failure-probability" min={0} max={1} step={0.1} value={crossingSettings.failure.probability} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } />
-      </form>
-      { lights().map((light, index) =>
-        <LightComponent
-            key={index}
-            index={index}
-            currentTimestamp={currentTimestamp}
-            light={light}
-            lightSettings={lightSettings[index]}
-            onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
-            onClone={() => onClone(index)}
-            onDelete={ lights().length > 1 ? () => onDelete(index) : undefined }
-        />
-      )}
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <Card sx={{ m: 1 }}>
+          <CardContent>
+            <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Crossing</h2>
+            <form className="">
+              <Input label="Cycle length" id="cycle-length" min={10} value={crossingSettings.cycleLength / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } />
+              <Input label="Failure duration" id="failure-duration" min={10} value={crossingSettings.failure.duration / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) }/>
+              <Input label="Failure probability" id="failure-probability" min={0} max={1} step={0.1} value={crossingSettings.failure.probability} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } />
+            </form>
+          </CardContent>
+        </Card>
+      </Collapse>
+      {/* <div className="flex items-center" style={{ overflowX: "auto" }}> */}
+      <Stack direction="row" spacing={2}   justifyContent="center" alignItems="center">
+        { lights().map((light, index) =>
+          <div key={index}>
+            <LightComponent
+                index={index}
+                currentTimestamp={currentTimestamp}
+                light={light}
+                lightSettings={lightSettings[index]}
+                onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
+                onClone={() => onClone(index)}
+                onDelete={ lights().length > 1 ? () => onDelete(index) : undefined }
+            />
+          </div>
+        )}
+        <div>
+          <IconButton aria-label="delete" color="primary" size="large" onClick={() => onClone(lightSettings.length - 1)}>
+            <AddIcon fontSize="inherit" />
+          </IconButton>
+        </div>
+      </Stack>
+      {/* </div> */}
     </div>
   )
 }

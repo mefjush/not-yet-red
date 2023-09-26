@@ -1,6 +1,11 @@
 "use client"
 
-import { useState } from 'react'
+import { Box, Grid, Slider, Typography, Input as MuiInput } from '@mui/material'
+import { styled } from '@mui/material/styles'
+
+const MInput = styled(MuiInput)`
+  width: 42px;
+`;
 
 interface ChangeEvent {
   target: {
@@ -13,33 +18,59 @@ export default function Input({id, label, min, max, step, value, onChange}: {id:
 
   const toEvent = (val: any) => ({ target: { value: Number(val) }})
 
-  const change = (e: ChangeEvent) => {
+  const fix = (inVal: number) => {
+    let outVal: number = inVal
     if (max) {
-      e.target.value = Math.min(e.target.value, max)
+      outVal = Math.min(inVal, max)
     }
     if (min || min == 0) {
-      e.target.value = Math.max(e.target.value, min)
+      outVal = Math.max(inVal, min)
     }
     if (step && step < 1) {
-      e.target.value = Math.round(e.target.value * 100) / 100
+      outVal = Math.round(inVal * 100) / 100
     }
-    onChange(e)
+    return toEvent(outVal)
+  }
+
+  const handleSliderChange = (event: Event, newValue: number | number[]) => {
+    onChange(fix(newValue as number))
+  }
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(toEvent(event.target.value === '' ? 0 : Number(event.target.value)))
   }
 
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium leading-6 text-gray-900">{label}</label>
-      <div className="grid grid-cols-1 sm:grid-cols-6">
-        <div className="sm:col-span-4">
-          <input id={id} type="number" min={min} max={max} value={value} onChange={(e) => change(toEvent(e.target.value))} className="block w-full rounded-md border-0 py-1.5 px-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"/>
-        </div>
-        <div className="sm:col-span-1 pl-2">
-          <button type="button" onClick={ () => change(toEvent(value + (step || 1))) } className="block w-full flex justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">+</button>
-        </div>
-        <div className="sm:col-span-1 pl-2">
-          <button type="button" onClick={ () => change(toEvent(value - (step || 1))) } className="block w-full flex justify-center rounded-md bg-indigo-400 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">-</button>
-        </div>
-      </div>
-    </div>
+    <Box>
+      <Typography id={id} gutterBottom>
+        {label}
+      </Typography>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs>
+          <Slider
+            value={typeof value === 'number' ? value : 0}
+            step={step || 1}
+            min={min}
+            max={max}
+            onChange={handleSliderChange}
+            aria-labelledby={id}
+          />
+        </Grid>
+        <Grid item>
+          <MInput
+            value={value}
+            size="small"
+            onChange={handleInputChange}
+            inputProps={{
+              step: (step || 1),
+              min: min,
+              max: max,
+              type: 'number',
+              'aria-labelledby': id
+            }}
+          />
+        </Grid>
+      </Grid>
+    </Box>
   )
 }
