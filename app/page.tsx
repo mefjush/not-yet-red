@@ -12,9 +12,9 @@ import { useState } from 'react'
 import { UiMode } from './uiMode'
 
 const modeIcons = new Map<number, React.JSX.Element>([
-  [UiMode.LIGHTS, <TrafficIcon />],
-  [UiMode.BARS, <TuneIcon />], 
-  [UiMode.QR, <QrCodeIcon />]
+  [UiMode.LIGHTS, <TrafficIcon key="traffic" />],
+  [UiMode.BARS, <TuneIcon key="tune" />], 
+  [UiMode.QR, <QrCodeIcon key="qr" />]
 ])
 
 export default function Home() {
