@@ -1,20 +1,19 @@
 "use client"
 
 import TrafficLight from './trafficLight'
-import LightConfig from './lightConfig'
+import LightConfig, { LightSettings } from './lightConfig'
 import Input from './input'
-import { IconButton, Card, CardActions, CardContent, Box } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import { useRef } from 'react'
 import { Typography } from '@mui/material'
 import Tune from './tune'
-import { Stack } from '@mui/material'
 import { UiMode } from './uiMode'
 
 export default function LightComponent({ index, mode, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, mode: UiMode, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties}) {
 
-  const lightRef = useRef(null);
+  const lightRef = useRef<HTMLImageElement>(null);
 
   const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()} style={{ marginLeft: "auto" }}><DeleteIcon /></IconButton>
 
@@ -37,7 +36,7 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
         {theLight}
       </CardContent>
       <CardActions>
-        <IconButton aria-label="fullscreen" onClick={() => lightRef.current.requestFullscreen()}><FullscreenIcon /></IconButton>
+        <IconButton aria-label="fullscreen" onClick={() => lightRef.current?.requestFullscreen()}><FullscreenIcon /></IconButton>
         {deleteButton}
       </CardActions>
     </Card>

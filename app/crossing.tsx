@@ -105,7 +105,7 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
               currentTimestamp={currentTimestamp}
               light={light}
               lightConfig={lightConfigs[index]}
-              onLightSettingsChange={(settings: LightConfig) => updateLightSettings(settings, index)}
+              onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
               onDelete={lights().length > 1 ? () => onDelete(index) : undefined}
               style={autoMargin(index)}
               mode={mode}
