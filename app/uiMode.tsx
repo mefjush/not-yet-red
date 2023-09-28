@@ -1,0 +1,1 @@
+export enum UiMode { LIGHTS, BARS, QR }

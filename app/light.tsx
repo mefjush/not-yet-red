@@ -1,36 +1,45 @@
 "use client"
 
 import TrafficLight from './trafficLight'
-import LightSettings from './lightSettings'
+import LightConfig from './lightConfig'
 import Input from './input'
-import { IconButton, Card, CardActions, CardContent } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Box } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
+import FullscreenIcon from '@mui/icons-material/Fullscreen'
+import { useRef } from 'react'
+import { Typography } from '@mui/material'
+import Tune from './tune'
+import { Stack } from '@mui/material'
+import { UiMode } from './uiMode'
 
-export default function LightComponent({ index, currentTimestamp, light, lightSettings, onLightSettingsChange, onClone, onDelete }: { index: number, currentTimestamp: number, light: TrafficLight, lightSettings: LightSettings, onLightSettingsChange: (lightSettings: LightSettings) => void, onClone: () => void, onDelete?: () => void}) {
+export default function LightComponent({ index, mode, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, mode: UiMode, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties}) {
 
-  const offsetId =`light-${index}-offset`
-  const redDurationId =`light-${index}-red-duration`
+  const lightRef = useRef(null);
 
-  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()}><DeleteIcon /></IconButton>
+  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()} style={{ marginLeft: "auto" }}><DeleteIcon /></IconButton>
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  return (
-    <div>
-      <Card sx={{ m: 1 }}>
-        <CardContent>
-          <h3 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Light #{index}</h3>
-          <form className="space-y-4">
-            <Input label="Offset duration" id={offsetId} min={0} value={lightSettings.offset / 1000} onChange={e => onLightSettingsChange({ ...lightSettings, offset: e.target.value * 1000 })} />
-            <Input label="Red duration" id={redDurationId} min={2} value={lightSettings.duration.red / 1000} onChange={e => onLightSettingsChange({ ...lightSettings, duration: { ...lightSettings.duration, red: e.target.value * 1000 } })} />
-          </form>
-          <img src={currentPhase.state.file} alt={currentPhase.state.name} style={{ maxWidth: "100%", maxHeight: "90vh" }}/>
-        </CardContent>
-        <CardActions>
-          {deleteButton}
-        </CardActions>
-      </Card>
+  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.state.file} alt={currentPhase.state.name} style={{ marginLeft: "auto", width: "220px", maxWidth: "100%", maxHeight: "90vh" }}/>
+  const tune = <Tune lightConfig={lightConfig}/>
+  const theLight = mode == UiMode.LIGHTS ? lightImg : tune
 
-    </div>
+  return (
+    <Card sx={{ m: 1, minWidth: 250 }} style={style}>
+      <CardContent>
+        <Typography sx={{ fontSize: 14, mb: 1.5 }} color="text.secondary" gutterBottom>
+          Light #{index}
+        </Typography>
+        <form>
+          <Input label="Offset duration" id={`light-${index}-offset`} min={0} max={lightConfig.cycleLength() / 1000} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
+          <Input label="Red duration" id={`light-${index}-red-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={lightConfig.duration.red / 1000} onChange={e => onLightSettingsChange(lightConfig.withRedDuration(e.target.value * 1000))} />
+        </form>
+        {theLight}
+      </CardContent>
+      <CardActions>
+        <IconButton aria-label="fullscreen" onClick={() => lightRef.current.requestFullscreen()}><FullscreenIcon /></IconButton>
+        {deleteButton}
+      </CardActions>
+    </Card>
   )
 }

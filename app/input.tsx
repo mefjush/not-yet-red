@@ -42,7 +42,7 @@ export default function Input({id, label, min, max, step, value, onChange}: {id:
 
   return (
     <Box>
-      <Typography id={id} gutterBottom>
+      <Typography gutterBottom>
         {label}
       </Typography>
       <Grid container spacing={2} alignItems="center">

@@ -1,5 +1,6 @@
-import CrossingSettings from "./crossingSettings";
-import LightSettings from "./lightSettings";
+import { STATE } from "./STATE";
+import LightConfig from "./lightConfig";
+import { negativeSafeMod } from "./utils";
 
 const DEFAULT_OFFSET = 0
 
@@ -9,48 +10,15 @@ interface State {
   color: string
 }
 
-interface Phase {
+export interface Phase {
   state: State
   duration: number
 }
 
-const STATE = {
-  RED: { "name": "Red", "file": "img/red.png", "color": "#FF0000"},
-  RED_YELLOW: { "name": "Red-Yellow", "file": "img/red-yellow.png", "color": "#FFA500"},
-  GREEN: { "name": "Green", "file": "img/green.png", "color": "#008000"},
-  YELLOW: { "name": "Yellow", "file": "img/yellow.png", "color": "#FFFF00"},
-  NONE: { "name": "None", "file": "img/none.png", "color": "#D3D3D3"},
-};
-
-function negativeSafeMod(n: number, m: number) {
-  return ((n % m) + m) % m
-}
-
-const DEFAULT_PHASES = [
-  { state: STATE.RED, duration: 5000 },
-  { state: STATE.RED_YELLOW, duration: 2000 },
-  { state: STATE.GREEN, duration: 5000 },
-  { state: STATE.YELLOW, duration: 2000 }
-];
-
 const FAILURE_PHASES = [
-  { state: STATE.YELLOW, duration: 2000 },
-  { state: STATE.NONE, duration: 2000 }
+  { state: STATE.YELLOW, duration: 1000 },
+  { state: STATE.NONE, duration: 1000 }
 ];
-
-const defaultPhases = (cycleLength: number, lightSettings: LightSettings) => {
-  const DEFAULT_YELLOW_LENGTH = 2000
-  const timeLeft = cycleLength - 2 * DEFAULT_YELLOW_LENGTH
-  const red = Math.min(lightSettings.duration.red, timeLeft) || Math.floor(timeLeft / 2000) * 1000
-  return [
-    { state: STATE.RED, duration: red },
-    { state: STATE.RED_YELLOW, duration: DEFAULT_YELLOW_LENGTH },
-    { state: STATE.GREEN, duration: timeLeft - red },
-    { state: STATE.YELLOW, duration: DEFAULT_YELLOW_LENGTH }
-  ];
-}
-
-
 
 export default class TrafficLight {
   phases: Phase[]
@@ -58,9 +26,9 @@ export default class TrafficLight {
   intervals: number[]
   cycleLength: number
 
-  constructor(crossingSettings: CrossingSettings, lightSettings: LightSettings, failed: boolean) {
-    this.phases = failed ? FAILURE_PHASES : defaultPhases(crossingSettings.cycleLength, lightSettings)
-    this.offset = lightSettings.offset || DEFAULT_OFFSET
+  constructor(lightSettings: LightConfig, failed: boolean) {
+    this.phases = failed ? FAILURE_PHASES : lightSettings.phases()
+    this.offset = failed ? 0 : lightSettings.offset || DEFAULT_OFFSET
     this.intervals = this.phases.map(phase => phase.duration)
     this.cycleLength = this.intervals.reduce((sum, a) => sum + a, 0)
   }

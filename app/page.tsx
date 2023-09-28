@@ -1,16 +1,29 @@
 "use client"
 
-import { AppBar, Box, Collapse, Drawer, FormControlLabel, FormGroup, IconButton, List, ListItem, Switch, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, FormControlLabel, FormGroup, IconButton, Switch, Toolbar, Typography } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
+import CloseIcon from '@mui/icons-material/Close'
+import TrafficIcon from '@mui/icons-material/Traffic'
+import TuneIcon from '@mui/icons-material/Tune'
+import QrCodeIcon from '@mui/icons-material/QrCode'
 import CrossingComponent from './crossing'
 
 import { useState } from 'react'
+import { UiMode } from './uiMode'
+
+const modeIcons = new Map<number, React.JSX.Element>([
+  [UiMode.LIGHTS, <TrafficIcon />],
+  [UiMode.BARS, <TuneIcon />], 
+  [UiMode.QR, <QrCodeIcon />]
+])
 
 export default function Home() {
 
   const [wakeLock, setWakeLock] = useState<WakeLockSentinel|null>(null)
 
   const [expanded, setExpanded] = useState(false)
+
+  const [mode, setMode] = useState(UiMode.LIGHTS)
 
   const wakeLocked = () => wakeLock != null
 
@@ -44,44 +57,15 @@ export default function Home() {
     }
   }
 
-
-  const toggleDrawer =
-    (open: boolean) =>
-    (event: React.KeyboardEvent | React.MouseEvent) => {
-      if (
-        event.type === 'keydown' &&
-        ((event as React.KeyboardEvent).key === 'Tab' ||
-          (event as React.KeyboardEvent).key === 'Shift')
-      ) {
-        return
-      }
-
-      setExpanded(open)
+  const toggleMode = () => {
+    setMode((mode + 1) % 3)
   }
+
+  const modeIcon = modeIcons.get(mode)
 
   return (
     <main>
       <Box sx={{ flexGrow: 1 }}>
-      <Drawer
-        anchor="left"
-        open={expanded}
-        onClose={toggleDrawer(false)}
-      >
-        <Box
-          sx={{ width: 250 }}
-          role="presentation"
-          onClick={toggleDrawer(false)}
-          onKeyDown={toggleDrawer(false)}
-        >
-          <List>
-            {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                {text}
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
         <AppBar position="static">
           <Toolbar>
             <IconButton
@@ -92,20 +76,19 @@ export default function Home() {
               sx={{ mr: 2 }}
               onClick={ () => setExpanded(!expanded) }
             >
-              <MenuIcon />
+              { expanded ? <CloseIcon /> : <MenuIcon /> }
             </IconButton>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Traffic Lights
             </Typography>
+            <IconButton size="large" sx={{ color: "#ffffff" }} onClick={() => toggleMode()}>{modeIcon}</IconButton>
             <FormGroup>
               <FormControlLabel control={<Switch color="warning" checked={wakeLocked()} onChange={() => toggleWakeLock()}/>} label="Screen on"/>
             </FormGroup>
           </Toolbar>
         </AppBar>
       </Box>
-
-
-      <CrossingComponent expanded={expanded} time={Date.now()}/>
+      <CrossingComponent expanded={expanded} mode={mode} time={Date.now()}/>
     </main>
   )
 }
