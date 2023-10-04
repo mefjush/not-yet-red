@@ -3,15 +3,15 @@ import { Phase } from "./trafficLight"
 import { negativeSafeMod } from "./utils"
 import LightConfig from "./lightConfig"
 
-const radiousSize = 10
+const radiousSize = 5
 
 export default function Tune({lightConfig: lightSettings}: {lightConfig: LightConfig}) {
 
-  const createSegment = function(segment: number, phase: Phase, length: number, count: number) {
+  const createSegment = function(phase: Phase, duration: number, idx: number, count: number) {
 
-    const radious = segment == 0 ? `${radiousSize}px ${radiousSize}px 0 0` : segment == count ? `0 0 ${radiousSize}px ${radiousSize}px` : "0 0 0 0"
+    const radious = idx == 0 ? `${radiousSize}px ${radiousSize}px 0 0` : idx == (count - 1) ? `0 0 ${radiousSize}px ${radiousSize}px` : "0 0 0 0"
     return (
-      <Box key={segment} sx={{ height: 5 * length / 1000, backgroundColor: phase.state.color, opacity: 0.8, borderRadius: radious }}></Box>
+      <Box key={idx} sx={{ height: 5 * duration / 1000, backgroundColor: phase.state.color, opacity: 0.8, borderRadius: radious }}></Box>
     )
   }
 
@@ -25,17 +25,22 @@ export default function Tune({lightConfig: lightSettings}: {lightConfig: LightCo
   }
 
   let cells = []
-  cells.push(createSegment(0, phases[phaseIdx], phases[phaseIdx].duration + offset, phases.length));
+  cells.push({ phase: phases[phaseIdx], duration: phases[phaseIdx].duration + offset })
 
   for (let segment = 0; segment < phases.length; segment++) {
     let index = (phaseIdx + segment + 1) % phases.length
     let duration = (segment == phases.length - 1) ? (-offset) : phases[index].duration
-    cells.push(createSegment(segment + 1, phases[index], duration, phases.length))
+    cells.push({ phase: phases[index], duration: duration })
   }
+
+  const cellsFiltered = cells
+    .filter((cell) => cell.duration > 0)
+
+  const divs = cellsFiltered.map((cell, idx) => createSegment(cell.phase, cell.duration, idx, cellsFiltered.length))
 
   return (
     <Stack sx={{ my: 2 }}>
-      {cells}
+      {divs}
     </Stack>
   )
 }

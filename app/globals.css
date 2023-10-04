@@ -1,6 +1,7 @@
 body {
   margin: 0;
   background-color: #F3F6F9;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
 }
 
 .the-traffic-light::backdrop {

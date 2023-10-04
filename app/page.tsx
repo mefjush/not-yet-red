@@ -3,28 +3,25 @@
 import { AppBar, Box, FormControlLabel, FormGroup, IconButton, Switch, Toolbar, Typography } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
-import TrafficIcon from '@mui/icons-material/Traffic'
-import TuneIcon from '@mui/icons-material/Tune'
 import QrCodeIcon from '@mui/icons-material/QrCode'
 import CrossingComponent from './crossing'
 
 import { useState } from 'react'
-import { UiMode } from './uiMode'
+import useStateParams, { BooleanSerDeser, objectSerDeser } from './url'
 
-const modeIcons = new Map<number, React.JSX.Element>([
-  [UiMode.LIGHTS, <TrafficIcon key="traffic" />],
-  [UiMode.BARS, <TuneIcon key="tune" />], 
-  [UiMode.QR, <QrCodeIcon key="qr" />]
+const modeIcons = new Map<boolean, React.JSX.Element>([
+  [true, <QrCodeIcon key="qr" />], 
+  [false, <QrCodeIcon key="qr" color="disabled" />]
 ])
 
 export default function Home() {
 
   const [wakeLock, setWakeLock] = useState<WakeLockSentinel|null>(null)
 
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useStateParams(false, "expanded", BooleanSerDeser)
 
-  const [mode, setMode] = useState(UiMode.LIGHTS)
-
+  const [mode, setMode] = useStateParams({ qr: false }, "qr", objectSerDeser())
+  
   const wakeLocked = () => wakeLock != null
 
   const requestWakeLock = async () => {
@@ -58,10 +55,10 @@ export default function Home() {
   }
 
   const toggleMode = () => {
-    setMode((mode + 1) % 3)
+    setMode({ qr: !mode.qr })
   }
 
-  const modeIcon = modeIcons.get(mode)
+  const modeIcon = modeIcons.get(mode.qr)
 
   return (
     <main>

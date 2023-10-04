@@ -1,1 +1,3 @@
-export enum UiMode { LIGHTS, BARS, QR }
+export type UiMode = {
+  qr: boolean
+}

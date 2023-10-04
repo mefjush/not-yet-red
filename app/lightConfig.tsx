@@ -29,6 +29,10 @@ export default class LightConfig {
     return { offset: offset, duration: { red: this.duration.red }}
   }
 
+  toLightSettings(): LightSettings {
+    return { offset: this.offset, duration: { red: this.duration.red }}
+  }
+
   cycleLength() {
     return this.crossingSettings.cycleLength
   }
