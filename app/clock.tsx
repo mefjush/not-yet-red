@@ -1,3 +1,5 @@
+const TIME_SYNC_URL = "https://worldtimeapi.org/api/timezone/Utc"
+
 interface ClockListener {
   nextStateTimestamp(d: number): number
 }
@@ -9,7 +11,7 @@ function syncTime(tickCallback: (timestamp: number) => void) {
   var request = new XMLHttpRequest()
   var start = Date.now()
 
-  request.open('GET', "http://worldtimeapi.org/api/timezone/Utc", false)
+  request.open('GET', TIME_SYNC_URL, false)
   request.onreadystatechange = function() {
     if (request.readyState != 4) {
       return
