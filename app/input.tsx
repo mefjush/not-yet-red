@@ -4,7 +4,7 @@ import { Box, Grid, Slider, Typography, Input as MuiInput } from '@mui/material'
 import { styled } from '@mui/material/styles'
 
 const MInput = styled(MuiInput)`
-  width: 42px;
+  width: 42px
 `;
 
 interface ChangeEvent {

@@ -47,6 +47,6 @@ export default class LightConfig {
       { state: STATE.RED_YELLOW, duration: DEFAULT_YELLOW_LENGTH },
       { state: STATE.GREEN, duration: timeLeft - red },
       { state: STATE.YELLOW, duration: DEFAULT_YELLOW_LENGTH }
-    ];
+    ]
   }
 }

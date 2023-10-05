@@ -1,6 +1,6 @@
-import { STATE } from "./STATE";
-import LightConfig from "./lightConfig";
-import { negativeSafeMod } from "./utils";
+import { STATE } from "./STATE"
+import LightConfig from "./lightConfig"
+import { negativeSafeMod } from "./utils"
 
 const DEFAULT_OFFSET = 0
 
@@ -18,7 +18,7 @@ export interface Phase {
 const FAILURE_PHASES = [
   { state: STATE.YELLOW, duration: 1000 },
   { state: STATE.NONE, duration: 1000 }
-];
+]
 
 export default class TrafficLight {
   phases: Phase[]
@@ -44,7 +44,7 @@ export default class TrafficLight {
     return {
       phaseIdx: phaseIdx,
       timestamp: cycleTimestamp
-    };
+    }
   }
 
   nextStateTimestamp(currentTimestamp: number) {

@@ -32,7 +32,7 @@ export default function Home() {
       alert(`${err.name}, ${err.message}`)
       console.error(`${err.name}, ${err.message}`)
     }
-  };
+  }
 
   const releaseWakeLock = async () => {
     if (!wakeLock) {

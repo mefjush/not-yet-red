@@ -12,10 +12,11 @@ import Tune from './tune'
 import { UiMode } from './uiMode'
 import { QRCodeSVG } from 'qrcode.react'
 import { objectSerDeser } from './url'
+import { usePathname } from 'next/navigation'
 
 export default function LightComponent({ index, mode, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, mode: UiMode, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties}) {
 
-  const lightRef = useRef<HTMLImageElement>(null);
+  const lightRef = useRef<HTMLImageElement>(null)
 
   const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()} style={{ marginLeft: "auto" }}><DeleteIcon /></IconButton>
 
@@ -26,8 +27,10 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
 
   const search = `?crossingSettings=${objectSerDeser().serialize(lightConfig.crossingSettings)}&lightSettings=${objectSerDeser().serialize([lightConfig.toLightSettings()])}`
 
-  const url = location.toString().replace(location.search, search)
-  // const url = "http://192.168.0.106:3000" + search
+  const pathname = usePathname()
+
+  // const url = pathname + search
+  const url = "http://192.168.0.106:3000" + search
 
   const qr = mode.qr ? <div style={{ margin: "auto auto" }}><QRCodeSVG value={url}/></div> : <></>
 
@@ -35,7 +38,7 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
     <Card sx={{ m: 1, minWidth: 250 }} style={style}>
       <CardContent>
         <Typography sx={{ fontSize: 14, mb: 1.5 }} color="text.secondary" gutterBottom>
-          Light #{index}
+          Light #{index} {currentTimestamp}
         </Typography>
         <form>
           <Input label="Offset duration" id={`light-${index}-offset`} min={0} max={lightConfig.cycleLength() / 1000} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />

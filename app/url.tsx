@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 interface SerDeser<T> {
   serialize: (state: T) => string
@@ -32,6 +32,7 @@ export default function useStateParams<T>(
     serdeser: SerDeser<T>
   ): [T, (state: T) => void] {
     const router = useRouter()
+    const pathname = usePathname()
     const searchParams = useSearchParams()
     const search = new URLSearchParams(searchParams)
   
@@ -51,7 +52,6 @@ export default function useStateParams<T>(
     const onChange = (s: T) => {
       setState(s)
       search.set(paramsName, serdeser.serialize(s))
-      const pathname = location.pathname
       router.push(pathname + "?" + search.toString())
     }
   

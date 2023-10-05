@@ -45,9 +45,9 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
     const clock = new Clock()
     clock.register([...lights(), failure], setCurrentTimestamp)
     return () => {
-      clock.unregister();
-    };
-  });
+      clock.unregister()
+    }
+  }, [lights, failure])
 
   const updateLightSettings = (settings: LightSettings, index: number) => {
     const copy = [...lightSettings]
