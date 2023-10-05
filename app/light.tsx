@@ -29,8 +29,8 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
 
   const pathname = usePathname()
 
-  // const url = pathname + search
-  const url = "http://192.168.0.106:3000" + search
+  const url = pathname + search
+  // const url = "http://192.168.0.106:3000" + search
 
   const qr = mode.qr ? <div style={{ margin: "auto auto" }}><QRCodeSVG value={url}/></div> : <></>
 
