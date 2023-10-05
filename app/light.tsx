@@ -21,7 +21,7 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.state.file} alt={currentPhase.state.name} style={{ marginLeft: "auto", width: "220px", maxWidth: "100%", maxHeight: "90vh" }}/>
+  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.state.file} alt={currentPhase.state.name} style={{ margin: "0 auto", width: "220px", maxWidth: "100%", maxHeight: "90vh" }}/>
   const tune = <Tune lightConfig={lightConfig}/>
 
   const search = `?crossingSettings=${objectSerDeser().serialize(lightConfig.crossingSettings)}&lightSettings=${objectSerDeser().serialize([lightConfig.toLightSettings()])}`
