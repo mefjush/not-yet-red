@@ -12,7 +12,6 @@ import Tune from './tune'
 import { UiMode } from './uiMode'
 import { QRCodeSVG } from 'qrcode.react'
 import { objectSerDeser } from './url'
-import { usePathname } from 'next/navigation'
 
 export default function LightComponent({ index, mode, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, mode: UiMode, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties}) {
 
@@ -27,12 +26,11 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
 
   const search = `?crossingSettings=${objectSerDeser().serialize(lightConfig.crossingSettings)}&lightSettings=${objectSerDeser().serialize([lightConfig.toLightSettings()])}`
 
-  const pathname = usePathname()
+  const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
+  // const baseUrl = "http://192.168.0.106:3000" 
+  const url = baseUrl + search
 
-  const url = pathname + search
-  // const url = "http://192.168.0.106:3000" + search
-
-  const qr = mode.qr ? <div style={{ margin: "auto auto" }}><QRCodeSVG value={url}/></div> : <></>
+  const qr = mode.qr ? <div style={{ margin: "auto auto" }}><QRCodeSVG size={256} value={url}/></div> : <></>
 
   return (
     <Card sx={{ m: 1, minWidth: 250 }} style={style}>
