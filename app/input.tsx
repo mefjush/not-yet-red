@@ -5,14 +5,13 @@ import { styled } from '@mui/material/styles'
 
 const MInput = styled(MuiInput)`
   width: 42px
-`;
+`
 
 interface ChangeEvent {
   target: {
     value: number
   }
 }
-
 
 export default function Input({id, label, min, max, step, value, onChange}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void)}) {
 

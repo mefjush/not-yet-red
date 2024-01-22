@@ -49,7 +49,8 @@ export default class Clock {
 
   nextTimeout: ReturnType<typeof setTimeout> | null = null
 
-  register(listeners: ClockListener[], tickCallback: (timestamp: number) => void) {
+  register(listeners: ClockListener[], tickCallback: (timestamp: number) => void, timeOffsetParam: number|null = null) {
+    timeOffset = timeOffsetParam
     if (timeOffset == null) {
       setTimeout(() => syncTime(tickCallback), 2000) //so it synces when everything is loaded
     }
@@ -60,7 +61,7 @@ export default class Clock {
     const timeToNextTick = Math.max(0, nextTimestamp - currentTimestamp)
 
     this.nextTimeout = setTimeout(function() {
-      tickCallback(nextTimestamp + 1)
+      tickCallback(nextTimestamp)
     }, timeToNextTick)
   }
 
