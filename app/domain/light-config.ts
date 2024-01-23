@@ -38,14 +38,13 @@ export default class LightConfig {
   }
 
   phases(): Phase[] {
-    const cycleLength = this.crossingSettings.cycleLength
-    const DEFAULT_YELLOW_LENGTH = 2000
-    const timeLeft = cycleLength - 2 * DEFAULT_YELLOW_LENGTH
-    const red = Math.min(this.duration.red, timeLeft) || Math.floor(timeLeft / 2000) * 1000
+    const DEFAULT_YELLOW_LENGTH = 2_000
+    const timeLeft = this.cycleLength() - (2 * DEFAULT_YELLOW_LENGTH)
+    const red = Math.max(Math.min(this.duration.red, timeLeft), 0)
     return [
       { state: STATE.RED, duration: red },
       { state: STATE.RED_YELLOW, duration: DEFAULT_YELLOW_LENGTH },
-      { state: STATE.GREEN, duration: timeLeft - red },
+      { state: STATE.GREEN, duration: Math.max(timeLeft - red, 0) },
       { state: STATE.YELLOW, duration: DEFAULT_YELLOW_LENGTH }
     ]
   }

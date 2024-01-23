@@ -21,7 +21,7 @@ describe('Clock', () => {
     let clock = new Clock()
 
     clock.register([listener], tickCallback, 0)
-  });
+  })
 
   it('ticks on earliest timestamp', done => {
     let earlyListener = testListener(10000)

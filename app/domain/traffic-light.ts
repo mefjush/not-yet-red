@@ -37,7 +37,7 @@ export default class TrafficLight {
     const cycleStart = Math.floor((currentTimestamp - this.offset) / this.cycleLength) * this.cycleLength + this.offset
     let cycleTimestamp = cycleStart
     let phaseIdx = 0
-    while (cycleTimestamp < currentTimestamp) {
+    while (cycleTimestamp <= currentTimestamp) {
       cycleTimestamp += this.intervals[phaseIdx]
       phaseIdx = (phaseIdx + 1) % this.intervals.length
     }
@@ -52,7 +52,7 @@ export default class TrafficLight {
   }
 
   currentPhase(currentTimestamp: number) {
-    const state = negativeSafeMod(this.nextTransition(currentTimestamp).phaseIdx - 1, this.intervals.length)
-    return this.phases[state]
+    const phaseIdx = negativeSafeMod(this.nextTransition(currentTimestamp).phaseIdx - 1, this.intervals.length)
+    return this.phases[phaseIdx]
   }
 }
