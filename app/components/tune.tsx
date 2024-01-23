@@ -1,7 +1,7 @@
 import { Box, Paper, Stack } from "@mui/material"
-import { Phase } from "./trafficLight"
-import { negativeSafeMod } from "./utils"
-import LightConfig from "./lightConfig"
+import { Phase } from "../domain/traffic-light"
+import { negativeSafeMod } from "../utils"
+import LightConfig from "../domain/light-config"
 
 const radiousSize = 5
 

@@ -49,10 +49,15 @@ export default class Clock {
 
   nextTimeout: ReturnType<typeof setTimeout> | null = null
 
-  register(listeners: ClockListener[], tickCallback: (timestamp: number) => void, timeOffsetParam: number|null = null) {
-    timeOffset = timeOffsetParam
+  register(listeners: ClockListener[], tickCallback: (timestamp: number) => void, fixedTimeOffset: number|null = null) {
+    console.log(`Register of ${ listeners.length } listeners`)
+
     if (timeOffset == null) {
-      setTimeout(() => syncTime(tickCallback), 2000) //so it synces when everything is loaded
+      if (fixedTimeOffset == null) {
+        setTimeout(() => syncTime(tickCallback), 2000) //so it synces when everything is loaded
+      } else {
+        timeOffset = fixedTimeOffset
+      }
     }
 
     const currentTimestamp = Date.now() - (timeOffset || 0)

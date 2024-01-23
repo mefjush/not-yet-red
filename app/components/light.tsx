@@ -1,7 +1,7 @@
 "use client"
 
-import TrafficLight from './trafficLight'
-import LightConfig, { LightSettings } from './lightConfig'
+import TrafficLight from '../domain/traffic-light'
+import LightConfig, { LightSettings } from '../domain/light-config'
 import Input from './input'
 import { IconButton, Card, CardActions, CardContent, Stack } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -9,9 +9,9 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import { useRef } from 'react'
 import { Typography } from '@mui/material'
 import Tune from './tune'
-import { UiMode } from './uiMode'
+import { UiMode } from '../uiMode'
 import { QRCodeSVG } from 'qrcode.react'
-import { objectSerDeser } from './url'
+import { objectSerDeser } from '../url'
 
 export default function LightComponent({ index, mode, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, mode: UiMode, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties}) {
 

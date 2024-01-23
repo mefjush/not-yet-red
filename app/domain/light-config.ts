@@ -1,6 +1,6 @@
-import { STATE } from "./STATE"
+import { STATE } from "./state"
 import CrossingSettings from "./crossingSettings"
-import { Phase } from "./trafficLight"
+import { Phase } from "./traffic-light"
 
 export interface LightSettings {
   offset: number

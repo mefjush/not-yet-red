@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import LightComponent from './light'
-import Clock from './clock'
-import TrafficLight from './trafficLight'
-import LightConfig, { LightSettings } from './lightConfig'
-import Failure from './failure'
+import Clock from '../domain/clock'
+import TrafficLight from '../domain/traffic-light'
+import LightConfig, { LightSettings } from '../domain/light-config'
+import Failure from '../domain/failure'
 import Input from './input'
 import { Card, CardContent, Collapse, Container, Fab, Grid, Stack } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import { UiMode } from './uiMode'
-import useStateParams, { objectSerDeser } from './url'
+import { UiMode } from '../uiMode'
+import useStateParams, { objectSerDeser } from '../url'
 
 const DEFAULT_FAILURE_DURATION = 10000
 const DEFAULT_FAILURE_PROBABILITY = 0.1

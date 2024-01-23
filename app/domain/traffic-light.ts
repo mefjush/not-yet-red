@@ -1,6 +1,6 @@
-import { STATE } from "./STATE"
-import LightConfig from "./lightConfig"
-import { negativeSafeMod } from "./utils"
+import { STATE } from "./state"
+import LightConfig from "./light-config"
+import { negativeSafeMod } from "../utils"
 
 const DEFAULT_OFFSET = 0
 

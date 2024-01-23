@@ -17,7 +17,7 @@ export default class Failure {
          bucket += 1
          this.nextTransition = bucket * this.duration
          if (this.nextTransition - currentTimestamp > MAX_NEXT_TRANSITION_WAIT) {
-          //  console.log(`No next transition found, will force-transit in ${MAX_NEXT_TRANSITION_WAIT / 1000} s`)
+           //  console.log(`No next transition found, will force-transit in ${MAX_NEXT_TRANSITION_WAIT / 1000} s`)
            break
          }
       }

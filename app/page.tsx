@@ -4,7 +4,7 @@ import { AppBar, Box, FormControlLabel, FormGroup, IconButton, Switch, Toolbar, 
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
 import QrCodeIcon from '@mui/icons-material/QrCode'
-import CrossingComponent from './crossing'
+import CrossingComponent from './components/crossing'
 
 import { useState } from 'react'
 import useStateParams, { BooleanSerDeser, objectSerDeser } from './url'
