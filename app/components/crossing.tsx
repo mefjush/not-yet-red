@@ -9,7 +9,7 @@ import Failure from '../domain/failure'
 import Input from './input'
 import { Card, CardContent, Collapse, Container, Fab, Grid, Stack } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import { UiMode } from '../uiMode'
+import { UiMode } from '../ui-mode'
 import useStateParams, { objectSerDeser } from '../url'
 
 const DEFAULT_FAILURE_DURATION = 10000

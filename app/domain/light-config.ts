@@ -1,5 +1,5 @@
 import { STATE } from "./state"
-import CrossingSettings from "./crossingSettings"
+import CrossingSettings from "./crossing-settings"
 import { Phase } from "./traffic-light"
 
 export interface LightSettings {

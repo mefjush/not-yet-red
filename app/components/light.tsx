@@ -9,7 +9,7 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import { useRef } from 'react'
 import { Typography } from '@mui/material'
 import Tune from './tune'
-import { UiMode } from '../uiMode'
+import { UiMode } from '../ui-mode'
 import { QRCodeSVG } from 'qrcode.react'
 import { objectSerDeser } from '../url'
 
