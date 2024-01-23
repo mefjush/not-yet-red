@@ -11,10 +11,10 @@ describe('Clock', () => {
     
     let tickCallback = (timestamp: number) => {
       try {
-        expect(timestamp).toBe(10000);
-        done();
+        expect(timestamp).toBe(10000)
+        done()
       } catch (error) {
-        done(error);
+        done(error)
       }
     }
 
@@ -29,15 +29,15 @@ describe('Clock', () => {
     
     let tickCallback = (timestamp: number) => {
       try {
-        expect(timestamp).toBe(10000);
-        done();
+        expect(timestamp).toBe(10000)
+        done()
       } catch (error) {
-        done(error);
+        done(error)
       }
     }
 
     let clock = new Clock()
 
     clock.register([lateListener, earlyListener], tickCallback, 0)
-  });
+  })
 })
