@@ -39,15 +39,15 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
 
   const lightConfigs = lightSettings.map(lightSetting => new LightConfig(crossingSettings, lightSetting))
 
-  const lights = () => lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
+  const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
 
   useEffect(() => {
     const clock = new Clock()
-    clock.register([...lights(), failure], setCurrentTimestamp)
+    clock.register([...lights, failure], setCurrentTimestamp)
     return () => {
       clock.unregister()
     }
-  }, [lights, failure])
+  }, [lightSettings, crossingSettings, currentTimestamp])
 
   const updateLightSettings = (settings: LightSettings, index: number) => {
     const copy = [...lightSettings]
@@ -99,7 +99,7 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
         </Container>
       </Collapse>
       <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 1, m: 1 }} style={{overflowX: 'auto'}}>
-        { lights().map((light, index) =>
+        { lights.map((light, index) =>
           <LightComponent
               key={index}
               index={index}
@@ -107,7 +107,7 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
               light={light}
               lightConfig={lightConfigs[index]}
               onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
-              onDelete={lights().length > 1 ? () => onDelete(index) : undefined}
+              onDelete={lights.length > 1 ? () => onDelete(index) : undefined}
               style={autoMargin(index)}
               mode={mode}
           />

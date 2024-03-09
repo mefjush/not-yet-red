@@ -30,6 +30,8 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
   // const baseUrl = "http://192.168.0.106:3000" 
   const url = baseUrl + search
 
+  console.log("Rendering light @ " + currentTimestamp)
+
   const qr = mode.qr ? <div style={{ margin: "auto auto" }}><QRCodeSVG size={256} value={url}/></div> : <></>
 
   return (

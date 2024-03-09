@@ -8,8 +8,8 @@ let timeOffset: number | null = null
 
 function syncTime(tickCallback: (timestamp: number) => void) {
   console.log("Syncing time")
-  var request = new XMLHttpRequest()
-  var start = Date.now()
+  let request = new XMLHttpRequest()
+  let start = Date.now()
 
   request.open('GET', TIME_SYNC_URL, false)
   request.onreadystatechange = function() {

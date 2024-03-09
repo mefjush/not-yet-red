@@ -1,4 +1,4 @@
-const MAX_NEXT_TRANSITION_WAIT = 300000
+const MAX_NEXT_TRANSITION_WAIT = 300_000
 
 export default class Failure {
   constructor(private duration: number, private probability: number, private nextTransition = 0) {
@@ -11,18 +11,13 @@ export default class Failure {
   nextStateTimestamp(currentTimestamp: number) {
     let currentState = this.currentState(currentTimestamp)
 
-    if (this.nextTransition < currentTimestamp) {
-      let bucket = Math.floor(currentTimestamp / this.duration) + 1
-      while (this.state(bucket) == currentState) {
-         bucket += 1
-         this.nextTransition = bucket * this.duration
-         if (this.nextTransition - currentTimestamp > MAX_NEXT_TRANSITION_WAIT) {
-           //  console.log(`No next transition found, will force-transit in ${MAX_NEXT_TRANSITION_WAIT / 1000} s`)
-           break
-         }
+    let bucket = Math.floor(currentTimestamp / this.duration) + 1
+    while (this.state(bucket) == currentState || this.nextTransition < currentTimestamp) {
+      bucket += 1
+      this.nextTransition = bucket * this.duration
+      if (this.nextTransition - currentTimestamp > MAX_NEXT_TRANSITION_WAIT) {
+        break
       }
-
-      // console.log("Next failure transition in: " + (this.nextTransition - currentTimestamp) + " ms")
     }
 
     return this.nextTransition
