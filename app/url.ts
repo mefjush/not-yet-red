@@ -52,7 +52,7 @@ export default function useStateParams<T>(
     const onChange = (s: T) => {
       setState(s)
       search.set(paramsName, serdeser.serialize(s))
-      router.push(pathname + "?" + search.toString())
+      router.push(pathname + "?" + search.toString(), { scroll: false })
     }
   
     return [state, onChange]
