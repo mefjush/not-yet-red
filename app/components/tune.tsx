@@ -1,11 +1,15 @@
-import { Box, Paper, Stack } from "@mui/material"
+import { Box, Stack } from "@mui/material"
+import { useState } from 'react'
 import { Phase } from "../domain/traffic-light"
 import { negativeSafeMod } from "../utils"
-import LightConfig from "../domain/light-config"
+import LightConfig, {LightSettings} from "../domain/light-config"
 
 const radiousSize = 5
 
-export default function Tune({lightConfig: lightSettings}: {lightConfig: LightConfig}) {
+export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void}) {
+
+  const [touchMoveStartPosition, setTouchMoveStartPosition] = useState(0)
+  const [touchMoveStartOffset, setTouchMoveStartOffset] = useState(0)
 
   const createSegment = function(phase: Phase, duration: number, idx: number, count: number) {
 
@@ -15,8 +19,24 @@ export default function Tune({lightConfig: lightSettings}: {lightConfig: LightCo
     )
   }
 
-  let offset = lightSettings.offset
-  let phases = lightSettings.phases()
+  const touchMove = (touches: React.TouchList) => {
+    let moveDistance = touches[touches.length - 1].clientY - touchMoveStartPosition
+    console.log(touches)
+    // let oldSettings = lightConfig.toLightSettings()
+    // console.log("Old offset " + oldSettings.offset)
+    let newOffset = touchMoveStartOffset + (Math.round(moveDistance) * 200)
+    console.log("Move distance " + moveDistance)
+    console.log("New offset " + newOffset)
+    onLightSettingsChange({ ...lightConfig.toLightSettings(), offset: newOffset })
+  }
+
+  const touchStart = (e: React.TouchEvent) => {
+    setTouchMoveStartOffset(lightConfig.toLightSettings().offset)
+    setTouchMoveStartPosition(e.changedTouches[0].clientY)
+  }
+
+  let offset = lightConfig.offset
+  let phases = lightConfig.phases()
 
   let phaseIdx = 0
   while (offset > 0) {
@@ -38,8 +58,9 @@ export default function Tune({lightConfig: lightSettings}: {lightConfig: LightCo
 
   const divs = cellsFiltered.map((cell, idx) => createSegment(cell.phase, cell.duration, idx, cellsFiltered.length))
 
+  // https://github.com/petehunt/react-touch-lib/blob/90fb75f0f2bc92c4d9ac8b90806a10157aae3aa9/src/primitives/TouchableArea.js#L42-L49
   return (
-    <Stack sx={{ my: 2 }}>
+    <Stack style={{ touchAction: "none" }} sx={{ my: 2 }} onTouchStart={e => touchStart(e)} onTouchMove={e => touchMove(e.touches)}>
       {divs}
     </Stack>
   )
