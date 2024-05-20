@@ -9,8 +9,7 @@ const tuneHeight = 250
 
 export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void}) {
 
-  const [touchMoveStartPosition, setTouchMoveStartPosition] = useState(0)
-  const [touchMoveStartOffset, setTouchMoveStartOffset] = useState(0)
+  const [touchMoveStartData, setTouchMoveStartData] = useState({ position: 0, offset: 0 })
 
   const createSegment = function(phase: Phase, duration: number, cycleLength: number, idx: number, count: number) {
 
@@ -21,23 +20,25 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
   }
 
   const touchMove = (touches: React.TouchList) => {
-    let moveDistance = touches[touches.length - 1].clientY - touchMoveStartPosition
+    let moveDistance = touches[touches.length - 1].clientY - touchMoveStartData.position
     // console.log(touches)
     // console.log("Old offset " + touchMoveStartOffset)
     // console.log("Move distance " + moveDistance)
-    let offsetPercentage = moveDistance / tuneHeight
     
+    let offsetPercentage = moveDistance / tuneHeight
     // console.log("Offset percentage " + offsetPercentage)
 
-    let newOffset = touchMoveStartOffset + (offsetPercentage * lightConfig.cycleLength())
-    
+    let newOffset = touchMoveStartData.offset + (offsetPercentage * lightConfig.cycleLength())
     // console.log("New offset " + newOffset)
+    
     onLightSettingsChange(lightConfig.withOffset(newOffset))
   }
 
   const touchStart = (e: React.TouchEvent) => {
-    setTouchMoveStartOffset(lightConfig.toLightSettings().offset)
-    setTouchMoveStartPosition(e.changedTouches[0].clientY)
+    setTouchMoveStartData({
+      position: e.changedTouches[0].clientY,
+      offset: lightConfig.toLightSettings().offset
+    })
   }
 
   let offset = lightConfig.offset
