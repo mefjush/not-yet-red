@@ -1,6 +1,7 @@
 import { STATE } from "./state"
 import CrossingSettings from "./crossing-settings"
 import { Phase } from "./traffic-light"
+import { negativeSafeMod } from "../utils"
 
 export interface LightSettings {
   offset: number
@@ -26,7 +27,9 @@ export default class LightConfig {
   }
 
   withOffset(offset: number): LightSettings {
-    return { offset: offset, duration: { red: this.duration.red }}
+    let roundedOffset = Math.round((offset / 1000)) * 1000
+    let sanitizedOffset = negativeSafeMod(roundedOffset, this.cycleLength())
+    return { offset: sanitizedOffset, duration: { red: this.duration.red }}
   }
 
   toLightSettings(): LightSettings {

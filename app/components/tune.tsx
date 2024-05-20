@@ -27,7 +27,7 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
     let newOffset = touchMoveStartOffset + (Math.round(moveDistance) * 200)
     console.log("Move distance " + moveDistance)
     console.log("New offset " + newOffset)
-    onLightSettingsChange({ ...lightConfig.toLightSettings(), offset: newOffset })
+    onLightSettingsChange(lightConfig.withOffset(newOffset))
   }
 
   const touchStart = (e: React.TouchEvent) => {

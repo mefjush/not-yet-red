@@ -72,7 +72,7 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
           Light #{index} {currentTimestamp}
         </Typography>
         <form>
-          <Input label="Offset duration" id={`light-${index}-offset`} min={0} max={lightConfig.cycleLength() / 1000} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
+          <Input label="Offset duration" id={`light-${index}-offset`} min={0} max={(lightConfig.cycleLength() / 1000) - 1} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
           <Input label="Red duration" id={`light-${index}-red-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={lightConfig.duration.red / 1000} onChange={e => onLightSettingsChange(lightConfig.withRedDuration(e.target.value * 1000))} />
         </form>
         <Stack direction="column" alignItems="stretch">
