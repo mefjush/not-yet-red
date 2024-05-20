@@ -5,28 +5,33 @@ import { negativeSafeMod } from "../utils"
 import LightConfig, {LightSettings} from "../domain/light-config"
 
 const radiousSize = 5
+const tuneHeight = 250
 
 export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void}) {
 
   const [touchMoveStartPosition, setTouchMoveStartPosition] = useState(0)
   const [touchMoveStartOffset, setTouchMoveStartOffset] = useState(0)
 
-  const createSegment = function(phase: Phase, duration: number, idx: number, count: number) {
+  const createSegment = function(phase: Phase, duration: number, cycleLength: number, idx: number, count: number) {
 
     const radious = idx == 0 ? `${radiousSize}px ${radiousSize}px 0 0` : idx == (count - 1) ? `0 0 ${radiousSize}px ${radiousSize}px` : "0 0 0 0"
     return (
-      <Box key={idx} sx={{ height: 5 * duration / 1000, backgroundColor: phase.state.color, opacity: 0.8, borderRadius: radious }}></Box>
+      <Box key={idx} sx={{ height: tuneHeight * duration / cycleLength, backgroundColor: phase.state.color, opacity: 0.8, borderRadius: radious }}></Box>
     )
   }
 
   const touchMove = (touches: React.TouchList) => {
     let moveDistance = touches[touches.length - 1].clientY - touchMoveStartPosition
-    console.log(touches)
-    // let oldSettings = lightConfig.toLightSettings()
-    // console.log("Old offset " + oldSettings.offset)
-    let newOffset = touchMoveStartOffset + (Math.round(moveDistance) * 200)
-    console.log("Move distance " + moveDistance)
-    console.log("New offset " + newOffset)
+    // console.log(touches)
+    // console.log("Old offset " + touchMoveStartOffset)
+    // console.log("Move distance " + moveDistance)
+    let offsetPercentage = moveDistance / tuneHeight
+    
+    // console.log("Offset percentage " + offsetPercentage)
+
+    let newOffset = touchMoveStartOffset + (offsetPercentage * lightConfig.cycleLength())
+    
+    // console.log("New offset " + newOffset)
     onLightSettingsChange(lightConfig.withOffset(newOffset))
   }
 
@@ -56,7 +61,7 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
   const cellsFiltered = cells
     .filter((cell) => cell.duration > 0)
 
-  const divs = cellsFiltered.map((cell, idx) => createSegment(cell.phase, cell.duration, idx, cellsFiltered.length))
+  const divs = cellsFiltered.map((cell, idx) => createSegment(cell.phase, cell.duration, lightConfig.cycleLength(), idx, cellsFiltered.length))
 
   // https://github.com/petehunt/react-touch-lib/blob/90fb75f0f2bc92c4d9ac8b90806a10157aae3aa9/src/primitives/TouchableArea.js#L42-L49
   return (

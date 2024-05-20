@@ -27,9 +27,9 @@ export default class LightConfig {
   }
 
   withOffset(offset: number): LightSettings {
-    let roundedOffset = Math.round((offset / 1000)) * 1000
-    let sanitizedOffset = negativeSafeMod(roundedOffset, this.cycleLength())
-    return { offset: sanitizedOffset, duration: { red: this.duration.red }}
+    let positiveOffset = negativeSafeMod(offset, this.cycleLength())
+    let roundedOffset = Math.round((positiveOffset / 1000)) * 1000
+    return { offset: roundedOffset, duration: { red: this.duration.red }}
   }
 
   toLightSettings(): LightSettings {
