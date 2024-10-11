@@ -12,6 +12,7 @@ import Tune from './tune'
 import { UiMode } from '../ui-mode'
 import { QRCodeSVG } from 'qrcode.react'
 import { objectSerDeser } from '../url'
+import { STATE } from '../domain/state'
 
 export default function LightComponent({ index, mode, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, mode: UiMode, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties }) {
 
@@ -65,6 +66,10 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
     lightRef.current?.requestFullscreen().finally(() => releaseWakeLock())
   }
 
+  let durationInputs = lightConfig.phases.sort((a, b) => a.state.priority - b.state.priority).reverse().map(phase => (
+    <Input label={`${phase.state.name} duration`} id={`light-${index}-${phase.state.name}-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={phase.duration / 1000} onChange={e => onLightSettingsChange(lightConfig.withPhaseDuration(phase, e.target.value * 1000))} />
+  ));
+
   return (
     <Card style={style}>
       <CardContent>
@@ -76,8 +81,7 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
             <Stack direction="column" alignItems="stretch">
               <form>
                 <Input label="Offset duration" id={`light-${index}-offset`} min={0} max={(lightConfig.cycleLength() / 1000) - 1} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
-                <Input label="Red duration" id={`light-${index}-red-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={lightConfig.duration.red / 1000} onChange={e => onLightSettingsChange(lightConfig.withRedDuration(e.target.value * 1000))} />
-                
+                {durationInputs}
               </form>
               {tune}
               {qr}

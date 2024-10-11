@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import LightComponent from './light'
 import Clock from '../domain/clock'
 import TrafficLight from '../domain/traffic-light'
-import LightConfig, { LightSettings } from '../domain/light-config'
+import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
 import { Card, CardContent, Collapse, Container, Fab, Grid, Stack, Divider } from '@mui/material'
@@ -26,8 +26,6 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
       duration: DEFAULT_FAILURE_DURATION
     }
   }, "crossingSettings", objectSerDeser())
-
-  const DEFAULT_LIGHT_SETTINGS: LightSettings = { offset: 0, duration: { red: 30_000 }}
 
   const [currentTimestamp, setCurrentTimestamp] = useState(() => time)
 
@@ -65,17 +63,6 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
     const copy = [...lightSettings]
     copy.splice(index, 1)
     setLightSettings(copy)
-  }
-
-  const autoMargin = (index: number) => {
-    let style = {}
-    if (index == 0) {
-      style = { ...style, marginLeft: "auto" }
-    }
-    if (index == lightSettings.length - 1) {
-      style = { ...style, marginRight: "auto" }
-    }
-    return style
   }
 
   return (

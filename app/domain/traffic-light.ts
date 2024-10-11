@@ -8,6 +8,8 @@ interface State {
   name: string
   file: string
   color: string
+  priority: number
+  order: number
 }
 
 export interface Phase {
@@ -27,7 +29,7 @@ export default class TrafficLight {
   cycleLength: number
 
   constructor(lightSettings: LightConfig, failed: boolean) {
-    this.phases = failed ? FAILURE_PHASES : lightSettings.phases()
+    this.phases = failed ? FAILURE_PHASES : lightSettings.phases
     this.offset = failed ? 0 : lightSettings.offset || DEFAULT_OFFSET
     this.intervals = this.phases.map(phase => phase.duration)
     this.cycleLength = this.intervals.reduce((sum, a) => sum + a, 0)

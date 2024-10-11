@@ -42,7 +42,7 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
   }
 
   let offset = lightConfig.offset
-  let phases = lightConfig.phases()
+  let phases = lightConfig.phases
 
   let phaseIdx = 0
   while (offset > 0) {

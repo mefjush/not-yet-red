@@ -12,9 +12,12 @@ let crossingSettings = {
 
 let lightSettings = {
   offset: 0,
-  duration: {
-    red: 30_000
-  }
+  phases: [
+    { state: STATE.RED, duration: 30_000 },
+    { state: STATE.RED_YELLOW, duration: 2_000 },
+    { state: STATE.GREEN, duration: 26_000 },
+    { state: STATE.YELLOW, duration: 2_000 }
+  ]
 }
 
 describe('TrafficLight', () => {
