@@ -7,7 +7,7 @@ import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Container, Fab, Grid, Stack } from '@mui/material'
+import { Card, CardContent, Collapse, Container, Fab, Grid, Stack, Divider } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { UiMode } from '../ui-mode'
 import useStateParams, { objectSerDeser } from '../url'
@@ -80,25 +80,21 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
 
   return (
     <>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <Container>
-          <Grid>
-            <Grid item>
-              <Card sx={{ m: 1 }}>
-                <CardContent>
-                  <h2>Settings</h2>
-                  <form>
-                    <Input label="Cycle length" id="cycle-length" min={10} max={180} value={crossingSettings.cycleLength / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } />
-                    <Input label="Failure duration" id="failure-duration" min={10} max={180} value={crossingSettings.failure.duration / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } />
-                    <Input label="Failure probability" id="failure-probability" min={0} max={1} step={0.1} value={crossingSettings.failure.probability} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } />
-                  </form>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Container>
-      </Collapse>
-      <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 1, m: 1 }} style={{overflowX: 'auto'}}>
+      <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          <Card>
+            <CardContent>
+              <h2>Settings</h2>
+              <form>
+                <Input label="Cycle length" id="cycle-length" min={10} max={180} value={crossingSettings.cycleLength / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } />
+                <Input label="Failure duration" id="failure-duration" min={10} max={180} value={crossingSettings.failure.duration / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } />
+                <Input label="Failure probability" id="failure-probability" min={0} max={1} step={0.1} value={crossingSettings.failure.probability} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } />
+              </form>
+            </CardContent>
+          </Card>
+          <Divider></Divider>
+        </Collapse>
+
         { lights.map((light, index) =>
           <LightComponent
               key={index}
@@ -108,7 +104,6 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
               lightConfig={lightConfigs[index]}
               onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
               onDelete={lights.length > 1 ? () => onDelete(index) : undefined}
-              style={autoMargin(index)}
               mode={mode}
           />
         )}

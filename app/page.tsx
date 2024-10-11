@@ -15,7 +15,7 @@ const modeIcons = new Map<boolean, React.JSX.Element>([
 
 export default function Home() {
 
-  const [expanded, setExpanded] = useStateParams(false, "expanded", BooleanSerDeser)
+  const [expanded, setExpanded] = useStateParams(true, "expanded", BooleanSerDeser)
 
   const [mode, setMode] = useStateParams({ qr: false }, "qr", objectSerDeser())
 

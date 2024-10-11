@@ -5,7 +5,7 @@ import { negativeSafeMod } from "../utils"
 import LightConfig, {LightSettings} from "../domain/light-config"
 
 const radiousSize = 5
-const tuneHeight = 250
+const tuneHeight = 150
 
 export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void}) {
 
@@ -15,7 +15,7 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
 
     const radious = idx == 0 ? `${radiousSize}px ${radiousSize}px 0 0` : idx == (count - 1) ? `0 0 ${radiousSize}px ${radiousSize}px` : "0 0 0 0"
     return (
-      <Box key={idx} sx={{ height: tuneHeight * duration / cycleLength, backgroundColor: phase.state.color, opacity: 0.8, borderRadius: radious }}></Box>
+      <Box key={idx} sx={{ width: `${100 * duration / cycleLength}%`, backgroundColor: phase.state.color, opacity: 0.8, borderRadius: 0, height: "20px" }}></Box>
     )
   }
 
@@ -66,7 +66,7 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
 
   // https://github.com/petehunt/react-touch-lib/blob/90fb75f0f2bc92c4d9ac8b90806a10157aae3aa9/src/primitives/TouchableArea.js#L42-L49
   return (
-    <Stack style={{ touchAction: "none" }} sx={{ my: 2 }} onTouchStart={e => touchStart(e)} onTouchMove={e => touchMove(e.touches)}>
+    <Stack style={{ touchAction: "none" }} sx={{ my: 2 }} direction="row" onTouchStart={e => touchStart(e)} onTouchMove={e => touchMove(e.touches)}>
       {divs}
     </Stack>
   )
