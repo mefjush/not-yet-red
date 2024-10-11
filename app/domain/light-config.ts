@@ -54,12 +54,14 @@ export default class LightConfig {
     
   withPhaseDuration(oldPhase: Phase, newDuration: number): LightSettings {
     let remainingPhases = this.phases.filter(p => p.state != oldPhase.state).sort((a, b) => a.state.priority - b.state.priority).reverse();
+    let fixablePhases = remainingPhases.filter(p => p.state.priority >= 3)
+    let unfixablePhases = remainingPhases.filter(p => p.state.priority < 3)
 
     let diff = oldPhase.duration - newDuration;
 
     let fixedRemaining = []
     
-    for (let p of remainingPhases) {
+    for (let p of fixablePhases) {
       let durationBeforeFix = p.duration
       fixedRemaining.push({ state: p.state, duration: Math.max(0, p.duration + diff) })
       if (diff < 0 && durationBeforeFix < Math.abs(diff)) {
@@ -69,9 +71,9 @@ export default class LightConfig {
       }
     }
 
-    fixedRemaining.push({ state: oldPhase.state, duration: newDuration })
+    fixedRemaining.push({ state: oldPhase.state, duration: newDuration + diff })
 
-    return { offset: this.offset, phases: fixedRemaining.sort((a, b) => a.state.order - b.state.order)}
+    return { offset: this.offset, phases: fixedRemaining.concat(unfixablePhases).sort((a, b) => a.state.order - b.state.order)}
   }
 }
 
