@@ -67,7 +67,7 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
   }
 
   let durationInputs = lightConfig.phases.sort((a, b) => a.state.priority - b.state.priority).reverse().map(phase => (
-    <Input label={`${phase.state.name} duration`} id={`light-${index}-${phase.state.name}-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={phase.duration / 1000} onChange={e => onLightSettingsChange(lightConfig.withPhaseDuration(phase, e.target.value * 1000))} />
+    <Input key={`light-${index}-${phase.state.name}-duration`} label={`${phase.state.name} duration`} id={`light-${index}-${phase.state.name}-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={phase.duration / 1000} onChange={e => onLightSettingsChange(lightConfig.withPhaseDuration(phase, e.target.value * 1000))} />
   ));
 
   return (
@@ -87,8 +87,10 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
               {qr}
             </Stack>
           </Grid>
-          <Grid container xs={4} sx={{ alignItems: "center", justifyContent: "center" }}>
-            {lightImg}
+          <Grid item xs={4}>
+            <Grid container sx={{ alignItems: "center", justifyContent: "center" }}>
+              {lightImg}
+            </Grid>
           </Grid>
         </Grid>
       </CardContent>
