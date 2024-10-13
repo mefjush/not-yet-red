@@ -20,23 +20,18 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
   }
 
   const touchMove = (touches: React.TouchList) => {
-    let moveDistance = touches[touches.length - 1].clientY - touchMoveStartData.position
-    // console.log(touches)
-    // console.log("Old offset " + touchMoveStartOffset)
-    // console.log("Move distance " + moveDistance)
+    let moveDistance = touches[touches.length - 1].clientX - touchMoveStartData.position
     
     let offsetPercentage = moveDistance / tuneHeight
-    // console.log("Offset percentage " + offsetPercentage)
 
     let newOffset = touchMoveStartData.offset + (offsetPercentage * lightConfig.cycleLength())
-    // console.log("New offset " + newOffset)
     
     onLightSettingsChange(lightConfig.withOffset(newOffset))
   }
 
   const touchStart = (e: React.TouchEvent) => {
     setTouchMoveStartData({
-      position: e.changedTouches[0].clientY,
+      position: e.changedTouches[0].clientX,
       offset: lightConfig.toLightSettings().offset
     })
   }

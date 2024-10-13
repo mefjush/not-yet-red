@@ -9,7 +9,6 @@ import Failure from '../domain/failure'
 import Input from './input'
 import { Card, CardContent, Collapse, Container, Fab, Grid, Stack, Divider } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import { UiMode } from '../ui-mode'
 import useStateParams, { objectSerDeser } from '../url'
 
 const DEFAULT_FAILURE_DURATION = 10_000
@@ -17,7 +16,7 @@ const DEFAULT_FAILURE_PROBABILITY = 0.1
 const DEFAULT_CYCLE_LENGTH = 60_000
 
 
-export default function CrossingComponent({time, expanded, mode}: {time: number, expanded: boolean, mode: UiMode}) {
+export default function CrossingComponent({time, expanded}: {time: number, expanded: boolean}) {
 
   const [crossingSettings, setCrossingSettings] = useStateParams({
     cycleLength: DEFAULT_CYCLE_LENGTH,
@@ -91,7 +90,6 @@ export default function CrossingComponent({time, expanded, mode}: {time: number,
               lightConfig={lightConfigs[index]}
               onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
               onDelete={lights.length > 1 ? () => onDelete(index) : undefined}
-              mode={mode}
           />
         )}
         <Fab color="primary" aria-label="add" onClick={() => onClone(lightSettings.length - 1)} style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}>

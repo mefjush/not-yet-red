@@ -3,28 +3,29 @@
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
 import Input from './input'
-import { IconButton, Card, CardActions, CardContent, Stack, Grid } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Grid, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
+import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import { useRef, useState } from 'react'
 import { Typography } from '@mui/material'
 import Tune from './tune'
-import { UiMode } from '../ui-mode'
 import { QRCodeSVG } from 'qrcode.react'
 import { objectSerDeser } from '../url'
-import { STATE } from '../domain/state'
 
-export default function LightComponent({ index, mode, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, mode: UiMode, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties }) {
+export default function LightComponent({ index, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties }) {
 
   const lightRef = useRef<HTMLImageElement>(null)
 
   const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null)
 
-  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()} style={{ marginLeft: "auto" }}><DeleteIcon /></IconButton>
+  const [shareMode, setShareMode] = useState<Boolean>(false)
+
+  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()}><DeleteIcon /></IconButton>
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.state.file} alt={currentPhase.state.name} style={{ width: "220px", maxWidth: "100%", maxHeight: "90vh" }} />
+  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.state.file} alt={currentPhase.state.name} style={{ width: "200px", maxWidth: "100%", maxHeight: "90vh" }} />
   const tune = <Tune lightConfig={lightConfig} onLightSettingsChange={onLightSettingsChange} />
 
   const search = `?crossingSettings=${objectSerDeser().serialize(lightConfig.crossingSettings)}&lightSettings=${objectSerDeser().serialize([lightConfig.toLightSettings()])}`
@@ -35,7 +36,7 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
 
   console.log("Rendering light @ " + currentTimestamp)
 
-  const qr = mode.qr ? <div style={{ margin: "auto auto" }}><QRCodeSVG size={256} value={url} /></div> : <></>
+  const qr = <div style={{ margin: "auto auto" }}><QRCodeSVG size={256} value={url} /></div>
 
   const requestWakeLock = async () => {
     try {
@@ -80,11 +81,10 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
           <Grid item xs={8}>
             <Stack direction="column" alignItems="stretch">
               <form>
-                <Input label="Offset duration" id={`light-${index}-offset`} min={0} max={(lightConfig.cycleLength() / 1000) - 1} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
                 {durationInputs}
+                <Input label="Offset duration" id={`light-${index}-offset`} min={0} max={(lightConfig.cycleLength() / 1000) - 1} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
               </form>
               {tune}
-              {qr}
             </Stack>
           </Grid>
           <Grid item xs={4}>
@@ -96,8 +96,40 @@ export default function LightComponent({ index, mode, currentTimestamp, light, l
       </CardContent>
       <CardActions>
         <IconButton aria-label="fullscreen" onClick={() => enterFullScreen()}><FullscreenIcon /></IconButton>
+        <IconButton aria-label="share" onClick={() => setShareMode(!shareMode) }><ShareIcon /></IconButton>
         {deleteButton}
       </CardActions>
+      <Dialog
+        open={shareMode == true}
+        onClose={() => setShareMode(false)}
+      >
+        <DialogTitle>Share</DialogTitle>
+        <DialogContent>
+          <Box
+            noValidate
+            component="form"
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              m: 'auto',
+              width: 'fit-content',
+            }}
+          >
+            {qr}
+            <TextField
+              margin="normal"
+              label="Url"
+              fullWidth
+              variant="outlined"
+              defaultValue={url}
+              inputProps={{ readOnly: true }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShareMode(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }

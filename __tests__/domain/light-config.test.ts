@@ -84,4 +84,22 @@ describe('LightConfig', () => {
     expect(modified.phases).toContainEqual({ state: STATE.RED, duration: 56_000 })
     expect(modified.phases).toContainEqual({ state: STATE.GREEN, duration: 0 })
   })
+
+  it('adjusts the red and green duration on cycle length duration decrease', () => {
+    let lightConfig = new LightConfig({ ...crossingSettings, cycleLength: 50_000 }, lightSettings)
+
+    expect(lightConfig.phases).toContainEqual({ state: STATE.RED, duration: 25_000 })
+    expect(lightConfig.phases).toContainEqual({ state: STATE.GREEN, duration: 21_000 })
+    expect(lightConfig.phases).toContainEqual({ state: STATE.YELLOW, duration: 2_000 })
+    expect(lightConfig.phases).toContainEqual({ state: STATE.RED_YELLOW, duration: 2_000 })
+  })
+
+  it('adjusts the red and green duration on cycle length duration increase', () => {
+    let lightConfig = new LightConfig({ ...crossingSettings, cycleLength: 71_000 }, lightSettings)
+
+    expect(lightConfig.phases).toContainEqual({ state: STATE.RED, duration: 35_000 })
+    expect(lightConfig.phases).toContainEqual({ state: STATE.GREEN, duration: 32_000 })
+    expect(lightConfig.phases).toContainEqual({ state: STATE.YELLOW, duration: 2_000 })
+    expect(lightConfig.phases).toContainEqual({ state: STATE.RED_YELLOW, duration: 2_000 })
+  })
 })

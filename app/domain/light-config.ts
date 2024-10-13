@@ -2,12 +2,6 @@ import { STATE } from "./state"
 import CrossingSettings from "./crossing-settings"
 import { Phase } from "./traffic-light"
 import { negativeSafeMod } from "../utils"
-import { duration } from "@mui/material"
-
-// export interface PhaseConfig {
-//   state: typeof STATE
-//   defaultDuration: number | null
-// }
 
 export interface LightSettings {
   offset: number
@@ -18,44 +12,58 @@ export default class LightConfig {
 
   crossingSettings: CrossingSettings
   offset: number
-  // duration: { red: number }
   phases: Phase[]
 
   constructor(crossingSettings: CrossingSettings, lightSettings: LightSettings) {
     this.crossingSettings = crossingSettings
     this.offset = lightSettings.offset
-    this.phases = lightSettings.phases
+    this.phases = this.rescale(crossingSettings, lightSettings).phases
   }
-
-  // constructor(crossingSettings: CrossingSettings, phases: Phase[]) {
-  //   this.crossingSettings = crossingSettings
-  //   this.offset = lightSettings.offset
-  //   this.duration = lightSettings.duration
-  // }
-
-  // withRedDuration(red: number): LightSettings {
-  //   return { offset: this.offset, phases: this.phases}
-  // }
-  
 
   withOffset(offset: number): LightSettings {
     let positiveOffset = negativeSafeMod(offset, this.cycleLength())
     let roundedOffset = Math.round((positiveOffset / 1000)) * 1000
-    return { offset: roundedOffset, phases: this.phases}
+    return { offset: roundedOffset, phases: this.phases }
   }
 
   toLightSettings(): LightSettings {
-    return { offset: this.offset, phases: this.phases}
+    return { offset: this.offset, phases: this.phases }
   }
 
   cycleLength() {
     return this.crossingSettings.cycleLength
   }
+
+  isFixable(phase: Phase): boolean {
+    return phase.state.priority >= 3
+  }
+
+  roundSeconds(duration: number): number {
+    return Math.round(duration / 1000) * 1000
+  }
+
+  rescale(crossingSettings: CrossingSettings, lightSettings: LightSettings): LightSettings {
+    let phasesLength = lightSettings.phases.reduce((acc, phase) => acc + phase.duration, 0)
+    let diff = crossingSettings.cycleLength - phasesLength
+
+    let fixableCount = lightSettings.phases.filter(this.isFixable).length
+    let diffPerPhase = this.roundSeconds(diff / fixableCount)
+    let diffRemainder = diff - (diffPerPhase * fixableCount)
+
+    let fixedPhases = lightSettings.phases.map((phase, index) => {
+      if (!this.isFixable(phase)) {
+        return phase
+      }
+      let applicableDiff = diffPerPhase + ((index === 0) ? diffRemainder : 0)
+      return { state: phase.state, duration: phase.duration + applicableDiff }
+    })
+    return { ...lightSettings, phases: fixedPhases }
+  }
     
   withPhaseDuration(oldPhase: Phase, newDuration: number): LightSettings {
     let remainingPhases = this.phases.filter(p => p.state != oldPhase.state).sort((a, b) => a.state.priority - b.state.priority).reverse();
-    let fixablePhases = remainingPhases.filter(p => p.state.priority >= 3)
-    let unfixablePhases = remainingPhases.filter(p => p.state.priority < 3)
+    let fixablePhases = remainingPhases.filter(this.isFixable)
+    let unfixablePhases = remainingPhases.filter(p => !this.isFixable(p))
 
     let diff = oldPhase.duration - newDuration;
 
