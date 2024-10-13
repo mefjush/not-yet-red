@@ -46,6 +46,10 @@ export default class LightConfig {
     let phasesLength = lightSettings.phases.reduce((acc, phase) => acc + phase.duration, 0)
     let diff = crossingSettings.cycleLength - phasesLength
 
+    if (Math.abs(diff) == 0) {
+      return lightSettings
+    }
+
     let fixableCount = lightSettings.phases.filter(this.isFixable).length
     let diffPerPhase = this.roundSeconds(diff / fixableCount)
     let diffRemainder = diff - (diffPerPhase * fixableCount)
@@ -61,7 +65,7 @@ export default class LightConfig {
   }
     
   withPhaseDuration(oldPhase: Phase, newDuration: number): LightSettings {
-    let remainingPhases = this.phases.filter(p => p.state != oldPhase.state).sort((a, b) => a.state.priority - b.state.priority).reverse();
+    let remainingPhases = this.phases.filter(p => p.state != oldPhase.state).toSorted((a, b) => a.state.priority - b.state.priority).reverse();
     let fixablePhases = remainingPhases.filter(this.isFixable)
     let unfixablePhases = remainingPhases.filter(p => !this.isFixable(p))
 
@@ -81,7 +85,7 @@ export default class LightConfig {
 
     fixedRemaining.push({ state: oldPhase.state, duration: newDuration + diff })
 
-    return { offset: this.offset, phases: fixedRemaining.concat(unfixablePhases).sort((a, b) => a.state.order - b.state.order)}
+    return { offset: this.offset, phases: fixedRemaining.concat(unfixablePhases).toSorted((a, b) => a.state.order - b.state.order)}
   }
 }
 

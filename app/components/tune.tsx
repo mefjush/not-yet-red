@@ -12,10 +12,8 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
   const [touchMoveStartData, setTouchMoveStartData] = useState({ position: 0, offset: 0 })
 
   const createSegment = function(phase: Phase, duration: number, cycleLength: number, idx: number, count: number) {
-
-    const radious = idx == 0 ? `${radiousSize}px ${radiousSize}px 0 0` : idx == (count - 1) ? `0 0 ${radiousSize}px ${radiousSize}px` : "0 0 0 0"
     return (
-      <Box key={idx} sx={{ width: `${100 * duration / cycleLength}%`, backgroundColor: phase.state.color, opacity: 0.8, borderRadius: 0, height: "20px" }}></Box>
+      <Box key={idx} sx={{ width: `${100 * duration / cycleLength}%`, backgroundColor: phase.state.color, opacity: 0.8, height: "20px" }}></Box>
     )
   }
 
@@ -61,7 +59,7 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
 
   // https://github.com/petehunt/react-touch-lib/blob/90fb75f0f2bc92c4d9ac8b90806a10157aae3aa9/src/primitives/TouchableArea.js#L42-L49
   return (
-    <Stack style={{ touchAction: "none" }} sx={{ my: 2 }} direction="row" onTouchStart={e => touchStart(e)} onTouchMove={e => touchMove(e.touches)}>
+    <Stack style={{ touchAction: "none" }} sx={{ m: 0 }} direction="row" onTouchStart={e => touchStart(e)} onTouchMove={e => touchMove(e.touches)}>
       {divs}
     </Stack>
   )

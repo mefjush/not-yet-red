@@ -67,7 +67,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     lightRef.current?.requestFullscreen().finally(() => releaseWakeLock())
   }
 
-  let durationInputs = lightConfig.phases.sort((a, b) => a.state.priority - b.state.priority).reverse().map(phase => (
+  let durationInputs = lightConfig.phases.toSorted((a, b) => a.state.priority - b.state.priority).reverse().map(phase => (
     <Input key={`light-${index}-${phase.state.name}-duration`} label={`${phase.state.name} duration`} id={`light-${index}-${phase.state.name}-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={phase.duration / 1000} onChange={e => onLightSettingsChange(lightConfig.withPhaseDuration(phase, e.target.value * 1000))} />
   ));
 
@@ -82,9 +82,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             <Stack direction="column" alignItems="stretch">
               <form>
                 {durationInputs}
-                <Input label="Offset duration" id={`light-${index}-offset`} min={0} max={(lightConfig.cycleLength() / 1000) - 1} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
+                <Input label="Offset" id={`light-${index}-offset`} min={0} max={(lightConfig.cycleLength() / 1000) - 1} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
               </form>
-              {tune}
             </Stack>
           </Grid>
           <Grid item xs={4}>
@@ -99,6 +98,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         <IconButton aria-label="share" onClick={() => setShareMode(!shareMode) }><ShareIcon /></IconButton>
         {deleteButton}
       </CardActions>
+      {tune}
       <Dialog
         open={shareMode == true}
         onClose={() => setShareMode(false)}
