@@ -1,6 +1,7 @@
 "use client"
 
-import { Box, Grid, Slider, Typography, Input as MuiInput } from '@mui/material'
+import { Box, Slider, Typography, Input as MuiInput } from '@mui/material'
+import Grid from '@mui/material/Grid2'
 import { styled } from '@mui/material/styles'
 
 const MInput = styled(MuiInput)`
@@ -45,7 +46,7 @@ export default function Input({id, label, min, max, step, value, onChange}: {id:
         {label}
       </Typography>
       <Grid container spacing={2} alignItems="center">
-        <Grid item xs>
+        <Grid size={11}>
           <Slider
             value={typeof value === 'number' ? value : 0}
             step={step || 1}
@@ -55,7 +56,7 @@ export default function Input({id, label, min, max, step, value, onChange}: {id:
             aria-labelledby={id}
           />
         </Grid>
-        <Grid item>
+        <Grid size={1}>
           <MInput
             value={value}
             size="small"

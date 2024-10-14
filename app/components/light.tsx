@@ -3,7 +3,8 @@
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
 import Input from './input'
-import { IconButton, Card, CardActions, CardContent, Stack, Grid, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, IconButtonProps, CardHeader, Avatar, Collapse } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, IconButtonProps, CardHeader, Avatar, Collapse } from '@mui/material'
+import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -47,7 +48,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.state.file} alt={currentPhase.state.name} style={{ maxWidth: "100%", maxHeight: "70vh" }} />
+  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.state.file} alt={currentPhase.state.name} style={{ maxWidth: "100%", maxHeight: "330px" }} />
   const tune = <Tune lightConfig={lightConfig} onLightSettingsChange={onLightSettingsChange} />
 
   const search = `?crossingSettings=${objectSerDeser().serialize(lightConfig.crossingSettings)}&lightSettings=${objectSerDeser().serialize([lightConfig.toLightSettings()])}`
@@ -119,7 +120,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
           <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
-            <Grid item xs={8} md={10}>
+            <Grid size="grow">
               <Stack direction="column" alignItems="stretch">
                 <form>
                   {durationInputs}
@@ -127,10 +128,10 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
                 </form>
               </Stack>
             </Grid>
-            <Grid item xs={4} md={2}>
-              <Grid container sx={{ alignItems: "center", justifyContent: "center" }}>
+            <Grid size="auto">
+              {/* <Grid container sx={{ alignItems: "center", justifyContent: "center" }}> */}
                 {lightImg}
-              </Grid>
+              {/* </Grid> */}
             </Grid>
           </Grid>
         </CardContent>

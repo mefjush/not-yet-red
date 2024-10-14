@@ -1,6 +1,6 @@
 "use client"
 
-import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Divider } from '@mui/material'
+import { AppBar, Box, IconButton, Toolbar, Typography, Stack } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
 import CrossingComponent from './components/crossing'
