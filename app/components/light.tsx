@@ -9,7 +9,6 @@ import ShareIcon from '@mui/icons-material/Share'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import { useRef, useState } from 'react'
-import { Typography } from '@mui/material'
 import Tune from './tune'
 import { QRCodeSVG } from 'qrcode.react'
 import { objectSerDeser } from '../url'
@@ -20,28 +19,15 @@ interface ExpandMoreProps extends IconButtonProps {
 }
 
 const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme }) => ({
+  const { expand, ...other } = props
+  return <IconButton {...other} />
+})(({ theme, expand }) => ({
+  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
   marginLeft: 'auto',
   transition: theme.transitions.create('transform', {
     duration: theme.transitions.duration.shortest,
-  }),
-  variants: [
-    {
-      props: ({ expand }) => !expand,
-      style: {
-        transform: 'rotate(0deg)',
-      },
-    },
-    {
-      props: ({ expand }) => !!expand,
-      style: {
-        transform: 'rotate(180deg)',
-      },
-    },
-  ],
-}));
+  })
+}))
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties }) {
 
@@ -55,9 +41,9 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
-  };
+  }
 
-  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()}><DeleteIcon /></IconButton>
+  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()} style={{marginLeft: 'auto'}}><DeleteIcon /></IconButton>
 
   const currentPhase = light.currentPhase(currentTimestamp)
 

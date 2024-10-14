@@ -1,16 +1,15 @@
 "use client"
 
-import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Divider } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
 import CrossingComponent from './components/crossing'
 
-import useStateParams, { BooleanSerDeser, objectSerDeser } from './url'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 
 function Content() {
-  
-  const [expanded, setExpanded] = useStateParams(true, "expanded", BooleanSerDeser)
+
+  const [expanded, setExpanded] = useState(true)
  
   return (
     <>
@@ -39,14 +38,20 @@ function Content() {
 }
 
 export default function Home() {
-
-  // const [expanded, setExpanded] = useStateParams(true, "expanded", BooleanSerDeser)
-
   return (
     <main>
       <Suspense>
         <Content />
       </Suspense>
+      <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <img src="/favicon.ico" /> <p>2024 <strong>Traffic Lights</strong> by mefju</p>
+        </Box>
+      </Stack>
     </main>
   )
 }
