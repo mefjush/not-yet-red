@@ -1,4 +1,12 @@
-export const STATE = {
+export enum State {
+  RED = "RED",
+  RED_YELLOW = "RED_YELLOW",
+  GREEN = "GREEN",
+  YELLOW = "YELLOW",
+  NONE = "NONE"
+}
+
+export const STATE_ATTRIBUTES = {
   RED: { "name": "Red", "file": "img/red.png", "color": "#FF0000", priority: 3, order: 1 },
   RED_YELLOW: { "name": "Red-Yellow", "file": "img/red-yellow.png", "color": "#FFA500", priority: 2, order: 2 },
   GREEN: { "name": "Green", "file": "img/green.png", "color": "#008000", priority: 4, order: 3 },

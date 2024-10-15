@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { LightSettings, Phase } from "./domain/light-config"
+import { State } from "./domain/state"
+import CrossingSettings from "./domain/crossing-settings"
 
 interface SerDeser<T> {
   serialize: (state: T) => string
@@ -11,18 +14,40 @@ export const BooleanSerDeser: SerDeser<boolean> = {
   deserialize: (s: string) => s === 'true'
 }
 
-export function objectSerDeser<T>(): SerDeser<T> {
-  return {
-    serialize: (s: T) => new URLSearchParams(JSON.stringify(s)).toString(),
-    deserialize: (s: string) => {
-      const params = new URLSearchParams(`key=${s}`)
-      const key = params.get('key')
-      if (key != null) {
-        return JSON.parse(key.slice(0, -1)) as T
-      } else {
-        return null as T
+export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
+  serialize: (lightSettingsArray: LightSettings[]) => {
+    return lightSettingsArray.map(ls => {
+      return ls.offset + "---" + ls.phases.map(p => p.state + "-" + p.duration).join("--")
+    }).join("----")
+  },
+  deserialize: (s: string) => {
+    return s.split("----").map(ls => {
+      let lsSplit = ls.split("---")
+      return {
+        offset: Number.parseInt(lsSplit[0]), 
+        phases: lsSplit[1].split("--").map(ph => { 
+          let phSplit = ph.split("-")
+          let stateName = <keyof typeof State> phSplit[0] 
+          return new Phase(State[stateName], Number.parseInt(phSplit[1]))
+        })
       }
-    } 
+    })
+  }
+}
+
+export const CrossingSettingsSerDeser: SerDeser<CrossingSettings> = {
+  serialize: (crossingSettings: CrossingSettings) => {
+    return crossingSettings.cycleLength + "-" + crossingSettings.failure.duration + "-" + crossingSettings.failure.probability
+  },
+  deserialize: (s: string) => {
+    let split = s.split("-")
+    return {
+      cycleLength: Number.parseInt(split[0]),
+      failure: {
+        duration: Number.parseInt(split[1]),
+        probability: Number.parseFloat(split[2])
+      }
+    }
   }
 }
 

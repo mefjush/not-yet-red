@@ -5,8 +5,10 @@ interface ClockListener {
 }
 
 let timeOffset: number | null = null
+let timeSyncTry: number = 0
 
 function syncTime(tickCallback: (timestamp: number) => void) {
+  timeSyncTry += 1
   console.log("Syncing time")
   let request = new XMLHttpRequest()
   let start = Date.now()
@@ -48,13 +50,17 @@ function syncTime(tickCallback: (timestamp: number) => void) {
 export default class Clock {
 
   nextTimeout: ReturnType<typeof setTimeout> | null = null
+  timeSync: ReturnType<typeof setTimeout> | null = null
 
   register(listeners: ClockListener[], tickCallback: (timestamp: number) => void, fixedTimeOffset: number|null = null) {
     console.log(`Register of ${ listeners.length } listeners`)
 
     if (timeOffset == null) {
-      if (fixedTimeOffset == null) {
-        setTimeout(() => syncTime(tickCallback), 2000) //so it synces when everything is loaded
+      if (fixedTimeOffset == null && !this.timeSync && timeSyncTry < 5) {
+        this.timeSync = setTimeout(() => syncTime((timestamp) => {
+          this.timeSync = null
+          tickCallback(timestamp)
+        }), 2000) //so it synces when everything is loaded
       } else {
         timeOffset = fixedTimeOffset
       }

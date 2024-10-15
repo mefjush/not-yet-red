@@ -12,8 +12,8 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import { useRef, useState } from 'react'
 import Tune from './tune'
 import { QRCodeSVG } from 'qrcode.react'
-import { objectSerDeser } from '../url'
 import { styled } from '@mui/material/styles';
+import { CrossingSettingsSerDeser, LightSettingsSerDeser } from '../url'
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -48,10 +48,10 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.state.file} alt={currentPhase.state.name} style={{ maxWidth: "100%", maxHeight: "330px" }} />
+  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.stateAttributes().file} alt={currentPhase.stateAttributes().name} style={{ maxWidth: "100%", maxHeight: "330px" }} />
   const tune = <Tune lightConfig={lightConfig} onLightSettingsChange={onLightSettingsChange} />
 
-  const search = `?crossingSettings=${objectSerDeser().serialize(lightConfig.crossingSettings)}&lightSettings=${objectSerDeser().serialize([lightConfig.toLightSettings()])}`
+  const search = `?crossingSettings=${CrossingSettingsSerDeser.serialize(lightConfig.crossingSettings)}&lightSettings=${LightSettingsSerDeser.serialize([lightConfig.toLightSettings()])}`
 
   const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
   // const baseUrl = "http://192.168.0.106:3000" 
@@ -90,8 +90,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     lightRef.current?.requestFullscreen().finally(() => releaseWakeLock())
   }
 
-  let durationInputs = lightConfig.phases.toSorted((a, b) => a.state.priority - b.state.priority).reverse().map(phase => (
-    <Input key={`light-${index}-${phase.state.name}-duration`} label={`${phase.state.name} duration`} id={`light-${index}-${phase.state.name}-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={phase.duration / 1000} onChange={e => onLightSettingsChange(lightConfig.withPhaseDuration(phase, e.target.value * 1000))} />
+  let durationInputs = lightConfig.phases.toSorted((a, b) => a.stateAttributes().priority - b.stateAttributes().priority).reverse().map(phase => (
+    <Input key={`light-${index}-${phase.stateAttributes().name}-duration`} label={`${phase.stateAttributes().name} duration`} id={`light-${index}-${phase.stateAttributes().name}-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={phase.duration / 1000} onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} />
   ));
 
   return (
@@ -100,7 +100,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         avatar={
           <Avatar 
             aria-label="traffic-light" 
-            sx={{ bgcolor: currentPhase.state.color }}
+            sx={{ bgcolor: currentPhase.stateAttributes().color }}
           >
             {index}
           </Avatar>

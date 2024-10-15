@@ -1,7 +1,29 @@
-import { STATE } from "./state"
+import { State, STATE_ATTRIBUTES } from "./state"
 import CrossingSettings from "./crossing-settings"
-import { Phase } from "./traffic-light"
 import { negativeSafeMod } from "../utils"
+
+
+interface StateAttributes {
+  name: string
+  file: string
+  color: string
+  priority: number
+  order: number
+}
+
+export class Phase {
+  state: State
+  duration: number
+
+  constructor(state: State, duration: number) {
+    this.state = state
+    this.duration = duration
+  }
+  
+  stateAttributes(): StateAttributes {
+    return STATE_ATTRIBUTES[this.state]
+  }
+}
 
 export interface LightSettings {
   offset: number
@@ -35,7 +57,7 @@ export default class LightConfig {
   }
 
   isFixable(phase: Phase): boolean {
-    return phase.state.priority >= 3
+    return phase.stateAttributes().priority >= 3
   }
 
   roundSeconds(duration: number): number {
@@ -59,23 +81,24 @@ export default class LightConfig {
         return phase
       }
       let applicableDiff = diffPerPhase + ((index === 0) ? diffRemainder : 0)
-      return { state: phase.state, duration: phase.duration + applicableDiff }
+      return new Phase(phase.state,  phase.duration + applicableDiff)
     })
     return { ...lightSettings, phases: fixedPhases }
   }
     
-  withPhaseDuration(oldPhase: Phase, newDuration: number): LightSettings {
-    let remainingPhases = this.phases.filter(p => p.state != oldPhase.state).toSorted((a, b) => a.state.priority - b.state.priority).reverse();
+  withStateDuration(state: State, newDuration: number): LightSettings {
+    let remainingPhases = this.phases.filter(p => p.state != state).toSorted((a, b) => a.stateAttributes().priority - b.stateAttributes().priority).reverse();
     let fixablePhases = remainingPhases.filter(this.isFixable)
     let unfixablePhases = remainingPhases.filter(p => !this.isFixable(p))
 
-    let diff = oldPhase.duration - newDuration;
+    let oldDuration = this.phases.find(p => p.state == state)?.duration || 0
+    let diff = oldDuration - newDuration;
 
     let fixedRemaining = []
     
     for (let p of fixablePhases) {
       let durationBeforeFix = p.duration
-      fixedRemaining.push({ state: p.state, duration: Math.max(0, p.duration + diff) })
+      fixedRemaining.push(new Phase(p.state, Math.max(0, p.duration + diff)))
       if (diff < 0 && durationBeforeFix < Math.abs(diff)) {
         diff = diff + durationBeforeFix
       } else {
@@ -83,18 +106,18 @@ export default class LightConfig {
       }
     }
 
-    fixedRemaining.push({ state: oldPhase.state, duration: newDuration + diff })
+    fixedRemaining.push(new Phase(state, newDuration + diff))
 
-    return { offset: this.offset, phases: fixedRemaining.concat(unfixablePhases).toSorted((a, b) => a.state.order - b.state.order)}
+    return { offset: this.offset, phases: fixedRemaining.concat(unfixablePhases).toSorted((a, b) => a.stateAttributes().order - b.stateAttributes().order)}
   }
 }
 
 export const DEFAULT_LIGHT_SETTINGS = {
   offset: 0,
   phases: [
-    { state: STATE.RED, duration: 30_000 },
-    { state: STATE.RED_YELLOW, duration: 2_000 },
-    { state: STATE.GREEN, duration: 26_000 },
-    { state: STATE.YELLOW, duration: 2_000 }
+    new Phase(State.RED, 30_000),
+    new Phase(State.RED_YELLOW, 2_000),
+    new Phase(State.GREEN, 26_000),
+    new Phase(State.YELLOW, 2_000)
   ]
 }

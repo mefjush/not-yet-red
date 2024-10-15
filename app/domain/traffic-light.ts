@@ -1,25 +1,12 @@
-import { STATE } from "./state"
-import LightConfig from "./light-config"
+import { State } from "./state"
+import LightConfig, { Phase } from "./light-config"
 import { negativeSafeMod } from "../utils"
 
 const DEFAULT_OFFSET = 0
 
-interface State {
-  name: string
-  file: string
-  color: string
-  priority: number
-  order: number
-}
-
-export interface Phase {
-  state: State
-  duration: number
-}
-
 const FAILURE_PHASES = [
-  { state: STATE.YELLOW, duration: 1000 },
-  { state: STATE.NONE, duration: 1000 }
+  new Phase(State.YELLOW, 1000),
+  new Phase(State.NONE, 1000)
 ]
 
 export default class TrafficLight {

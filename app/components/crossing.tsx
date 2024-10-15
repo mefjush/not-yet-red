@@ -9,26 +9,16 @@ import Failure from '../domain/failure'
 import Input from './input'
 import { Card, CardContent, Collapse, Fab, Stack, Divider } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import useStateParams, { objectSerDeser } from '../url'
-
-const DEFAULT_FAILURE_DURATION = 10_000
-const DEFAULT_FAILURE_PROBABILITY = 0.1
-const DEFAULT_CYCLE_LENGTH = 60_000
-
+import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
+import { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
 
 export default function CrossingComponent({time, expanded}: {time: number, expanded: boolean}) {
 
-  const [crossingSettings, setCrossingSettings] = useStateParams({
-    cycleLength: DEFAULT_CYCLE_LENGTH,
-    failure: {
-      probability: DEFAULT_FAILURE_PROBABILITY,
-      duration: DEFAULT_FAILURE_DURATION
-    }
-  }, "crossingSettings", objectSerDeser())
+  const [crossingSettings, setCrossingSettings] = useStateParams(DEFAULT_CROSSING_SETTINGS, "crossingSettings", CrossingSettingsSerDeser)
 
   const [currentTimestamp, setCurrentTimestamp] = useState(() => time)
 
-  const [lightSettings, setLightSettings] = useStateParams([DEFAULT_LIGHT_SETTINGS], "lightSettings", objectSerDeser())
+  const [lightSettings, setLightSettings] = useStateParams([DEFAULT_LIGHT_SETTINGS], "lightSettings", LightSettingsSerDeser)
 
   const failure = new Failure(crossingSettings.failure.duration, crossingSettings.failure.probability)
 

@@ -1,5 +1,5 @@
-import { STATE } from '../../app/domain/state'
-import LightConfig from '../../app/domain/light-config'
+import { State } from '../../app/domain/state'
+import LightConfig, { DEFAULT_LIGHT_SETTINGS } from '../../app/domain/light-config'
 
 let crossingSettings = {
   cycleLength: 60_000,
@@ -9,25 +9,17 @@ let crossingSettings = {
   }
 }
 
-let lightSettings = {
-  offset: 0,
-  phases: [
-    { state: STATE.RED, duration: 30_000 },
-    { state: STATE.RED_YELLOW, duration: 2_000 },
-    { state: STATE.GREEN, duration: 26_000 },
-    { state: STATE.YELLOW, duration: 2_000 }
-  ]
-}
+let lightSettings = DEFAULT_LIGHT_SETTINGS
 
 describe('LightConfig', () => {
   it('calculates phases', () => {
     let lightConfig = new LightConfig(crossingSettings, lightSettings)
 
     expect(lightConfig.phases).toEqual([ 
-        { state: STATE.RED, duration: 30_000 },
-        { state: STATE.RED_YELLOW, duration: 2_000 },
-        { state: STATE.GREEN, duration: 26_000 },
-        { state: STATE.YELLOW, duration: 2_000 },
+        { state: State.RED, duration: 30_000 },
+        { state: State.RED_YELLOW, duration: 2_000 },
+        { state: State.GREEN, duration: 26_000 },
+        { state: State.YELLOW, duration: 2_000 },
     ])
   })
 
@@ -61,45 +53,45 @@ describe('LightConfig', () => {
   it('adjusts the green duration on red increase', () => {
     let lightConfig = new LightConfig(crossingSettings, lightSettings)
 
-    let modified = lightConfig.withPhaseDuration({ state: STATE.RED, duration: 30_000 }, 31_000)
+    let modified = lightConfig.withStateDuration(State.RED, 31_000)
     
-    expect(modified.phases).toContainEqual({ state: STATE.RED, duration: 31_000 })
-    expect(modified.phases).toContainEqual({ state: STATE.GREEN, duration: 25_000 })
+    expect(modified.phases).toContainEqual({ state: State.RED, duration: 31_000 })
+    expect(modified.phases).toContainEqual({ state: State.GREEN, duration: 25_000 })
   })
 
   it('adjusts the green duration on red decrease', () => {
     let lightConfig = new LightConfig(crossingSettings, lightSettings)
 
-    let modified = lightConfig.withPhaseDuration({ state: STATE.RED, duration: 30_000 }, 29_000)
+    let modified = lightConfig.withStateDuration(State.RED, 29_000)
     
-    expect(modified.phases).toContainEqual({ state: STATE.RED, duration: 29_000 })
-    expect(modified.phases).toContainEqual({ state: STATE.GREEN, duration: 27_000 })
+    expect(modified.phases).toContainEqual({ state: State.RED, duration: 29_000 })
+    expect(modified.phases).toContainEqual({ state: State.GREEN, duration: 27_000 })
   })
 
   it('adjusts the red duration up to the green limit', () => {
     let lightConfig = new LightConfig(crossingSettings, lightSettings)
 
-    let modified = lightConfig.withPhaseDuration({ state: STATE.RED, duration: 30_000 }, 60_000)
+    let modified = lightConfig.withStateDuration(State.RED, 60_000)
     
-    expect(modified.phases).toContainEqual({ state: STATE.RED, duration: 56_000 })
-    expect(modified.phases).toContainEqual({ state: STATE.GREEN, duration: 0 })
+    expect(modified.phases).toContainEqual({ state: State.RED, duration: 56_000 })
+    expect(modified.phases).toContainEqual({ state: State.GREEN, duration: 0 })
   })
 
   it('adjusts the red and green duration on cycle length duration decrease', () => {
     let lightConfig = new LightConfig({ ...crossingSettings, cycleLength: 50_000 }, lightSettings)
 
-    expect(lightConfig.phases).toContainEqual({ state: STATE.RED, duration: 25_000 })
-    expect(lightConfig.phases).toContainEqual({ state: STATE.GREEN, duration: 21_000 })
-    expect(lightConfig.phases).toContainEqual({ state: STATE.YELLOW, duration: 2_000 })
-    expect(lightConfig.phases).toContainEqual({ state: STATE.RED_YELLOW, duration: 2_000 })
+    expect(lightConfig.phases).toContainEqual({ state: State.RED, duration: 25_000 })
+    expect(lightConfig.phases).toContainEqual({ state: State.GREEN, duration: 21_000 })
+    expect(lightConfig.phases).toContainEqual({ state: State.YELLOW, duration: 2_000 })
+    expect(lightConfig.phases).toContainEqual({ state: State.RED_YELLOW, duration: 2_000 })
   })
 
   it('adjusts the red and green duration on cycle length duration increase', () => {
     let lightConfig = new LightConfig({ ...crossingSettings, cycleLength: 71_000 }, lightSettings)
 
-    expect(lightConfig.phases).toContainEqual({ state: STATE.RED, duration: 35_000 })
-    expect(lightConfig.phases).toContainEqual({ state: STATE.GREEN, duration: 32_000 })
-    expect(lightConfig.phases).toContainEqual({ state: STATE.YELLOW, duration: 2_000 })
-    expect(lightConfig.phases).toContainEqual({ state: STATE.RED_YELLOW, duration: 2_000 })
+    expect(lightConfig.phases).toContainEqual({ state: State.RED, duration: 35_000 })
+    expect(lightConfig.phases).toContainEqual({ state: State.GREEN, duration: 32_000 })
+    expect(lightConfig.phases).toContainEqual({ state: State.YELLOW, duration: 2_000 })
+    expect(lightConfig.phases).toContainEqual({ state: State.RED_YELLOW, duration: 2_000 })
   })
 })
