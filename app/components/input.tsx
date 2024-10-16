@@ -1,7 +1,6 @@
 "use client"
 
-import { Box, Slider, Typography, Input as MuiInput } from '@mui/material'
-import Grid from '@mui/material/Grid2'
+import { Box, Slider, Typography, Input as MuiInput, Stack } from '@mui/material'
 import { styled } from '@mui/material/styles'
 
 const MInput = styled(MuiInput)`
@@ -45,32 +44,28 @@ export default function Input({id, label, min, max, step, value, onChange}: {id:
       <Typography gutterBottom>
         {label}
       </Typography>
-      <Grid container spacing={2} alignItems="center">
-        <Grid size={11}>
-          <Slider
-            value={typeof value === 'number' ? value : 0}
-            step={step || 1}
-            min={min}
-            max={max}
-            onChange={handleSliderChange}
-            aria-labelledby={id}
-          />
-        </Grid>
-        <Grid size={1}>
-          <MInput
-            value={value}
-            size="small"
-            onChange={handleInputChange}
-            inputProps={{
-              step: (step || 1),
-              min: min,
-              max: max,
-              type: 'number',
-              'aria-labelledby': id
-            }}
-          />
-        </Grid>
-      </Grid>
+      <Stack direction="row" spacing={2}>
+        <Slider
+          value={typeof value === 'number' ? value : 0}
+          step={step || 1}
+          min={min}
+          max={max}
+          onChange={handleSliderChange}
+          aria-labelledby={id}
+        />
+        <MInput
+          value={value}
+          size="small"
+          onChange={handleInputChange}
+          inputProps={{
+            step: (step || 1),
+            min: min,
+            max: max,
+            type: 'number',
+            'aria-labelledby': id
+          }}
+        />
+        </Stack>
     </Box>
   )
 }

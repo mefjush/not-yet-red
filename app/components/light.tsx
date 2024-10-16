@@ -12,25 +12,11 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import { useRef, useState } from 'react'
 import Tune from './tune'
 import { QRCodeSVG } from 'qrcode.react'
-import { styled } from '@mui/material/styles';
 import { CrossingSettingsSerDeser, LightSettingsSerDeser } from '../url'
+import { ExpandMore } from './expand-more'
 
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
 
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props
-  return <IconButton {...other} />
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  })
-}))
-
-export default function LightComponent({ index, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete, style }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, style?: React.CSSProperties }) {
+export default function LightComponent({ index, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void }) {
 
   const lightRef = useRef<HTMLImageElement>(null)
 
@@ -48,10 +34,10 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.stateAttributes().file} alt={currentPhase.stateAttributes().name} style={{ maxWidth: "100%", maxHeight: "330px" }} />
+  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.stateAttributes().file} alt={currentPhase.stateAttributes().name} style={{ maxWidth: "100%", maxHeight: "200px" }} />
   const tune = <Tune lightConfig={lightConfig} onLightSettingsChange={onLightSettingsChange} />
 
-  const search = `?crossingSettings=${CrossingSettingsSerDeser.serialize(lightConfig.crossingSettings)}&lightSettings=${LightSettingsSerDeser.serialize([lightConfig.toLightSettings()])}`
+  const search = `?crossing=${CrossingSettingsSerDeser.serialize(lightConfig.crossingSettings)}&lights=${LightSettingsSerDeser.serialize([lightConfig.toLightSettings()])}`
 
   const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
   // const baseUrl = "http://192.168.0.106:3000" 
@@ -94,17 +80,19 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     <Input key={`light-${index}-${phase.stateAttributes().name}-duration`} label={`${phase.stateAttributes().name} duration`} id={`light-${index}-${phase.stateAttributes().name}-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={phase.duration / 1000} onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} />
   ));
 
+  let avatar = (
+    <Avatar 
+      aria-label="traffic-light" 
+      sx={{ bgcolor: currentPhase.stateAttributes().color }}
+    >
+      {index}
+    </Avatar>
+  )
+
   return (
-    <Card style={style}>
+    <Card>
       <CardHeader
-        avatar={
-          <Avatar 
-            aria-label="traffic-light" 
-            sx={{ bgcolor: currentPhase.stateAttributes().color }}
-          >
-            {index}
-          </Avatar>
-        }
+        avatar={avatar}
         action={
           <ExpandMore
             expand={expanded}
@@ -120,6 +108,9 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
           <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
+            <Grid size="auto">
+              {lightImg}
+            </Grid>
             <Grid size="grow">
               <Stack direction="column" alignItems="stretch">
                 <form>
@@ -127,11 +118,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
                   <Input label="Offset" id={`light-${index}-offset`} min={0} max={(lightConfig.cycleLength() / 1000) - 1} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
                 </form>
               </Stack>
-            </Grid>
-            <Grid size="auto">
-              {/* <Grid container sx={{ alignItems: "center", justifyContent: "center" }}> */}
-                {lightImg}
-              {/* </Grid> */}
             </Grid>
           </Grid>
         </CardContent>
@@ -165,7 +151,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
               fullWidth
               variant="outlined"
               defaultValue={url}
-              inputProps={{ readOnly: true }}
+              slotProps={{ htmlInput: { readOnly: true }}}
             />
           </Box>
         </DialogContent>
