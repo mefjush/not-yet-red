@@ -30,6 +30,9 @@ export interface LightSettings {
   phases: Phase[]
 }
 
+const sortByOrder = (a: Phase, b: Phase) => a.stateAttributes().order - b.stateAttributes().order
+const sortByPriority = (a: Phase, b: Phase) => a.stateAttributes().priority - b.stateAttributes().priority
+
 export default class LightConfig {
 
   crossingSettings: CrossingSettings
@@ -74,20 +77,33 @@ export default class LightConfig {
 
     let fixableCount = lightSettings.phases.filter(this.isFixable).length
     let diffPerPhase = this.roundSeconds(diff / fixableCount)
-    let diffRemainder = diff - (diffPerPhase * fixableCount)
+    let diffRemainder = diff
 
-    let fixedPhases = lightSettings.phases.map((phase, index) => {
-      if (!this.isFixable(phase)) {
-        return phase
-      }
-      let applicableDiff = diffPerPhase + ((index === 0) ? diffRemainder : 0)
-      return new Phase(phase.state,  phase.duration + applicableDiff)
-    })
-    return { ...lightSettings, phases: fixedPhases }
+    let fixedPhases = lightSettings.phases.toSorted((a, b) => b.duration - a.duration)
+    
+    let fixStrategies = [
+      { precondition: this.isFixable, applicableDiff: () => diffPerPhase },
+      { precondition: this.isFixable, applicableDiff: () => diffRemainder },
+      { precondition: (p: Phase) => true, applicableDiff: () => diffRemainder }
+    ]
+
+    for (let i = 0; i < fixStrategies.length && Math.abs(diffRemainder) != 0; i++) {
+      let strategy = fixStrategies[i]
+      fixedPhases = fixedPhases.map((phase) => {
+        if (!strategy.precondition(phase)) {
+          return phase
+        }
+        let applicableDiff = Math.max(strategy.applicableDiff(), -phase.duration)
+        diffRemainder -= applicableDiff
+        return new Phase(phase.state, phase.duration + applicableDiff)
+      })
+    } 
+    
+    return { ...lightSettings, phases: fixedPhases.toSorted(sortByOrder) }
   }
     
   withStateDuration(state: State, newDuration: number): LightSettings {
-    let remainingPhases = this.phases.filter(p => p.state != state).toSorted((a, b) => a.stateAttributes().priority - b.stateAttributes().priority).reverse();
+    let remainingPhases = this.phases.filter(p => p.state != state).toSorted(sortByPriority).reverse()
     let fixablePhases = remainingPhases.filter(this.isFixable)
     let unfixablePhases = remainingPhases.filter(p => !this.isFixable(p))
 
@@ -108,7 +124,7 @@ export default class LightConfig {
 
     fixedRemaining.push(new Phase(state, newDuration + diff))
 
-    return { offset: this.offset, phases: fixedRemaining.concat(unfixablePhases).toSorted((a, b) => a.stateAttributes().order - b.stateAttributes().order)}
+    return { offset: this.offset, phases: fixedRemaining.concat(unfixablePhases).toSorted(sortByOrder) }
   }
 }
 
