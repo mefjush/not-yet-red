@@ -3,7 +3,7 @@
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
 import Input from './input'
-import { IconButton, Card, CardActions, CardContent, Stack, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, IconButtonProps, CardHeader, Avatar, Collapse, Slider, Typography } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, IconButtonProps, CardHeader, Avatar, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, SliderOwnerState } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -102,7 +102,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
           aria-labelledby={`light-${index}-offset`}
           slots={{ track: Tune }}
-          slotProps={{ track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } }}
+          slotProps={{ track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SlotComponentProps<'span', SliderComponentsPropsOverrides, SliderOwnerState> }}
         />
     </Box>
   )

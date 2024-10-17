@@ -1,13 +1,8 @@
-import { Box, Button, Stack } from "@mui/material"
-import { useState } from 'react'
+import { Box, Stack } from "@mui/material"
 import { negativeSafeMod } from "../utils"
 import LightConfig, {LightSettings, Phase} from "../domain/light-config"
 
-const tuneHeight = 150
-
 export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void}) {
-
-  const [touchMoveStartData, setTouchMoveStartData] = useState({ position: 0, offset: 0 })
 
   const createSegment = function(phase: Phase, duration: number, cycleLength: number, idx: number, count: number) {
     const radious = idx == 0 ? "3px 0 0 3px" : idx == count - 1 ? "0 3px 3px 0" : "0"
@@ -15,41 +10,6 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
     return (
       <Box key={idx} sx={{ width: `${100 * duration / cycleLength}%`, backgroundColor: phase.stateAttributes().color, opacity: 0.8, height: "6px", borderRadius: radious }}></Box>
     )
-  }
-
-  const touchMove = (touches: React.TouchList) => {
-    let touch = touches[touches.length - 1]
-    move(touch.clientX, tuneHeight)
-  }
-
-  const drag = (e: React.DragEvent) => {
-    console.log(e.currentTarget.clientWidth)
-    move(e.clientX, e.currentTarget.clientWidth)
-  }
-
-  const move = (clientX: number, clientWidth: number) => {
-    let moveDistance = clientX - touchMoveStartData.position
-    
-    let offsetPercentage = moveDistance / clientWidth
-
-    let newOffset = touchMoveStartData.offset + (offsetPercentage * lightConfig.cycleLength())
-    
-    onLightSettingsChange(lightConfig.withOffset(newOffset))
-  }
-
-  const touchStart = (e: React.TouchEvent) => {
-    moveStart(e.changedTouches[0].clientX)
-  }
-
-  const dragStart = (e: React.DragEvent) => {
-    moveStart(e.clientX)
-  }
-
-  const moveStart = (clientX: number) => {
-    setTouchMoveStartData({
-      position: clientX,
-      offset: lightConfig.toLightSettings().offset
-    })
   }
 
   let offset = lightConfig.offset
