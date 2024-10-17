@@ -7,7 +7,7 @@ import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Fab, Stack, CardHeader, Avatar } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, CardHeader, Avatar, Typography, Box } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
 import { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
@@ -63,73 +63,60 @@ export default function CrossingComponent({time}: {time: number}) {
   }
 
   return (
-    
-    <>
-    
-      <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-        <Card>
-          <CardHeader
-            avatar={
-              <Avatar 
-                aria-label="traffic-light" 
-                sx={{  }}
-              >
-                S
-              </Avatar>
-            }
-            action={
-              <ExpandMore
-                expand={expanded}
-                onClick={handleExpandClick}
-                aria-expanded={expanded}
-                aria-label="show more"
-              >
-                <ExpandMoreIcon />
+    <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+      <Card>
+        <CardHeader
+          avatar={
+            <Avatar 
+              aria-label="traffic-light" 
+              sx={{  }}
+            >
+              S
+            </Avatar>
+          }
+          action={
+            <ExpandMore
+              expand={expanded}
+              onClick={handleExpandClick}
+              aria-expanded={expanded}
+              aria-label="show more"
+            >
+              <ExpandMoreIcon />
             </ExpandMore>
-            }
-            title="Crossing settings"
-          />
-          <Collapse in={expanded} timeout="auto" unmountOnExit>
-            <CardContent>
-              <form>
-                <Input label="Cycle length" id="cycle-length" min={10} max={180} value={crossingSettings.cycleLength / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } />
-                <Input label="Failure duration" id="failure-duration" min={10} max={180} value={crossingSettings.failure.duration / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } />
-                <Input label="Failure probability" id="failure-probability" min={0} max={1} step={0.1} value={crossingSettings.failure.probability} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } />
-              </form>
-            </CardContent>
-          </Collapse>
-        </Card>
-
-{/* 
+          }
+          title={
+            <Box sx={{ mx: 2 }}>
+              <Typography gutterBottom>
+                Crossing settings
+              </Typography>
+            </Box>
+          }
+        />
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <Card>
-            <CardContent>
-              <h2>Crossing settings</h2>
-              <form>
-                <Input label="Cycle length" id="cycle-length" min={10} max={180} value={crossingSettings.cycleLength / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } />
-                <Input label="Failure duration" id="failure-duration" min={10} max={180} value={crossingSettings.failure.duration / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } />
-                <Input label="Failure probability" id="failure-probability" min={0} max={1} step={0.1} value={crossingSettings.failure.probability} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } />
-              </form>
-            </CardContent>
-          </Card>
-          <Divider></Divider>
-        </Collapse> */}
+          <CardContent>
+            <form>
+              <Input label="Cycle length" id="cycle-length" min={10} max={180} value={crossingSettings.cycleLength / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } />
+              <Input label="Failure duration" id="failure-duration" min={10} max={180} value={crossingSettings.failure.duration / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } />
+              <Input label="Failure probability" id="failure-probability" min={0} max={1} step={0.1} value={crossingSettings.failure.probability} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } />
+            </form>
+          </CardContent>
+        </Collapse>
+      </Card>
 
-        { lights.map((light, index) =>
-          <LightComponent
-              key={index}
-              index={index}
-              currentTimestamp={currentTimestamp}
-              light={light}
-              lightConfig={lightConfigs[index]}
-              onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
-              onDelete={lights.length > 1 ? () => onDelete(index) : undefined}
-          />
-        )}
-        <Fab color="primary" aria-label="add" onClick={() => onClone(lightSettings.length - 1)} style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}>
-          <AddIcon />
-        </Fab>
-      </Stack>
-    </>
+      { lights.map((light, index) =>
+        <LightComponent
+            key={index}
+            index={index}
+            currentTimestamp={currentTimestamp}
+            light={light}
+            lightConfig={lightConfigs[index]}
+            onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
+            onDelete={lights.length > 1 ? () => onDelete(index) : undefined}
+        />
+      )}
+      <Fab color="primary" aria-label="add" onClick={() => onClone(lightSettings.length - 1)} style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}>
+        <AddIcon />
+      </Fab>
+    </Stack>
   )
 }

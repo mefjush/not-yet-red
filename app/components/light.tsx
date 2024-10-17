@@ -3,7 +3,7 @@
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
 import Input from './input'
-import { IconButton, Card, CardActions, CardContent, Stack, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, IconButtonProps, CardHeader, Avatar, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, SliderOwnerState } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, IconButtonProps, CardHeader, Avatar, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, SliderOwnerState, InputAdornment } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -11,9 +11,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import { useRef, useState } from 'react'
 import Tune from './tune'
-import { QRCodeSVG } from 'qrcode.react'
 import { CrossingSettingsSerDeser, LightSettingsSerDeser } from '../url'
 import { ExpandMore } from './expand-more'
+import ShareDialog from './share-dialog'
 
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void }) {
@@ -22,7 +22,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null)
 
-  const [shareMode, setShareMode] = useState<Boolean>(false)
+  const [shareMode, setShareMode] = useState<boolean>(false)
 
   const [expanded, setExpanded] = useState(true)
 
@@ -45,7 +45,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   console.log("Rendering light @ " + currentTimestamp)
 
-  const qr = <div style={{ margin: "auto auto" }}><QRCodeSVG size={256} value={url} /></div>
+
 
   const requestWakeLock = async () => {
     try {
@@ -77,7 +77,16 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   }
 
   let durationInputs = lightConfig.phases.toSorted((a, b) => a.stateAttributes().priority - b.stateAttributes().priority).reverse().map(phase => (
-    <Input key={`light-${index}-${phase.stateAttributes().name}-duration`} label={`${phase.stateAttributes().name} duration`} id={`light-${index}-${phase.stateAttributes().name}-duration`} min={0} max={lightConfig.cycleLength() / 1000} value={phase.duration / 1000} onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} />
+    <Input 
+      key={`light-${index}-${phase.stateAttributes().name}-duration`} 
+      label={`${phase.stateAttributes().name} duration`} 
+      id={`light-${index}-${phase.stateAttributes().name}-duration`} 
+      min={0} 
+      max={lightConfig.cycleLength() / 1000} 
+      value={phase.duration / 1000} 
+      onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} 
+      color={phase.stateAttributes().color}
+    />
   ));
 
   let avatar = (
@@ -98,7 +107,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           value={lightConfig.offset / 1000}
           step={1}
           min={0} 
-          max={(lightConfig.cycleLength() / 1000) - 1}
+          max={(lightConfig.cycleLength() / 1000)}
           onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
           aria-labelledby={`light-${index}-offset`}
           slots={{ track: Tune }}
@@ -119,7 +128,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             aria-label="show more"
           >
             <ExpandMoreIcon />
-        </ExpandMore>
+          </ExpandMore>
         }
         title={title}
       />
@@ -146,37 +155,11 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         {deleteButton}
       </CardActions>
       {/* {tune} */}
-      <Dialog
+      <ShareDialog
+        url={url}
         open={shareMode == true}
         onClose={() => setShareMode(false)}
-      >
-        <DialogTitle>Share</DialogTitle>
-        <DialogContent>
-          <Box
-            noValidate
-            component="form"
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              m: 'auto',
-              width: 'fit-content',
-            }}
-          >
-            {qr}
-            <TextField
-              margin="normal"
-              label="Url"
-              fullWidth
-              variant="outlined"
-              defaultValue={url}
-              slotProps={{ htmlInput: { readOnly: true }}}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShareMode(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      />
     </Card>
   )
 }

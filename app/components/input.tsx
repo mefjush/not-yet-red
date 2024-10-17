@@ -1,7 +1,9 @@
 "use client"
 
-import { Box, Slider, Typography, Input as MuiInput, Stack } from '@mui/material'
+import { OverridableStringUnion } from '@mui/types';
+import { Box, Slider, Typography, Input as MuiInput, Stack, ButtonGroup, Button, ButtonPropsColorOverrides } from '@mui/material'
 import { styled } from '@mui/material/styles'
+import { ColorizeOutlined } from '@mui/icons-material';
 
 const MInput = styled(MuiInput)`
   width: 42px
@@ -13,7 +15,7 @@ interface ChangeEvent {
   }
 }
 
-export default function Input({id, label, min, max, step, value, onChange}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void)}) {
+export default function Input({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color?: OverridableStringUnion<'inherit', ButtonPropsColorOverrides>}) {
 
   const toEvent = (val: any) => ({ target: { value: Number(val) }})
 
@@ -41,11 +43,11 @@ export default function Input({id, label, min, max, step, value, onChange}: {id:
 
   return (
     <Box>
-      <Typography gutterBottom>
+      {/* <Typography gutterBottom>
         {label}
-      </Typography>
+      </Typography> */}
       <Stack direction="row" spacing={2}>
-        <Slider
+        {/* <Slider
           value={typeof value === 'number' ? value : 0}
           step={step || 1}
           min={min}
@@ -57,14 +59,21 @@ export default function Input({id, label, min, max, step, value, onChange}: {id:
           value={value}
           size="small"
           onChange={handleInputChange}
-          inputProps={{
+          inputProps={
             step: (step || 1),
             min: min,
             max: max,
             type: 'number',
             'aria-labelledby': id
           }}
-        />
+        /> */}
+          <Box width={150} sx={{ p: 1 }}>
+          <ButtonGroup variant="outlined" aria-label="Basic button group" fullWidth>
+            <Button color={color} variant='contained' onClick={e => onChange(fix(value - 1))}>-</Button>
+            <Button color={color}>{value}</Button>
+            <Button color={color} variant='contained' onClick={e => onChange(fix(value + 1))}>+</Button>
+          </ButtonGroup>
+          </Box>
         </Stack>
     </Box>
   )

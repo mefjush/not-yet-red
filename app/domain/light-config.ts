@@ -1,15 +1,7 @@
-import { State, STATE_ATTRIBUTES } from "./state"
+import { State, STATE_ATTRIBUTES, StateAttributes } from "./state"
 import CrossingSettings from "./crossing-settings"
 import { negativeSafeMod } from "../utils"
 
-
-interface StateAttributes {
-  name: string
-  file: string
-  color: string
-  priority: number
-  order: number
-}
 
 export class Phase {
   state: State
@@ -46,8 +38,8 @@ export default class LightConfig {
   }
 
   withOffset(offset: number): LightSettings {
-    let positiveOffset = negativeSafeMod(offset, this.cycleLength())
-    let roundedOffset = Math.round((positiveOffset / 1000)) * 1000
+    // let positiveOffset = negativeSafeMod(offset, this.cycleLength() + 1000)
+    let roundedOffset = Math.round((offset / 1000)) * 1000
     return { offset: roundedOffset, phases: this.phases }
   }
 
