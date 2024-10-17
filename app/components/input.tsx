@@ -1,7 +1,7 @@
 "use client"
 
 import { OverridableStringUnion } from '@mui/types';
-import { Box, Slider, Typography, Input as MuiInput, Stack, ButtonGroup, Button, ButtonPropsColorOverrides } from '@mui/material'
+import { Box, Slider, Typography, Input as MuiInput, Stack, ButtonGroup, Button, ButtonPropsColorOverrides, SliderPropsColorOverrides } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { ColorizeOutlined } from '@mui/icons-material';
 
@@ -48,18 +48,19 @@ export default function Input({id, label, min, max, step, value, onChange, color
       </Typography> */}
       <Stack direction="row" spacing={2}>
         {/* <Slider
+          color={color as OverridableStringUnion<'inherit', SliderPropsColorOverrides>}
           value={typeof value === 'number' ? value : 0}
           step={step || 1}
           min={min}
           max={max}
           onChange={handleSliderChange}
           aria-labelledby={id}
-        />
-        <MInput
+        /> */}
+        {/* <MInput
           value={value}
           size="small"
           onChange={handleInputChange}
-          inputProps={
+          inputProps={{
             step: (step || 1),
             min: min,
             max: max,
@@ -67,14 +68,14 @@ export default function Input({id, label, min, max, step, value, onChange, color
             'aria-labelledby': id
           }}
         /> */}
-          <Box width={150} sx={{ p: 1 }}>
+        <Box width={200} sx={{ p: 1 }}>
           <ButtonGroup variant="outlined" aria-label="Basic button group" fullWidth>
             <Button color={color} variant='contained' onClick={e => onChange(fix(value - 1))}>-</Button>
             <Button color={color}>{value}</Button>
             <Button color={color} variant='contained' onClick={e => onChange(fix(value + 1))}>+</Button>
           </ButtonGroup>
-          </Box>
-        </Stack>
+        </Box>
+      </Stack>
     </Box>
   )
 }

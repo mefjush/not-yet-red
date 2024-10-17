@@ -43,6 +43,14 @@ declare module "@mui/material/Button" {
     tlGreen: true
     tlGrey: true
   }
+
+  interface SliderPropsColorOverrides {
+    tlRed: true
+    tlYellow: true
+    tlOrange: true
+    tlGreen: true
+    tlGrey: true
+  }
 }
 
 const { palette } = createTheme();

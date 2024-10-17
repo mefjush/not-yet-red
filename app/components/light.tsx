@@ -103,16 +103,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       <Typography gutterBottom>
         Traffic Light #{index}
       </Typography>
-      <Slider
-          value={lightConfig.offset / 1000}
-          step={1}
-          min={0} 
-          max={(lightConfig.cycleLength() / 1000)}
-          onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
-          aria-labelledby={`light-${index}-offset`}
-          slots={{ track: Tune }}
-          slotProps={{ track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SlotComponentProps<'span', SliderComponentsPropsOverrides, SliderOwnerState> }}
-        />
     </Box>
   )
 
@@ -132,6 +122,20 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         }
         title={title}
       />
+      <Box sx={{ mx: 4 }}>
+        <Slider
+          value={lightConfig.offset / 1000}
+          step={1}
+          min={0} 
+          max={(lightConfig.cycleLength() / 1000)}
+          valueLabelDisplay="auto"
+          valueLabelFormat={(value) => `Offset: ${value} s`}
+          onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
+          aria-label="Offset"
+          slots={{ track: Tune }}
+          slotProps={{ track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SlotComponentProps<'span', SliderComponentsPropsOverrides, SliderOwnerState> }}
+        />
+      </Box>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
           <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
