@@ -3,7 +3,7 @@
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
 import Input from './input'
-import { IconButton, Card, CardActions, CardContent, Stack, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, IconButtonProps, CardHeader, Avatar, Collapse } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, IconButtonProps, CardHeader, Avatar, Collapse, Slider, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -89,6 +89,24 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     </Avatar>
   )
 
+  let title = (
+    <Box sx={{ mx: 2 }}>
+      <Typography gutterBottom>
+        Traffic Light #{index}
+      </Typography>
+      <Slider
+          value={lightConfig.offset / 1000}
+          step={1}
+          min={0} 
+          max={(lightConfig.cycleLength() / 1000) - 1}
+          onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
+          aria-labelledby={`light-${index}-offset`}
+          slots={{ track: Tune }}
+          slotProps={{ track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } }}
+        />
+    </Box>
+  )
+
   return (
     <Card>
       <CardHeader
@@ -103,7 +121,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             <ExpandMoreIcon />
         </ExpandMore>
         }
-        title={`Traffic Light #${index}`}
+        title={title}
       />
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
@@ -115,19 +133,19 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
               <Stack direction="column" alignItems="stretch">
                 <form>
                   {durationInputs}
-                  <Input label="Offset" id={`light-${index}-offset`} min={0} max={(lightConfig.cycleLength() / 1000) - 1} value={lightConfig.offset / 1000} onChange={e => onLightSettingsChange(lightConfig.withOffset(e.target.value * 1000))} />
                 </form>
               </Stack>
             </Grid>
           </Grid>
         </CardContent>
       </Collapse>
+
       <CardActions>
         <IconButton aria-label="fullscreen" onClick={() => enterFullScreen()}><FullscreenIcon /></IconButton>
         <IconButton aria-label="share" onClick={() => setShareMode(!shareMode) }><ShareIcon /></IconButton>
         {deleteButton}
       </CardActions>
-      {tune}
+      {/* {tune} */}
       <Dialog
         open={shareMode == true}
         onClose={() => setShareMode(false)}

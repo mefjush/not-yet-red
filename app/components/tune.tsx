@@ -10,18 +10,10 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
   const [touchMoveStartData, setTouchMoveStartData] = useState({ position: 0, offset: 0 })
 
   const createSegment = function(phase: Phase, duration: number, cycleLength: number, idx: number, count: number) {
-    return (
-      <Box key={idx} sx={{ width: `${100 * duration / cycleLength}%`, backgroundColor: phase.stateAttributes().color, opacity: 0.8, height: "20px" }}></Box>
-    )
-  }
+    const radious = idx == 0 ? "3px 0 0 3px" : idx == count - 1 ? "0 3px 3px 0" : "0"
 
-  const createSegment2 = function(inc: boolean, phase: Phase, duration: number, cycleLength: number, idx: number, count: number) {
-    let step = inc ? 1000 : -1000
-    let margin = idx % 2 == 0 ? "0" : "100px"
     return (
-      <Box key={idx} sx={{ width: `${100 * duration / cycleLength}%` }} display="flex" justifyContent="center" alignItems="center">
-        <Button sx={{ marginTop: margin }}  variant="outlined" onClick={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, phase.duration + step))}>{inc ? "+" : "-"}</Button>
-      </Box>
+      <Box key={idx} sx={{ width: `${100 * duration / cycleLength}%`, backgroundColor: phase.stateAttributes().color, opacity: 0.8, height: "6px", borderRadius: radious }}></Box>
     )
   }
 
@@ -82,21 +74,11 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
     .filter((cell) => cell.duration > 0)
 
   const divs = cellsFiltered.map((cell, idx) => createSegment(cell.phase, cell.duration, lightConfig.cycleLength(), idx, cellsFiltered.length))
-  // const pluses = cellsFiltered.map((cell, idx) => createSegment2(true, cell.phase, cell.duration, lightConfig.cycleLength(), idx, cellsFiltered.length))
-  // const minuses = cellsFiltered.map((cell, idx) => createSegment2(false, cell.phase, cell.duration, lightConfig.cycleLength(), idx, cellsFiltered.length))
 
   // https://github.com/petehunt/react-touch-lib/blob/90fb75f0f2bc92c4d9ac8b90806a10157aae3aa9/src/primitives/TouchableArea.js#L42-L49
   return (
-    <>
-      {/* <Stack style={{ touchAction: "none" }} sx={{ m: 1 }} direction="row">
-        {pluses}
-      </Stack> */}
-      <Stack style={{ touchAction: "none" }} sx={{ m: 0 }} direction="row" onDragStart={e => dragStart(e)} onTouchStart={e => touchStart(e)} onTouchMove={e => touchMove(e.touches)} onDrag={e => drag(e)} onDragEnd={e => console.log(e)}>
-        {divs}
-      </Stack>
-      {/* <Stack style={{ touchAction: "none" }} sx={{ m: 1 }} direction="row">
-        {minuses}
-      </Stack> */}
-    </>
+    <Stack style={{ touchAction: "none" }} sx={{ m: 0 }} direction="row">
+      {divs}
+    </Stack>
   )
 }
