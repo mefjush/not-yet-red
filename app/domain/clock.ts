@@ -68,12 +68,17 @@ export default class Clock {
 
     const currentTimestamp = Date.now() - (timeOffset || 0)
     const timestamps = listeners.map(listener => listener.nextStateTimestamp(currentTimestamp))
-    const nextTimestamp =  Math.min(...timestamps)
+    const nextTimestamp = Math.min(...timestamps)
     const timeToNextTick = Math.max(0, nextTimestamp - currentTimestamp)
 
     this.nextTimeout = setTimeout(function() {
       tickCallback(nextTimestamp)
     }, timeToNextTick)
+
+
+    // this.nextTimeout = setTimeout(function() {
+    //   tickCallback(Date.now() - (timeOffset || 0))
+    // }, 1000)
   }
 
   unregister() {

@@ -32,9 +32,13 @@ export default function CrossingComponent({time}: {time: number}) {
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
 
+  const wrapListener = {
+    nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / crossingSettings.cycleLength) + 1) * crossingSettings.cycleLength
+  }
+
   useEffect(() => {
     const clock = new Clock()
-    clock.register([...lights, failure], setCurrentTimestamp)
+    clock.register([...lights, failure, wrapListener], setCurrentTimestamp)
     return () => {
       clock.unregister()
     }
@@ -69,7 +73,6 @@ export default function CrossingComponent({time}: {time: number}) {
           avatar={
             <Avatar 
               aria-label="traffic-light" 
-              sx={{  }}
             >
               S
             </Avatar>
@@ -95,9 +98,31 @@ export default function CrossingComponent({time}: {time: number}) {
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <CardContent>
             <form>
-              <Input label="Cycle length" id="cycle-length" min={10} max={180} value={crossingSettings.cycleLength / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } />
-              <Input label="Failure duration" id="failure-duration" min={10} max={180} value={crossingSettings.failure.duration / 1000} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } />
-              <Input label="Failure probability" id="failure-probability" min={0} max={1} step={0.1} value={crossingSettings.failure.probability} onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } />
+              <Input 
+                label="Cycle length" 
+                id="cycle-length" 
+                min={10} 
+                max={180}
+                value={crossingSettings.cycleLength / 1000} 
+                onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } 
+              />
+              <Input 
+                label="Failure duration" 
+                id="failure-duration" 
+                min={10}
+                max={180} 
+                value={crossingSettings.failure.duration / 1000} 
+                onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } 
+              />
+              <Input 
+                label="Failure probability" 
+                id="failure-probability" 
+                min={0} 
+                max={1} 
+                step={0.1} 
+                value={crossingSettings.failure.probability} 
+                onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } 
+              />
             </form>
           </CardContent>
         </Collapse>

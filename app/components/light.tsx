@@ -10,7 +10,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Tune from './tune'
 import { CrossingSettingsSerDeser, LightSettingsSerDeser } from '../url'
 import { ExpandMore } from './expand-more'
@@ -28,6 +28,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const [expanded, setExpanded] = useState(true)
 
+  const [markTransition, setMarkerTransition] = useState(0)
+
   const handleExpandClick = () => {
     setExpanded(!expanded);
   }
@@ -43,8 +45,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
   // const baseUrl = "http://192.168.0.106:3000" 
   const url = baseUrl + search
-
-  console.log("Rendering light @ " + currentTimestamp)
 
   const requestWakeLock = async () => {
     try {
@@ -105,6 +105,17 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     </Box>
   )
 
+  const markPosition = (currentTimestamp % lightConfig.cycleLength() / 1000)
+
+  const needsTransition = markTransition == markPosition
+
+  const transitionDuration = needsTransition ? ((lightConfig.cycleLength() / 1000) - markPosition) + "s" : "0s"
+  const markPositionToSet = needsTransition ? lightConfig.cycleLength() / 1000 : markPosition
+
+  useEffect(() => {
+    setMarkerTransition(markPosition)
+  }, [markPosition]);
+
   return (
     <Card>
       <CardHeader
@@ -140,11 +151,11 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           slotProps={{ 
             track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SlotComponentProps<'span', SliderComponentsPropsOverrides, SliderOwnerState>,
             rail: { style: { display: "none" } },
-            mark: { style: { display: "none" } }
+            mark: { style: { display: "none" } },
+            markLabel: { style: { transitionDuration: transitionDuration, transitionTimingFunction: 'linear' } }
           }}
-          marks={[{ value: (currentTimestamp % lightConfig.cycleLength()) / 1000, label: <ArrowDropUpIcon /> }]}
+          marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]}
         />
-        {/*  */}
       </Box>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
