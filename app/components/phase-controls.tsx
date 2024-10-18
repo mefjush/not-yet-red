@@ -3,8 +3,9 @@
 import { Slider, Input as MuiInput, Stack, ButtonGroup, Button, Dialog, DialogTitle, DialogContent } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import Grid from '@mui/material/Grid2'
-import { KeyboardEvent, FocusEvent, useState } from 'react';
-import { TrafficLightColors } from '../domain/state';
+import { KeyboardEvent, FocusEvent, useState } from 'react'
+import { TrafficLightColors } from '../domain/state'
+import { useLongPress } from 'use-long-press';
 
 const MInput = styled(MuiInput)`
   width: 42px
@@ -89,14 +90,37 @@ function PhaseSlider({id, label, min, max, step, value, onChange, color}: {id: s
 export default function PhaseControls({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors}) {
   
   const [open, setOpen] = useState(false)
+  const [longPressIterval, setLongPressIterval] = useState<NodeJS.Timeout|null>(null)
+  
+  const clearLongPressIterval = () => {
+    if (longPressIterval) {
+      clearInterval(longPressIterval)
+    }
+  }
+
+  const useLongPressDiff = (diff: number) => {
+    return useLongPress(e => {
+      let i = 0
+      setLongPressIterval(setInterval(() => { 
+        i += diff
+        onChange(fix(value + i, min, max, step))
+      }, 50))
+    }, {
+      onFinish: clearLongPressIterval
+    })
+  }
+
+  const bindInc = useLongPressDiff(1)
+
+  const bindDec = useLongPressDiff(-1)
 
   return (
     <Grid container spacing={2} sx={{ my: 1 }}>
       <Grid size={{ xs: 12, md: 6, lg: 4 }}>
         <ButtonGroup variant="outlined" aria-label="Basic button group" fullWidth>
-          <Button color={color} variant='contained' onClick={e => onChange(fix(value - 1, min, max, step))}>-</Button>
+          <Button {...bindDec()} color={color} variant='contained' onClick={e => onChange(fix(value - 1, min, max, step))}>-</Button>
           <Button color={color} variant='outlined' onClick={e => setOpen(true)}>{value}</Button>
-          <Button color={color} variant='contained' onClick={e => onChange(fix(value + 1, min, max, step))}>+</Button>
+          <Button {...bindInc()} color={color} variant='contained' onClick={e => onChange(fix(value + 1, min, max, step))}>+</Button>
         </ButtonGroup>
       </Grid>
       <Grid size={{ xs: 12, md: 6, lg: 8 }} display={{ xs: 'none', md: 'block' }}>
