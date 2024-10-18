@@ -105,12 +105,12 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     </Box>
   )
 
-  const markPosition = (currentTimestamp % lightConfig.cycleLength() / 1000)
+  const markPosition = currentTimestamp % lightConfig.cycleLength()
 
   const needsTransition = markTransition == markPosition
 
-  const transitionDuration = needsTransition ? ((lightConfig.cycleLength() / 1000) - markPosition) + "s" : "0s"
-  const markPositionToSet = needsTransition ? lightConfig.cycleLength() / 1000 : markPosition
+  const transitionDuration = needsTransition ? lightConfig.cycleLength() - markPosition : 0
+  const markPositionToSet = needsTransition ? lightConfig.cycleLength() : markPosition
 
   useEffect(() => {
     setMarkerTransition(markPosition)
@@ -152,9 +152,9 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SlotComponentProps<'span', SliderComponentsPropsOverrides, SliderOwnerState>,
             rail: { style: { display: "none" } },
             mark: { style: { display: "none" } },
-            markLabel: { style: { transitionDuration: transitionDuration, transitionTimingFunction: 'linear' } }
+            markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
           }}
-          marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]}
+          marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]}
         />
       </Box>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
