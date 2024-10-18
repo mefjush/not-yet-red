@@ -8,7 +8,7 @@ export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig:
     const radious = idx == 0 ? "3px 0 0 3px" : idx == count - 1 ? "0 3px 3px 0" : "0"
 
     return (
-      <Box key={idx} bgcolor={`${phase.stateAttributes().color}.main`} sx={{ width: `${100 * duration / cycleLength}%`, opacity: 0.8, height: "6px", borderRadius: radious }} />
+      <Box key={idx} bgcolor={`${phase.stateAttributes().color}.main`} sx={{ width: `${100 * duration / cycleLength}%`, height: "6px", borderRadius: radious }} />
     )
   }
 

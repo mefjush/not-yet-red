@@ -8,6 +8,8 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import { useRef, useState } from 'react'
 import Tune from './tune'
 import { CrossingSettingsSerDeser, LightSettingsSerDeser } from '../url'
@@ -129,12 +131,20 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           min={0} 
           max={(lightConfig.cycleLength() / 1000)}
           valueLabelDisplay="auto"
-          valueLabelFormat={(value) => `Offset: ${value} s`}
+          valueLabelFormat={(value) => `${value} s`}
           onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
           aria-label="Offset"
-          slots={{ track: Tune }}
-          slotProps={{ track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SlotComponentProps<'span', SliderComponentsPropsOverrides, SliderOwnerState> }}
+          slots={{ 
+            track: Tune 
+          }}
+          slotProps={{ 
+            track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SlotComponentProps<'span', SliderComponentsPropsOverrides, SliderOwnerState>,
+            rail: { style: { display: "none" } },
+            mark: { style: { display: "none" } }
+          }}
+          marks={[{ value: (currentTimestamp % lightConfig.cycleLength()) / 1000, label: <ArrowDropUpIcon /> }]}
         />
+        {/*  */}
       </Box>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
