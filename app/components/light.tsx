@@ -2,14 +2,13 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Box, CardHeader, Avatar, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, SliderOwnerState, InputAdornment } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Box, CardHeader, Avatar, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, SliderOwnerState } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import { useEffect, useRef, useState } from 'react'
 import Tune from './tune'
 import { CrossingSettingsSerDeser, LightSettingsSerDeser } from '../url'
@@ -20,14 +19,12 @@ import PhaseControls from './phase-controls'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void }) {
 
-  const lightRef = useRef<HTMLImageElement>(null)
+  const fullscreenRef = useRef<HTMLDivElement>(null)
 
   const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null)
-
-  const [shareMode, setShareMode] = useState<boolean>(false)
-
+  const [shareMode, setShareMode] = useState(false)
+  const [fullscreenMode, setFullscreenMode] = useState(false)
   const [expanded, setExpanded] = useState(true)
-
   const [markTransition, setMarkerTransition] = useState(0)
 
   const handleExpandClick = () => {
@@ -38,7 +35,14 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.stateAttributes().file} alt={currentPhase.stateAttributes().name} style={{ maxWidth: "100%", maxHeight: "200px" }} />
+  const lightImg = (
+    <img 
+      className="the-traffic-light" 
+      src={currentPhase.stateAttributes().file} 
+      alt={currentPhase.stateAttributes().name} 
+      style={{ maxWidth: "100%", maxHeight: fullscreenMode ? "100vh" : "200px", height: fullscreenMode ? "100vh" : "auto" }} 
+    />
+  )
 
   const search = `?crossing=${CrossingSettingsSerDeser.serialize(lightConfig.crossingSettings)}&lights=${LightSettingsSerDeser.serialize([lightConfig.toLightSettings()])}`
 
@@ -70,9 +74,16 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
   }
 
-  const enterFullScreen = function () {
+  const enterFullScreen = () => {
     requestWakeLock()
-    lightRef.current?.requestFullscreen().finally(() => releaseWakeLock())
+    fullscreenRef.current?.requestFullscreen().finally(() => {
+      fullscreenRef.current?.addEventListener("fullscreenchange", (event) => {
+        if (document['fullscreenElement'] == null) {
+          setFullscreenMode(false)
+          releaseWakeLock()
+        }
+      });
+    })
   }
 
   let durationInputs = lightConfig.phases.toSorted((a, b) => a.stateAttributes().priority - b.stateAttributes().priority).reverse().map(phase => (
@@ -86,7 +97,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} 
       color={phase.stateAttributes().color}
     />
-  ));
+  ))
 
   let avatar = (
     <Avatar 
@@ -114,7 +125,13 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   useEffect(() => {
     setMarkerTransition(markPosition)
-  }, [markPosition]);
+  }, [markPosition])
+
+  useEffect(() => {
+    if (fullscreenMode) {
+      enterFullScreen()
+    }
+  }, [fullscreenMode])
 
   return (
     <Card>
@@ -149,7 +166,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             track: Tune 
           }}
           slotProps={{ 
-            track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SlotComponentProps<'span', SliderComponentsPropsOverrides, SliderOwnerState>,
+            track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
             rail: { style: { display: "none" } },
             mark: { style: { display: "none" } },
             markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
@@ -178,10 +195,17 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       </Collapse>
 
       <CardActions>
-        <IconButton aria-label="fullscreen" onClick={() => enterFullScreen()}><FullscreenIcon /></IconButton>
+        <IconButton aria-label="fullscreen" onClick={() => setFullscreenMode(true)}><FullscreenIcon /></IconButton>
         <IconButton aria-label="share" onClick={() => setShareMode(!shareMode) }><ShareIcon /></IconButton>
         {deleteButton}
       </CardActions>
+      <Box ref={fullscreenRef} className='fullscreen' display={fullscreenMode ? 'block' : 'none'}>
+        <Grid container>
+          <Grid display="flex" size='grow' justifyContent="center" alignItems="center">
+            {lightImg}
+          </Grid>
+        </Grid>
+      </Box>
       <ShareDialog
         url={url}
         open={shareMode}

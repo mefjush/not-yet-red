@@ -4,6 +4,6 @@ body {
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
 }
 
-.the-traffic-light::backdrop {
+.fullscreen::backdrop {
   background-color: #F3F6F9;
 }
