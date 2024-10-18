@@ -35,7 +35,9 @@ declare module "@mui/material/Button" {
     tlGreen: true
     tlGrey: true
   }
+}
 
+declare module "@mui/material/Box" {
   interface BoxPropsColorOverrides {
     tlRed: true
     tlYellow: true
@@ -43,7 +45,9 @@ declare module "@mui/material/Button" {
     tlGreen: true
     tlGrey: true
   }
+}
 
+declare module "@mui/material/Slider" {
   interface SliderPropsColorOverrides {
     tlRed: true
     tlYellow: true

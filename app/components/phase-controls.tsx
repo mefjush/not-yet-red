@@ -33,7 +33,7 @@ const fix = (inVal: number, min?: number, max?: number, step?: number) => {
   return toEvent(outVal)
 }
 
-function PhaseSlider({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color?: TrafficLightColors}) {
+function PhaseSlider({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors}) {
 
   const [tempValue, setTempValue] = useState<string|null>(null)
 
@@ -90,23 +90,23 @@ function PhaseSlider({id, label, min, max, step, value, onChange, color}: {id: s
 export default function PhaseControls({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors}) {
   
   const [open, setOpen] = useState(false)
-  const [longPressIterval, setLongPressIterval] = useState<NodeJS.Timeout|null>(null)
+  const [longPressInterval, setLongPressInterval] = useState<NodeJS.Timeout|null>(null)
   
-  const clearLongPressIterval = () => {
-    if (longPressIterval) {
-      clearInterval(longPressIterval)
+  const clearLongPressInterval = () => {
+    if (longPressInterval) {
+      clearInterval(longPressInterval)
     }
   }
 
   const useLongPressDiff = (diff: number) => {
     return useLongPress(e => {
       let i = 0
-      setLongPressIterval(setInterval(() => { 
+      setLongPressInterval(setInterval(() => { 
         i += diff
         onChange(fix(value + i, min, max, step))
       }, 50))
     }, {
-      onFinish: clearLongPressIterval
+      onFinish: clearLongPressInterval
     })
   }
 
