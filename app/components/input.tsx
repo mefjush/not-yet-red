@@ -43,20 +43,19 @@ export default function Input({id, label, min, max, step, value, onChange, color
 
   return (
     <Box>
-      {/* <Typography gutterBottom>
+      <Typography gutterBottom>
         {label}
-      </Typography> */}
+      </Typography>
       <Stack direction="row" spacing={2}>
-        {/* <Slider
-          color={color as OverridableStringUnion<'inherit', SliderPropsColorOverrides>}
+        <Slider
           value={typeof value === 'number' ? value : 0}
           step={step || 1}
           min={min}
           max={max}
           onChange={handleSliderChange}
           aria-labelledby={id}
-        /> */}
-        {/* <MInput
+        />
+        <MInput
           value={value}
           size="small"
           onChange={handleInputChange}
@@ -67,14 +66,7 @@ export default function Input({id, label, min, max, step, value, onChange, color
             type: 'number',
             'aria-labelledby': id
           }}
-        /> */}
-        <Box width={200} sx={{ p: 1 }}>
-          <ButtonGroup variant="outlined" aria-label="Basic button group" fullWidth>
-            <Button color={color} variant='contained' onClick={e => onChange(fix(value - 1))}>-</Button>
-            <Button color={color}>{value}</Button>
-            <Button color={color} variant='contained' onClick={e => onChange(fix(value + 1))}>+</Button>
-          </ButtonGroup>
-        </Box>
+        />
       </Stack>
     </Box>
   )

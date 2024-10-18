@@ -2,8 +2,7 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
-import Input from './input'
-import { IconButton, Card, CardActions, CardContent, Stack, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, IconButtonProps, CardHeader, Avatar, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, SliderOwnerState, InputAdornment } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Box, CardHeader, Avatar, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, SliderOwnerState, InputAdornment } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -14,6 +13,7 @@ import Tune from './tune'
 import { CrossingSettingsSerDeser, LightSettingsSerDeser } from '../url'
 import { ExpandMore } from './expand-more'
 import ShareDialog from './share-dialog'
+import PhaseControls from './phase-controls'
 
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void }) {
@@ -35,7 +35,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const currentPhase = light.currentPhase(currentTimestamp)
 
   const lightImg = <img className="the-traffic-light" ref={lightRef} src={currentPhase.stateAttributes().file} alt={currentPhase.stateAttributes().name} style={{ maxWidth: "100%", maxHeight: "200px" }} />
-  const tune = <Tune lightConfig={lightConfig} onLightSettingsChange={onLightSettingsChange} />
 
   const search = `?crossing=${CrossingSettingsSerDeser.serialize(lightConfig.crossingSettings)}&lights=${LightSettingsSerDeser.serialize([lightConfig.toLightSettings()])}`
 
@@ -44,8 +43,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const url = baseUrl + search
 
   console.log("Rendering light @ " + currentTimestamp)
-
-
 
   const requestWakeLock = async () => {
     try {
@@ -77,7 +74,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   }
 
   let durationInputs = lightConfig.phases.toSorted((a, b) => a.stateAttributes().priority - b.stateAttributes().priority).reverse().map(phase => (
-    <Input 
+    <PhaseControls 
       key={`light-${index}-${phase.stateAttributes().name}-duration`} 
       label={`${phase.stateAttributes().name} duration`} 
       id={`light-${index}-${phase.stateAttributes().name}-duration`} 
@@ -92,7 +89,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   let avatar = (
     <Avatar 
       aria-label="traffic-light" 
-      sx={{ bgcolor: currentPhase.stateAttributes().color }}
+      sx={{ bgcolor: `${currentPhase.stateAttributes().color}.main` }}
     >
       {index}
     </Avatar>
@@ -122,7 +119,10 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         }
         title={title}
       />
-      <Box sx={{ mx: 4 }}>
+      <Box sx={{ mx: 2 }}>
+        <Typography gutterBottom>
+          Offset
+        </Typography>
         <Slider
           value={lightConfig.offset / 1000}
           step={1}
@@ -139,15 +139,18 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
           <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
-            <Grid size="auto">
-              {lightImg}
-            </Grid>
-            <Grid size="grow">
+            <Grid size={{ xs: 12, md: 10, lg: 11 }}>
               <Stack direction="column" alignItems="stretch">
+                <Typography gutterBottom>
+                  Phases
+                </Typography>
                 <form>
                   {durationInputs}
                 </form>
               </Stack>
+            </Grid>
+            <Grid size={{ xs: 12, md: 2, lg: 1 }} display="flex" justifyContent="center" alignItems="center">
+              {lightImg}
             </Grid>
           </Grid>
         </CardContent>
@@ -158,10 +161,9 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         <IconButton aria-label="share" onClick={() => setShareMode(!shareMode) }><ShareIcon /></IconButton>
         {deleteButton}
       </CardActions>
-      {/* {tune} */}
       <ShareDialog
         url={url}
-        open={shareMode == true}
+        open={shareMode}
         onClose={() => setShareMode(false)}
       />
     </Card>

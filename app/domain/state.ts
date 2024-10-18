@@ -1,6 +1,3 @@
-import { OverridableStringUnion } from '@mui/types'
-import { ButtonPropsColorOverrides } from '@mui/material'
-
 export enum State {
   RED = "RED",
   RED_YELLOW = "RED_YELLOW",
@@ -9,12 +6,14 @@ export enum State {
   NONE = "NONE"
 }
 
+export type TrafficLightColors = 'tlRed' | 'tlGreen' | 'tlYellow' | 'tlOrange' | 'tlGrey'
+
 export interface StateAttributes {
   name: string,
   file: string,
   priority: number,
   order: number,
-  color: OverridableStringUnion<'inherit', ButtonPropsColorOverrides>
+  color: TrafficLightColors
 }
 
 export const STATE_ATTRIBUTES: { [id: string] : StateAttributes } = {
