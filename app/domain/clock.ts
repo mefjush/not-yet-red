@@ -13,7 +13,7 @@ function syncTime(tickCallback: (timestamp: number) => void) {
   let request = new XMLHttpRequest()
   let start = Date.now()
 
-  request.open('GET', TIME_SYNC_URL, false)
+  request.open('GET', TIME_SYNC_URL)
   request.onreadystatechange = function() {
     if (request.readyState != 4) {
       return
@@ -44,7 +44,13 @@ function syncTime(tickCallback: (timestamp: number) => void) {
       timeOffset = 0
     }
   }
-  request.send(null)
+  try {
+    request.send(null)
+  } catch(error) {
+    console.log("Time sync failed")
+    console.error(error)
+    timeOffset = 0
+  }
 }
 
 export default class Clock {

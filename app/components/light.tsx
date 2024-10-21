@@ -2,13 +2,13 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Box, CardHeader, Avatar, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, SliderOwnerState } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Box, CardHeader, Avatar, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, SliderOwnerState, Checkbox, Tabs, Tab } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useEffect, useRef, useState } from 'react'
 import Tune from './tune'
 import { CrossingSettingsSerDeser, LightSettingsSerDeser } from '../url'
@@ -63,6 +63,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   }
 
   const releaseWakeLock = async () => {
+    // TODO this does not seem to work!
+
     if (!wakeLock) {
       return
     }
@@ -148,7 +150,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           </ExpandMore>
         }
         title={title}
-      />
+      >
+      </CardHeader>
       <Box sx={{ mx: 2 }}>
         <Typography gutterBottom>
           Offset
@@ -195,6 +198,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       </Collapse>
 
       <CardActions>
+        {/* <Checkbox /> */}
         <IconButton aria-label="fullscreen" onClick={() => setFullscreenMode(true)}><FullscreenIcon /></IconButton>
         <IconButton aria-label="share" onClick={() => setShareMode(!shareMode) }><ShareIcon /></IconButton>
         {deleteButton}

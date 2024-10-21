@@ -7,12 +7,16 @@ import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Fab, Stack, CardHeader, Avatar, Typography, Box } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, CardHeader, Avatar, Typography, Box, Checkbox, IconButton, CardActions, Tabs, Tab } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
 import { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
 import { ExpandMore } from './expand-more'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ShareIcon from '@mui/icons-material/Share'
+import FullscreenIcon from '@mui/icons-material/Fullscreen'
+import SettingsIcon from '@mui/icons-material/Settings'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 export default function CrossingComponent({time}: {time: number}) {
 
@@ -68,33 +72,24 @@ export default function CrossingComponent({time}: {time: number}) {
 
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-      <Card>
-        <CardHeader
-          avatar={
-            <Avatar 
-              aria-label="traffic-light" 
-            >
-              S
-            </Avatar>
-          }
-          action={
-            <ExpandMore
+     <Card>
+        <CardActions>
+          <Checkbox />
+          <IconButton disabled={true} aria-label="fullscreen"><FullscreenIcon /></IconButton>
+          <IconButton disabled={true} aria-label="share"><ShareIcon /></IconButton>
+          <IconButton disabled={true} aria-label="delete"><DeleteIcon /></IconButton>
+
+          <ExpandMore
               expand={expanded}
               onClick={handleExpandClick}
               aria-expanded={expanded}
               aria-label="show more"
+              style={{marginLeft: 'auto'}}
             >
-              <ExpandMoreIcon />
+              <SettingsIcon />
             </ExpandMore>
-          }
-          title={
-            <Box sx={{ mx: 2 }}>
-              <Typography gutterBottom>
-                Crossing settings
-              </Typography>
-            </Box>
-          }
-        />
+        </CardActions>
+
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <CardContent>
             <form>
