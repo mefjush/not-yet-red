@@ -15,6 +15,7 @@ import { CrossingSettingsSerDeser, LightSettingsSerDeser } from '../url'
 import { ExpandMore } from './expand-more'
 import ShareDialog from './share-dialog'
 import PhaseControls from './phase-controls'
+import LightIcon from './light-icon'
 
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void }) {
@@ -35,14 +36,14 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const lightImg = (
-    <img 
-      className="the-traffic-light" 
-      src={currentPhase.stateAttributes().file} 
-      alt={currentPhase.stateAttributes().name} 
-      style={{ maxWidth: "100%", maxHeight: fullscreenMode ? "100vh" : "200px", height: fullscreenMode ? "100vh" : "auto" }} 
-    />
-  )
+  // const lightImg = (
+  //   <img 
+  //     className="the-traffic-light" 
+  //     src={currentPhase.stateAttributes().file} 
+  //     alt={currentPhase.stateAttributes().name} 
+  //     style={{ maxWidth: "100%", maxHeight: fullscreenMode ? "100vh" : "200px", height: fullscreenMode ? "100vh" : "auto" }} 
+  //   />
+  // )
 
   const search = `?crossing=${CrossingSettingsSerDeser.serialize(lightConfig.crossingSettings)}&lights=${LightSettingsSerDeser.serialize([lightConfig.toLightSettings()])}`
 
@@ -102,12 +103,15 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   ))
 
   let avatar = (
-    <Avatar 
-      aria-label="traffic-light" 
-      sx={{ bgcolor: `${currentPhase.stateAttributes().color}.main` }}
-    >
-      {index}
-    </Avatar>
+    <Box>
+      {/* <Checkbox /> */}
+      {/* <Avatar 
+        aria-label="traffic-light" 
+        sx={{ bgcolor: `${currentPhase.stateAttributes().color}.main` }}
+      >
+    </Avatar> */}
+      
+    </Box>
   )
 
   let title = (
@@ -135,10 +139,29 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
   }, [fullscreenMode])
 
+  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} size={ expanded ? 50 : 10 } display={'block'} />
+  
   return (
     <Card>
-      <CardHeader
-        avatar={avatar}
+      <CardActions>
+        <Checkbox />
+        {/* {avatar} */}
+        {lightIcon}
+        <ExpandMore
+            expand={expanded}
+            onClick={handleExpandClick}
+            aria-expanded={expanded}
+            aria-label="show more"
+            style={{marginLeft: 'auto'}}
+          >
+            <ExpandMoreIcon />
+          </ExpandMore>
+        {/* <IconButton aria-label="fullscreen" onClick={() => setFullscreenMode(true)}><FullscreenIcon /></IconButton>
+        <IconButton aria-label="share" onClick={() => setShareMode(!shareMode) }><ShareIcon /></IconButton>
+        {deleteButton} */}
+      </CardActions>
+      {/* <CardHeader
+        // avatar={avatar}
         action={
           <ExpandMore
             expand={expanded}
@@ -151,7 +174,30 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         }
         title={title}
       >
-      </CardHeader>
+      </CardHeader> */}
+
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <CardContent>
+          <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
+            <Grid size={{ xs: 12, md: 2, lg: 1 }} display="flex" justifyContent="center" alignItems="center">
+              {/* {lightImg} */}
+              {/* <LightIcon currentTimestamp={currentTimestamp} light={light} size={ expanded ? 50 : 10 } display='block'/> */}
+              {/* {lightIcon} */}
+            </Grid>
+            <Grid size={{ xs: 12, md: 10, lg: 11 }}>
+              <Stack direction="column" alignItems="stretch">
+                <Typography gutterBottom>
+                  Phases
+                </Typography>
+                <form>
+                  {durationInputs}
+                </form>
+              </Stack>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Collapse>
+
       <Box sx={{ mx: 2 }}>
         <Typography gutterBottom>
           Offset
@@ -177,25 +223,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]}
         />
       </Box>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
-            <Grid size={{ xs: 12, md: 10, lg: 11 }}>
-              <Stack direction="column" alignItems="stretch">
-                <Typography gutterBottom>
-                  Phases
-                </Typography>
-                <form>
-                  {durationInputs}
-                </form>
-              </Stack>
-            </Grid>
-            <Grid size={{ xs: 12, md: 2, lg: 1 }} display="flex" justifyContent="center" alignItems="center">
-              {lightImg}
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Collapse>
 
       <CardActions>
         {/* <Checkbox /> */}
@@ -206,7 +233,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       <Box ref={fullscreenRef} className='fullscreen' display={fullscreenMode ? 'block' : 'none'}>
         <Grid container>
           <Grid display="flex" size='grow' justifyContent="center" alignItems="center">
-            {lightImg}
+          {lightIcon}
           </Grid>
         </Grid>
       </Box>
