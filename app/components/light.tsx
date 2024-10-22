@@ -16,9 +16,10 @@ import { ExpandMore } from './expand-more'
 import ShareDialog from './share-dialog'
 import PhaseControls from './phase-controls'
 import LightIcon from './light-icon'
+import { SwitchBaseProps } from '@mui/material/internal/SwitchBase'
 
 
-export default function LightComponent({ index, currentTimestamp, light, lightConfig, onLightSettingsChange, onDelete }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void }) {
+export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void }) {
 
   const fullscreenRef = useRef<HTMLDivElement>(null)
 
@@ -33,17 +34,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   }
 
   const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()} style={{marginLeft: 'auto'}}><DeleteIcon /></IconButton>
-
-  const currentPhase = light.currentPhase(currentTimestamp)
-
-  // const lightImg = (
-  //   <img 
-  //     className="the-traffic-light" 
-  //     src={currentPhase.stateAttributes().file} 
-  //     alt={currentPhase.stateAttributes().name} 
-  //     style={{ maxWidth: "100%", maxHeight: fullscreenMode ? "100vh" : "200px", height: fullscreenMode ? "100vh" : "auto" }} 
-  //   />
-  // )
 
   const search = `?crossing=${CrossingSettingsSerDeser.serialize(lightConfig.crossingSettings)}&lights=${LightSettingsSerDeser.serialize([lightConfig.toLightSettings()])}`
 
@@ -102,26 +92,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     />
   ))
 
-  let avatar = (
-    <Box>
-      {/* <Checkbox /> */}
-      {/* <Avatar 
-        aria-label="traffic-light" 
-        sx={{ bgcolor: `${currentPhase.stateAttributes().color}.main` }}
-      >
-    </Avatar> */}
-      
-    </Box>
-  )
-
-  let title = (
-    <Box sx={{ mx: 2 }}>
-      <Typography gutterBottom>
-        Traffic Light #{index}
-      </Typography>
-    </Box>
-  )
-
   const markPosition = currentTimestamp % lightConfig.cycleLength()
 
   const needsTransition = markTransition == markPosition
@@ -139,14 +109,12 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
   }, [fullscreenMode])
 
-  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} size={ expanded ? 50 : 10 } display={'block'} />
-  
+  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} size={ expanded ? 50 : 20 } />
+
   return (
     <Card>
       <CardActions>
-        <Checkbox />
-        {/* {avatar} */}
-        {lightIcon}
+        <Checkbox value={selected} checked={selected} onChange={e => onSelectionChange(e.target.checked)}/>
         <ExpandMore
             expand={expanded}
             onClick={handleExpandClick}
@@ -156,35 +124,38 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           >
             <ExpandMoreIcon />
           </ExpandMore>
-        {/* <IconButton aria-label="fullscreen" onClick={() => setFullscreenMode(true)}><FullscreenIcon /></IconButton>
-        <IconButton aria-label="share" onClick={() => setShareMode(!shareMode) }><ShareIcon /></IconButton>
-        {deleteButton} */}
       </CardActions>
-      {/* <CardHeader
-        // avatar={avatar}
-        action={
-          <ExpandMore
-            expand={expanded}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <ExpandMoreIcon />
-          </ExpandMore>
-        }
-        title={title}
-      >
-      </CardHeader> */}
 
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
-            <Grid size={{ xs: 12, md: 2, lg: 1 }} display="flex" justifyContent="center" alignItems="center">
-              {/* {lightImg} */}
-              {/* <LightIcon currentTimestamp={currentTimestamp} light={light} size={ expanded ? 50 : 10 } display='block'/> */}
-              {/* {lightIcon} */}
-            </Grid>
-            <Grid size={{ xs: 12, md: 10, lg: 11 }}>
+      <CardContent>
+        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
+          <Grid size={{ xs: expanded ? 12 : 3, md: 2, lg: 1 }} display="flex" justifyContent="center" alignItems="center">
+            {lightIcon}
+          </Grid>
+          <Grid size={{ xs: expanded ? 12 : 9, md: 10, lg: 11 }}>
+            <Typography gutterBottom>
+              Offset
+            </Typography>
+            <Slider
+              value={lightConfig.offset / 1000}
+              step={1}
+              min={0} 
+              max={(lightConfig.cycleLength() / 1000)}
+              valueLabelDisplay="auto"
+              valueLabelFormat={(value) => `${value} s`}
+              onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
+              aria-label="Offset"
+              slots={{ 
+                track: Tune 
+              }}
+              slotProps={{ 
+                track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
+                rail: { style: { display: "none" } },
+                mark: { style: { display: "none" } },
+                markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
+              }}
+              marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]}
+            />
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
               <Stack direction="column" alignItems="stretch">
                 <Typography gutterBottom>
                   Phases
@@ -193,39 +164,12 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
                   {durationInputs}
                 </form>
               </Stack>
-            </Grid>
+            </Collapse>
           </Grid>
-        </CardContent>
-      </Collapse>
-
-      <Box sx={{ mx: 2 }}>
-        <Typography gutterBottom>
-          Offset
-        </Typography>
-        <Slider
-          value={lightConfig.offset / 1000}
-          step={1}
-          min={0} 
-          max={(lightConfig.cycleLength() / 1000)}
-          valueLabelDisplay="auto"
-          valueLabelFormat={(value) => `${value} s`}
-          onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
-          aria-label="Offset"
-          slots={{ 
-            track: Tune 
-          }}
-          slotProps={{ 
-            track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
-            rail: { style: { display: "none" } },
-            mark: { style: { display: "none" } },
-            markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
-          }}
-          marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]}
-        />
-      </Box>
+        </Grid>
+      </CardContent>
 
       <CardActions>
-        {/* <Checkbox /> */}
         <IconButton aria-label="fullscreen" onClick={() => setFullscreenMode(true)}><FullscreenIcon /></IconButton>
         <IconButton aria-label="share" onClick={() => setShareMode(!shareMode) }><ShareIcon /></IconButton>
         {deleteButton}

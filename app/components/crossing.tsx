@@ -7,7 +7,7 @@ import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Fab, Stack, CardHeader, Avatar, Typography, Box, Checkbox, IconButton, CardActions, Tabs, Tab } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Tabs, Tab } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
 import { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
@@ -26,6 +26,8 @@ export default function CrossingComponent({time}: {time: number}) {
 
   const [expanded, setExpanded] = useState(false)
 
+  const [selected, setSelected] = useState<number[]>([])
+
   const [lightSettings, setLightSettings] = useStateParams([DEFAULT_LIGHT_SETTINGS], "lights", LightSettingsSerDeser)
 
   const failure = new Failure(crossingSettings.failure.duration, crossingSettings.failure.probability)
@@ -35,7 +37,7 @@ export default function CrossingComponent({time}: {time: number}) {
   const lightConfigs = lightSettings.map(lightSetting => new LightConfig(crossingSettings, lightSetting))
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
-
+  
   const wrapListener = {
     nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / crossingSettings.cycleLength) + 1) * crossingSettings.cycleLength
   }
@@ -70,11 +72,15 @@ export default function CrossingComponent({time}: {time: number}) {
     setExpanded(!expanded);
   }
 
+  const onAllSelectionChanged = (b: boolean) => {
+    setSelected(b ? lights.map((l, i) => i) : [])
+  }
+
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-     <Card>
+      <Card>
         <CardActions>
-          <Checkbox />
+          <Checkbox onChange={e => onAllSelectionChanged(e.target.checked)} />
           <IconButton disabled={true} aria-label="fullscreen"><FullscreenIcon /></IconButton>
           <IconButton disabled={true} aria-label="share"><ShareIcon /></IconButton>
           <IconButton disabled={true} aria-label="delete"><DeleteIcon /></IconButton>
@@ -130,8 +136,10 @@ export default function CrossingComponent({time}: {time: number}) {
             currentTimestamp={currentTimestamp}
             light={light}
             lightConfig={lightConfigs[index]}
+            selected={selected.includes(index)}
             onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
             onDelete={lights.length > 1 ? () => onDelete(index) : undefined}
+            onSelectionChange={(checked) => checked ? setSelected([...selected, index]) : setSelected(selected.filter(x => x != index))}
         />
       )}
       <Fab color="primary" aria-label="add" onClick={() => onClone(lightSettings.length - 1)} style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}>
