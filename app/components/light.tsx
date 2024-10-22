@@ -109,7 +109,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
   }, [fullscreenMode])
 
-  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} size={ expanded ? 50 : 20 } />
+  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} height={ expanded ? '150px' : '60px' } />
 
   return (
     <Card>
@@ -176,8 +176,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       </CardActions>
       <Box ref={fullscreenRef} className='fullscreen' display={fullscreenMode ? 'block' : 'none'}>
         <Grid container>
-          <Grid display="flex" size='grow' justifyContent="center" alignItems="center">
-          {lightIcon}
+          <Grid display="flex" size='grow' justifyContent="center" alignItems="center" sx={{ m: 2 }}>
+            <LightIcon currentTimestamp={currentTimestamp} light={light} height='80vh' />
           </Grid>
         </Grid>
       </Box>
