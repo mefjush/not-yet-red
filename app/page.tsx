@@ -9,7 +9,7 @@ import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import CrossingComponent from './components/crossing'
 import { createTheme, ThemeProvider, styled, PaletteColorOptions } from '@mui/material/styles';
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense } from 'react'
 import { orange, green, yellow, red, grey } from '@mui/material/colors';
 
 //https://mui.com/material-ui/customization/palette/
@@ -74,17 +74,11 @@ const theme = createTheme({
 
 function Content() {
 
-  const [logoCounter, setLogoCounter] = useState(0)
-
   const logos = [
-    <CircleIcon color='disabled' style={{ transitionDuration: '1000ms' }} />,
-    <CircleIcon color='action' style={{ transitionDuration: '1000ms' }} />,
-    <CircleOutlinedIcon color='disabled' style={{ transitionDuration: '1000ms' }} />,
+    <CircleIcon key={1} color='disabled' style={{ transitionDuration: '1000ms' }} />,
+    <CircleIcon key={2} color='action' style={{ transitionDuration: '1000ms' }} />,
+    <CircleOutlinedIcon key={3} color='disabled' style={{ transitionDuration: '1000ms' }} />,
   ]
-
-  useEffect(() => {
-    setTimeout(() => setLogoCounter((logoCounter + 1) % logos.length), 5000)
-  })
 
   return (
     <>
@@ -101,7 +95,7 @@ function Content() {
               <MenuIcon />
             </IconButton> */}
             <IconButton size="large" edge="start" href="/">
-              {logos[logoCounter]}
+              {logos}
             </IconButton>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Traffic Lights
@@ -110,6 +104,18 @@ function Content() {
         </AppBar>
       </Box>
       <CrossingComponent time={Date.now()}/>
+      <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <IconButton size="large" edge="start" href="/">
+            {logos}
+          </IconButton> 
+          <p>2024 <strong>Traffic Lights</strong> by mefju</p>
+        </Box>
+      </Stack>
     </>
   )
 }
@@ -121,15 +127,6 @@ export default function Home() {
         <Suspense>
           <Content />
         </Suspense>
-        <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <img src="/favicon.ico" /> <p>2024 <strong>Traffic Lights</strong> by mefju</p>
-          </Box>
-        </Stack>
       </ThemeProvider>
     </main>
   )
