@@ -96,7 +96,7 @@ export default function CrossingComponent({time}: {time: number}) {
 
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-      <Card sx={{ position: 'sticky', top: 0, zIndex: 100 }}>
+      <Card sx={{ position: 'sticky', top: '2px', zIndex: 100 }}>
         <CardActions>
           <Checkbox 
             checked={selected.length == lightSettings.length} 

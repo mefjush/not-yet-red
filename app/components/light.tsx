@@ -2,7 +2,7 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, Checkbox, Tabs, Tab } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, Checkbox, Tabs, Tab, Box } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -24,7 +24,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     setExpanded(!expanded);
   }
 
-  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()} style={{marginLeft: 'auto'}}><DeleteIcon /></IconButton>
+  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()}><DeleteIcon /></IconButton>
 
   let durationInputs = lightConfig.phases.toSorted((a, b) => a.stateAttributes().priority - b.stateAttributes().priority).reverse().map(phase => (
     <PhaseControls 
@@ -56,15 +56,20 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     <Card>
       <CardActions>
         <Checkbox value={selected} checked={selected} onChange={e => onSelectionChange(e.target.checked)}/>
+        <IconButton aria-label="fullscreen" onClick={onFullscreen}><FullscreenIcon /></IconButton>
+        <IconButton aria-label="share" onClick={onShare}><ShareIcon /></IconButton>
+        {/* {deleteButton} */}
+        <IconButton sx={{ visibility: 'hidden' }}><DeleteIcon /></IconButton>
+        {/* <Typography gutterBottom sx={{ color: 'text.secondary' }}>Light {index}</Typography> */}
         <ExpandMore
             expand={expanded}
             onClick={handleExpandClick}
             aria-expanded={expanded}
             aria-label="show more"
             style={{marginLeft: 'auto'}}
-          >
-            <ExpandMoreIcon />
-          </ExpandMore>
+        >
+          <ExpandMoreIcon />
+        </ExpandMore>
       </CardActions>
 
       <CardContent>
@@ -111,9 +116,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       </CardContent>
 
       <CardActions>
-        <IconButton aria-label="fullscreen" onClick={onFullscreen}><FullscreenIcon /></IconButton>
-        <IconButton aria-label="share" onClick={onShare}><ShareIcon /></IconButton>
-        {deleteButton}
+
       </CardActions>
     </Card>
   )

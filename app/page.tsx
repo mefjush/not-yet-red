@@ -1,12 +1,15 @@
 "use client"
 
-import { AppBar, Box, IconButton, Toolbar, Typography, Stack } from '@mui/material'
+import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Avatar } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
+import TrafficIcon from '@mui/icons-material/Traffic'
+import CircleIcon from '@mui/icons-material/Circle'
+import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import CrossingComponent from './components/crossing'
 import { createTheme, ThemeProvider, styled, PaletteColorOptions } from '@mui/material/styles';
 
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { orange, green, yellow, red, grey } from '@mui/material/colors';
 
 //https://mui.com/material-ui/customization/palette/
@@ -70,7 +73,19 @@ const theme = createTheme({
 })
 
 function Content() {
-  
+
+  const [logoCounter, setLogoCounter] = useState(0)
+
+  const logos = [
+    <CircleIcon color='disabled' style={{ transitionDuration: '1000ms' }} />,
+    <CircleIcon color='action' style={{ transitionDuration: '1000ms' }} />,
+    <CircleOutlinedIcon color='disabled' style={{ transitionDuration: '1000ms' }} />,
+  ]
+
+  useEffect(() => {
+    setTimeout(() => setLogoCounter((logoCounter + 1) % logos.length), 5000)
+  })
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -85,6 +100,9 @@ function Content() {
             >
               <MenuIcon />
             </IconButton> */}
+            <IconButton size="large" edge="start" href="/">
+              {logos[logoCounter]}
+            </IconButton>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Traffic Lights
             </Typography>

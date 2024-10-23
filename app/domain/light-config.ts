@@ -123,9 +123,9 @@ export default class LightConfig {
 export const DEFAULT_LIGHT_SETTINGS = {
   offset: 0,
   phases: [
-    new Phase(State.RED, 30_000),
+    new Phase(State.RED, 16_000),
     new Phase(State.RED_YELLOW, 2_000),
-    new Phase(State.GREEN, 26_000),
+    new Phase(State.GREEN, 10_000),
     new Phase(State.YELLOW, 2_000)
   ]
 }
