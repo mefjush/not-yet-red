@@ -75,9 +75,9 @@ const theme = createTheme({
 function Content() {
 
   const logos = [
-    <CircleIcon key={1} color='disabled' style={{ transitionDuration: '1000ms' }} />,
-    <CircleIcon key={2} color='action' style={{ transitionDuration: '1000ms' }} />,
-    <CircleOutlinedIcon key={3} color='disabled' style={{ transitionDuration: '1000ms' }} />,
+    <CircleIcon key={1} color='disabled' />,
+    <CircleIcon key={2} color='action' />,
+    <CircleOutlinedIcon key={3} color='disabled' />,
   ]
 
   return (
