@@ -7,16 +7,19 @@ import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Tabs, Tab } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Tabs, Tab, Box, BottomNavigation, BottomNavigationAction, Paper } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
 import { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
 import { ExpandMore } from './expand-more'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import SettingsIcon from '@mui/icons-material/Settings'
 import DeleteIcon from '@mui/icons-material/Delete'
+import Fullscreen from './fullscreen'
+import LightIcon from './light-icon'
+import React from 'react'
+import ShareDialog from './share-dialog'
 
 export default function CrossingComponent({time}: {time: number}) {
 
@@ -27,6 +30,10 @@ export default function CrossingComponent({time}: {time: number}) {
   const [expanded, setExpanded] = useState(false)
 
   const [selected, setSelected] = useState<number[]>([])
+
+  const [fullscreenMode, setFullscreenMode] = useState<number[]>([])
+
+  const [shareMode, setShareMode] = useState<number[]>([])
 
   const [lightSettings, setLightSettings] = useStateParams([DEFAULT_LIGHT_SETTINGS], "lights", LightSettingsSerDeser)
 
@@ -56,16 +63,13 @@ export default function CrossingComponent({time}: {time: number}) {
     setLightSettings(copy)
   }
 
-  const onClone = (index: number) => {
-    const copy = [...lightSettings]
-    copy.splice(index + 1, 0, lightSettings[index])
-    setLightSettings(copy)
+  const onAdd = () => {
+    setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
   }
 
-  const onDelete = (index: number) => {
-    const copy = [...lightSettings]
-    copy.splice(index, 1)
-    setLightSettings(copy)
+  const onDelete = (indicesToDelete: number[]) => {
+    setSelected([])
+    setLightSettings([...lightSettings].filter((ls, i) => !indicesToDelete.includes(i)))
   }
 
   const handleExpandClick = () => {
@@ -76,14 +80,51 @@ export default function CrossingComponent({time}: {time: number}) {
     setSelected(b ? lights.map((l, i) => i) : [])
   }
 
+  const getShareUrl = function() {
+    if (shareMode.length == 0) {
+      return ""
+    } 
+
+    const selectedLightSettings = lightSettings.filter((ls, index) => shareMode.includes(index))
+
+    const search = `?crossing=${CrossingSettingsSerDeser.serialize(crossingSettings)}&lights=${LightSettingsSerDeser.serialize(selectedLightSettings)}`
+  
+    const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
+    // const baseUrl = "http://192.168.0.106:3000" 
+    return baseUrl + search
+  }  
+
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-      <Card>
+      <Card sx={{ position: 'sticky', top: 0, zIndex: 100 }}>
         <CardActions>
-          <Checkbox onChange={e => onAllSelectionChanged(e.target.checked)} />
-          <IconButton disabled={true} aria-label="fullscreen"><FullscreenIcon /></IconButton>
-          <IconButton disabled={true} aria-label="share"><ShareIcon /></IconButton>
-          <IconButton disabled={true} aria-label="delete"><DeleteIcon /></IconButton>
+          <Checkbox 
+            checked={selected.length == lightSettings.length} 
+            indeterminate={selected.length != lightSettings.length && selected.length > 0} 
+            aria-label='select all'
+            onChange={e => onAllSelectionChanged(e.target.checked)} 
+          />
+          <IconButton 
+            disabled={ selected.length == 0 } 
+            aria-label="fullscreen" 
+            onClick={() => setFullscreenMode(selected)}
+          >
+            <FullscreenIcon />
+          </IconButton>
+          <IconButton 
+            disabled={ selected.length == 0 } 
+            aria-label="share" 
+            onClick={() => setShareMode(selected)}
+          >
+            <ShareIcon />
+          </IconButton>
+          <IconButton 
+            disabled={ selected.length == 0 } 
+            aria-label="delete" 
+            onClick={() => onDelete(selected)}
+          >
+            <DeleteIcon />
+          </IconButton>
 
           <ExpandMore
               expand={expanded}
@@ -138,11 +179,31 @@ export default function CrossingComponent({time}: {time: number}) {
             lightConfig={lightConfigs[index]}
             selected={selected.includes(index)}
             onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
-            onDelete={lights.length > 1 ? () => onDelete(index) : undefined}
+            onDelete={lights.length > 1 ? () => onDelete([index]) : undefined}
             onSelectionChange={(checked) => checked ? setSelected([...selected, index]) : setSelected(selected.filter(x => x != index))}
+            onFullscreen={() => setFullscreenMode([index])}
+            onShare={() => setShareMode([index])}
         />
       )}
-      <Fab color="primary" aria-label="add" onClick={() => onClone(lightSettings.length - 1)} style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}>
+
+      <Fullscreen
+        enabled={fullscreenMode.length > 0}
+        onDisabled={() => setFullscreenMode([])}
+      >
+        { lights.filter((light, index) => fullscreenMode.includes(index)).map((light, index) =>
+          <Box sx={{ mx: 2 }}>
+            <LightIcon currentTimestamp={currentTimestamp} light={light} height='95vh'/>
+          </Box>
+        )}
+      </Fullscreen>
+
+      <ShareDialog
+        url={getShareUrl()}
+        open={shareMode.length > 0}
+        onClose={() => setShareMode([])}
+      />
+
+      <Fab color="primary" aria-label="add" onClick={onAdd} style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}>
         <AddIcon />
       </Fab>
     </Stack>
