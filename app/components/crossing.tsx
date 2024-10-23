@@ -191,7 +191,7 @@ export default function CrossingComponent({time}: {time: number}) {
         onDisabled={() => setFullscreenMode([])}
       >
         { lights.filter((light, index) => fullscreenMode.includes(index)).map((light, index) =>
-          <Box sx={{ mx: 2 }}>
+          <Box key={`fullscreen-light-${index}`} sx={{ mx: 2 }}>
             <LightIcon currentTimestamp={currentTimestamp} light={light} height='95vh'/>
           </Box>
         )}
