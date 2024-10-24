@@ -192,7 +192,7 @@ export default function CrossingComponent({time}: {time: number}) {
       >
         { lights.filter((light, index) => fullscreenMode.includes(index)).map((light, index) =>
           <Box key={`fullscreen-light-${index}`} sx={{ mx: 2 }}>
-            <LightIcon currentTimestamp={currentTimestamp} light={light} height='95vh'/>
+            <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfigs[index]} height='95vh'/>
           </Box>
         )}
       </Fullscreen>

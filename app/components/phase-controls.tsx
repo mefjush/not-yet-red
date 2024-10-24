@@ -8,7 +8,7 @@ import { TrafficLightColors } from '../domain/state'
 import { useLongPress } from 'use-long-press';
 
 const MInput = styled(MuiInput)`
-  width: 42px
+  width: 50px
 `
 
 interface ChangeEvent {

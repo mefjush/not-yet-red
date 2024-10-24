@@ -1,5 +1,5 @@
 import { State } from '../../app/domain/state'
-import LightConfig, { DEFAULT_LIGHT_SETTINGS } from '../../app/domain/light-config'
+import LightConfig, { DEFAULT_LIGHT_SETTINGS, TEST_LIGHT_SETTINGS } from '../../app/domain/light-config'
 import TrafficLight from  '../../app/domain/traffic-light'
 
 let crossingSettings = {
@@ -10,7 +10,7 @@ let crossingSettings = {
   }
 }
 
-let lightSettings = DEFAULT_LIGHT_SETTINGS
+const lightSettings = TEST_LIGHT_SETTINGS
 
 describe('TrafficLight', () => {
   it('calculates next transition when in the middle of first phase', () => {

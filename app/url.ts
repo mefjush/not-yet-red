@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { LightSettings, Phase } from "./domain/light-config"
+import { LightSettings, Phase, PresetId } from "./domain/light-config"
 import { State } from "./domain/state"
 import CrossingSettings from "./domain/crossing-settings"
 
@@ -17,7 +17,7 @@ export const BooleanSerDeser: SerDeser<boolean> = {
 export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
   serialize: (lightSettingsArray: LightSettings[]) => {
     return lightSettingsArray.map(ls => {
-      return ls.offset + "---" + ls.phases.map(p => p.state + "-" + p.duration).join("--")
+      return ls.offset + "---" + ls.phases.map(p => p.state + "-" + p.duration).join("--") + "---" + ls.presetId
     }).join("----")
   },
   deserialize: (s: string) => {
@@ -29,7 +29,8 @@ export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
           let phSplit = ph.split("-")
           let stateName = <keyof typeof State> phSplit[0] 
           return new Phase(State[stateName], Number.parseInt(phSplit[1]))
-        })
+        }),
+        presetId: lsSplit[2] as PresetId
       }
     })
   }

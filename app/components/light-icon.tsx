@@ -4,9 +4,8 @@ import TrafficLight from '../domain/traffic-light'
 import { Stack, Avatar, AvatarProps, IconProps } from '@mui/material'
 import { styled, alpha, Palette, PaletteColor } from "@mui/material/styles"
 import { SegmentColor } from '../domain/state'
-import DirectionsRunIcon from '@mui/icons-material/DirectionsRun'
-import CircleIcon from '@mui/icons-material/Circle';
-import ForkLeftIcon from '@mui/icons-material/ForkLeft';
+import LightConfig, { LightSettings, PRESETS, SymbolId, SYMBOLS } from '../domain/light-config'
+import { createElement } from 'react'
 
 const TRANSITION_DURATION = '300ms'
 
@@ -48,7 +47,7 @@ const StyledImgAvatar = styled(Avatar)<AvatarProps>(
   }
 )
 
-export default function LightIcon({ currentTimestamp, light, height }: { currentTimestamp: number, light: TrafficLight, height: string }) {
+export default function LightIcon({ currentTimestamp, light, lightConfig, height }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, height: string }) {
 
   const segments: SegmentColor[] = ['tlRed', 'tlYellow', 'tlGreen']
 
@@ -58,14 +57,28 @@ export default function LightIcon({ currentTimestamp, light, height }: { current
   const heightUnit = height.substring(height.length - 2, height.length)
   const segmentSize = 0.8 * heightValue / (segments.length)
 
-  const isImg = false
+  const isImg = lightConfig.preset.symbolId != SymbolId.NONE
+  const symbol = SYMBOLS[lightConfig.preset.symbolId]
 
   const imgScale = 0.7
 
   const segmentStates = segments.map(segment => {
     const on = currentPhase.stateAttributes().segments.includes(segment)
 
-    if (isImg) {
+    const inverted = symbol.isInverted(segment)
+    const iconSize = `${imgScale * segmentSize}${heightUnit}`
+    const icon = createElement(symbol.getIcon(segment), { 
+      sx: { 
+        width: iconSize, 
+        height: iconSize, 
+        color: inverted ? 'black' : `${segment}.main`, 
+        opacity: on ? 1 : 0.1 
+      }
+    })
+
+    // TODO clean this up
+
+    if (isImg && !inverted) {
       return (
         <StyledImgAvatar 
           prefix={on ? 'on' : 'off'} 
@@ -77,10 +90,12 @@ export default function LightIcon({ currentTimestamp, light, height }: { current
             border: `${0.015 * segmentSize}${heightUnit} solid black`
           }}
         >
-          <ForkLeftIcon sx={{ width: `${imgScale * segmentSize}${heightUnit}`, height: `${imgScale * segmentSize}${heightUnit}`, color: `${segment}.main`, opacity: on ? 1 : 0.1 }} />
+          {icon}
         </StyledImgAvatar>
       )
-    } else {
+    } 
+
+    if (isImg && inverted) {
       return (
         <StyledAvatar 
           prefix={on ? 'on' : 'off'} 
@@ -91,9 +106,24 @@ export default function LightIcon({ currentTimestamp, light, height }: { current
             height: `${segmentSize}${heightUnit}`,
             border: `${0.015 * segmentSize}${heightUnit} solid black`
           }}
-        > </StyledAvatar>
+        >
+          {icon}
+        </StyledAvatar>
       )
     }
+    
+    return (
+      <StyledAvatar 
+        prefix={on ? 'on' : 'off'} 
+        color={segment}
+        key={segment} 
+        sx={{ 
+          width: `${segmentSize}${heightUnit}`, 
+          height: `${segmentSize}${heightUnit}`,
+          border: `${0.015 * segmentSize}${heightUnit} solid black`
+        }}
+      > </StyledAvatar>
+    )
   })
 
   return (

@@ -1,8 +1,8 @@
 "use client"
 
 import TrafficLight from '../domain/traffic-light'
-import LightConfig, { LightSettings } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, Checkbox, Tabs, Tab, Box } from '@mui/material'
+import LightConfig, { LightSettings, PresetId, PRESETS, SymbolId, SYMBOLS } from '../domain/light-config'
+import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, Checkbox, Tabs, Tab, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -50,7 +50,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     setMarkerTransition(markPosition)
   }, [markPosition])
 
-  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} height={ expanded ? '150px' : '60px' } />
+  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
 
   return (
     <Card>
@@ -102,22 +102,26 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
               marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]}
             />
             <Collapse in={expanded} timeout="auto" unmountOnExit>
-              <Stack direction="column" alignItems="stretch">
+              <Stack direction="column" alignItems="stretch" spacing={2}>
+                <Typography gutterBottom>
+                  Preset
+                </Typography>
+                <Select value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
+                  { 
+                    Object.values(PRESETS).map(preset => 
+                      <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
+                    )
+                  }
+                </Select>
                 <Typography gutterBottom>
                   Phases
                 </Typography>
-                <form>
-                  {durationInputs}
-                </form>
+                {durationInputs}
               </Stack>
             </Collapse>
           </Grid>
         </Grid>
       </CardContent>
-
-      <CardActions>
-
-      </CardActions>
     </Card>
   )
 }
