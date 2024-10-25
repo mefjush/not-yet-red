@@ -42,6 +42,7 @@ export default function LightIcon({ currentTimestamp, light, lightConfig, height
   const symbol = SYMBOLS[lightConfig.preset.symbolId]
 
   const imgScale = 0.7
+  const iconSize = `${imgScale * segmentSize}${heightUnit}`
 
   const segmentStates = segments.map(segment => {
 
@@ -50,7 +51,6 @@ export default function LightIcon({ currentTimestamp, light, lightConfig, height
 
     let icon = <> </>
     if (isImg) {
-      const iconSize = `${imgScale * segmentSize}${heightUnit}`
       icon = createElement(symbol.getIcon(segment), { 
         sx: { 
           width: iconSize, 

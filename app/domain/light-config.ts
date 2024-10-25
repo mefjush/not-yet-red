@@ -1,14 +1,14 @@
-import { SegmentColor, State, STATE_ATTRIBUTES, StateAttributes, TrafficLightColors } from "./state"
+import { SegmentColor, State, STATE_ATTRIBUTES, StateAttributes } from "./state"
 import CrossingSettings from "./crossing-settings"
-import { negativeSafeMod } from "../utils"
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun'
-import { SvgIconClassKey } from "@mui/material"
 import { SvgIconComponent } from "@mui/icons-material"
 import BlurOnIcon from '@mui/icons-material/BlurOn'
 import ManIcon from '@mui/icons-material/Man'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
 const FOUR_STATE = [State.RED, State.RED_YELLOW, State.GREEN, State.YELLOW]
+const THREE_STATE = [State.RED, State.GREEN, State.YELLOW]
 const TWO_STATE = [State.RED, State.GREEN]
 
 const THREE_COLOR: SegmentColor[] = ['tlRed', 'tlYellow', 'tlGreen']
@@ -19,13 +19,16 @@ const DEFAULT_NEW_PHASE_DURATION = 2_000
 export enum SymbolId {
   NONE = "NONE",
   PEDESTRIAN = "PEDESTRIAN",
-  LEFT = "LEFT"
+  LEFT = "LEFT",
+  RIGHT = "RIGHT"
 }
 
 export enum PresetId {
   FOUR_PHASE = "FOUR_PHASE",
+  THREE_PHASE = "THREE_PHASE",
   PEDESTRIAN = "PEDESTRIAN",
-  LEFT = "LEFT"
+  LEFT = "LEFT",
+  RIGHT = "RIGHT"
 }
 
 export class Symbol {
@@ -66,17 +69,20 @@ export class Preset {
   }
 }
 
-export const SYMBOLS: { [key in SymbolId] : Symbol } = {
-  'NONE': new Symbol(SymbolId.NONE, false, BlurOnIcon),
-  'PEDESTRIAN': new Symbol(SymbolId.PEDESTRIAN, false, ManIcon, DirectionsRunIcon),
-  'LEFT': new Symbol(SymbolId.LEFT, true, ArrowBackIcon)
-}
+export const SYMBOLS = Object.fromEntries([
+  new Symbol(SymbolId.NONE, false, BlurOnIcon),
+  new Symbol(SymbolId.PEDESTRIAN, false, ManIcon, DirectionsRunIcon),
+  new Symbol(SymbolId.LEFT, true, ArrowBackIcon),
+  new Symbol(SymbolId.RIGHT, true, ArrowForwardIcon)
+].map(symbol => [symbol.symbolId, symbol]))
 
-export const PRESETS: { [key in PresetId] : Preset } = {
-  'FOUR_PHASE': new Preset(PresetId.FOUR_PHASE, "4-Phase", SymbolId.NONE, THREE_COLOR, FOUR_STATE),
-  'PEDESTRIAN': new Preset(PresetId.PEDESTRIAN, "Pedestrian", SymbolId.PEDESTRIAN, TWO_COLOR, TWO_STATE),
-  'LEFT': new Preset(PresetId.LEFT, "Left", SymbolId.LEFT, THREE_COLOR, FOUR_STATE),
-}
+export const PRESETS = Object.fromEntries([
+  new Preset(PresetId.FOUR_PHASE, "4-Phase", SymbolId.NONE, THREE_COLOR, FOUR_STATE),
+  new Preset(PresetId.THREE_PHASE, "3-Phase", SymbolId.NONE, THREE_COLOR, THREE_STATE),
+  new Preset(PresetId.PEDESTRIAN, "Pedestrian", SymbolId.PEDESTRIAN, TWO_COLOR, TWO_STATE),
+  new Preset(PresetId.LEFT, "Left", SymbolId.LEFT, THREE_COLOR, FOUR_STATE),
+  new Preset(PresetId.RIGHT, "Right", SymbolId.RIGHT, THREE_COLOR, FOUR_STATE),
+].map(preset => [preset.presetId, preset]))
 
 export class Phase {
   state: State
@@ -113,9 +119,6 @@ export default class LightConfig {
     this.offset = lightSettings.offset
     this.phases = this.rescale(crossingSettings, lightSettings).phases
     this.preset = PRESETS[lightSettings.presetId]
-    if (this.preset == null) {
-      console.log(lightSettings.presetId)
-    }
   }
 
   withOffset(offset: number): LightSettings {
@@ -192,7 +195,7 @@ export default class LightConfig {
     let fixedRemaining = []
     
     for (let p of fixablePhases) {
-      let durationBeforeFix = p.duration
+      const durationBeforeFix = p.duration
       fixedRemaining.push(new Phase(p.state, Math.max(0, p.duration + diff)))
       if (diff < 0 && durationBeforeFix < Math.abs(diff)) {
         diff = diff + durationBeforeFix
