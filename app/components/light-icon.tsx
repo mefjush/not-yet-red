@@ -49,13 +49,15 @@ const StyledImgAvatar = styled(Avatar)<AvatarProps>(
 
 export default function LightIcon({ currentTimestamp, light, lightConfig, height }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, height: string }) {
 
-  const segments: SegmentColor[] = ['tlRed', 'tlYellow', 'tlGreen']
+  
+
+  const segments: SegmentColor[] = lightConfig.preset.colors
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
   const heightValue = Number.parseInt(height.substring(0, height.length - 2))
   const heightUnit = height.substring(height.length - 2, height.length)
-  const segmentSize = 0.8 * heightValue / (segments.length)
+  const segmentSize = 0.8 * heightValue / 3 //(segments.length)
 
   const isImg = lightConfig.preset.symbolId != SymbolId.NONE
   const symbol = SYMBOLS[lightConfig.preset.symbolId]

@@ -1,13 +1,20 @@
-import { SegmentColor, State, STATE_ATTRIBUTES, StateAttributes } from "./state"
+import { SegmentColor, State, STATE_ATTRIBUTES, StateAttributes, TrafficLightColors } from "./state"
 import CrossingSettings from "./crossing-settings"
 import { negativeSafeMod } from "../utils"
-import { SyntheticEvent } from "react"
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun'
 import { SvgIconClassKey } from "@mui/material"
 import { SvgIconComponent } from "@mui/icons-material"
 import BlurOnIcon from '@mui/icons-material/BlurOn'
 import ManIcon from '@mui/icons-material/Man'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+
+const FOUR_STATE = [State.RED, State.RED_YELLOW, State.GREEN, State.YELLOW]
+const TWO_STATE = [State.RED, State.GREEN]
+
+const THREE_COLOR: SegmentColor[] = ['tlRed', 'tlYellow', 'tlGreen']
+const TWO_COLOR: SegmentColor[] = ['tlRed', 'tlGreen']
+
+const DEFAULT_NEW_PHASE_DURATION = 2_000
 
 export enum SymbolId {
   NONE = "NONE",
@@ -47,11 +54,15 @@ export class Preset {
   presetId: PresetId
   name: string
   symbolId: SymbolId
+  colors: SegmentColor[]
+  states: State[]
 
-  constructor(preset: PresetId, name: string, symbol: SymbolId) {
+  constructor(preset: PresetId, name: string, symbol: SymbolId, colors: SegmentColor[], states: State[]) {
     this.presetId = preset
     this.name = name
     this.symbolId = symbol
+    this.colors = colors
+    this.states = states
   }
 }
 
@@ -62,9 +73,9 @@ export const SYMBOLS: { [key in SymbolId] : Symbol } = {
 }
 
 export const PRESETS: { [key in PresetId] : Preset } = {
-  'FOUR_PHASE': new Preset(PresetId.FOUR_PHASE, "4-Phase", SymbolId.NONE),
-  'PEDESTRIAN': new Preset(PresetId.PEDESTRIAN, "Pedestrian", SymbolId.PEDESTRIAN),
-  'LEFT': new Preset(PresetId.LEFT, "Left", SymbolId.LEFT),
+  'FOUR_PHASE': new Preset(PresetId.FOUR_PHASE, "4-Phase", SymbolId.NONE, THREE_COLOR, FOUR_STATE),
+  'PEDESTRIAN': new Preset(PresetId.PEDESTRIAN, "Pedestrian", SymbolId.PEDESTRIAN, TWO_COLOR, TWO_STATE),
+  'LEFT': new Preset(PresetId.LEFT, "Left", SymbolId.LEFT, THREE_COLOR, FOUR_STATE),
 }
 
 export class Phase {
@@ -109,12 +120,14 @@ export default class LightConfig {
 
   withOffset(offset: number): LightSettings {
     // let positiveOffset = negativeSafeMod(offset, this.cycleLength() + 1000)
-    let roundedOffset = Math.round((offset / 1000)) * 1000
+    const roundedOffset = Math.round((offset / 1000)) * 1000
     return { offset: roundedOffset, phases: this.phases, presetId: this.preset.presetId }
   }
 
   withPreset(presetId: PresetId): LightSettings {
-    return { offset: this.offset, phases: this.phases, presetId: presetId }
+    const preset = PRESETS[presetId]
+    const newPhases = preset.states.map(state => this.phases.find(ph => ph.state == state) || new Phase(state, DEFAULT_NEW_PHASE_DURATION))
+    return { offset: this.offset, phases: newPhases, presetId: presetId }
   }
 
   toLightSettings(): LightSettings {
