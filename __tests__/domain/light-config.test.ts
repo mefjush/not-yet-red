@@ -106,4 +106,13 @@ describe('LightConfig', () => {
     expect(adjustedLightConfig.phases).toContainEqual({ state: State.YELLOW, duration: 2_000 })
     expect(adjustedLightConfig.phases).toContainEqual({ state: State.RED_YELLOW, duration: 2_000 })
   })
+
+  it('adjusts the offset so green start is kept at the same time frame after the duration change', () => {
+    let lightConfig = new LightConfig(crossingSettings, lightSettings)
+    let modified = lightConfig.withStateDuration(State.GREEN, 27_000)
+
+    let adjustedLightConfig = new LightConfig({ ...crossingSettings, cycleLength: 10_000 }, modified)
+
+    expect(adjustedLightConfig.offset).toBe(1_000)
+  })
 })

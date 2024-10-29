@@ -185,6 +185,13 @@ export default class LightConfig {
   }
     
   withStateDuration(state: State, newDuration: number): LightSettings {
+    const calculateStateOffset = (phases: Phase[]) => {
+      const stateIndex = this.phases.findIndex(p => p.state == state)
+      return phases
+        .filter((phase, idx) => idx < stateIndex)
+        .reduce((acc, phase) => acc + phase.duration, 0)
+    }
+
     let remainingPhases = this.phases.filter(p => p.state != state).toSorted(sortByPriority).reverse()
     let fixablePhases = remainingPhases.filter(this.isFixable)
     let unfixablePhases = remainingPhases.filter(p => !this.isFixable(p))
@@ -206,7 +213,11 @@ export default class LightConfig {
 
     fixedRemaining.push(new Phase(state, newDuration + diff))
 
-    return { offset: this.offset, phases: fixedRemaining.concat(unfixablePhases).toSorted(sortByOrder), presetId: this.preset.presetId }
+    const newPhases = fixedRemaining.concat(unfixablePhases).toSorted(sortByOrder)
+
+    const offsetDiff = calculateStateOffset(this.phases) - calculateStateOffset(newPhases)
+
+    return { offset: this.offset + offsetDiff, phases: newPhases, presetId: this.preset.presetId }
   }
 }
 
