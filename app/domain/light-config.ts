@@ -6,6 +6,7 @@ import BlurOnIcon from '@mui/icons-material/BlurOn'
 import ManIcon from '@mui/icons-material/Man'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { negativeSafeMod } from "../utils"
 
 const FOUR_STATE = [State.RED, State.RED_YELLOW, State.GREEN, State.YELLOW]
 const THREE_STATE = [State.RED, State.GREEN, State.YELLOW]
@@ -217,7 +218,7 @@ export default class LightConfig {
 
     const offsetDiff = calculateStateOffset(this.phases) - calculateStateOffset(newPhases)
 
-    return { offset: this.offset + offsetDiff, phases: newPhases, presetId: this.preset.presetId }
+    return { offset: negativeSafeMod(this.offset + offsetDiff, this.cycleLength()), phases: newPhases, presetId: this.preset.presetId }
   }
 }
 
