@@ -1,13 +1,12 @@
 "use client"
 
-import { OverridableStringUnion } from '@mui/types';
-import { Box, Slider, Typography, Input as MuiInput, Stack, ButtonGroup, Button, ButtonPropsColorOverrides, SliderPropsColorOverrides } from '@mui/material'
+import { OverridableStringUnion } from '@mui/types'
+import { Box, Slider, Typography, Input as MuiInput, Stack, ButtonPropsColorOverrides } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { ColorizeOutlined } from '@mui/icons-material';
 
-const MInput = styled(MuiInput)`
-  width: 42px
-`
+const MInput = styled(MuiInput)({
+  width: '42px'
+})
 
 interface ChangeEvent {
   target: {

@@ -1,8 +1,8 @@
 "use client"
 
 import TrafficLight from '../domain/traffic-light'
-import LightConfig, { LightSettings, PresetId, PRESETS, SymbolId, SYMBOLS } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SlotComponentProps, SliderComponentsPropsOverrides, Checkbox, Tabs, Tab, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
+import LightConfig, { LightSettings, PresetId, PRESETS } from '../domain/light-config'
+import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
