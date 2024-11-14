@@ -5,7 +5,7 @@ export default class Failure {
   }
 
   nextStateTimestamp(currentTimestamp: number) {
-    let currentState = this.currentState(currentTimestamp)
+    const currentState = this.currentState(currentTimestamp)
 
     let bucket = Math.floor(currentTimestamp / this.duration) + 1
     while (this.state(bucket) == currentState || this.nextTransition < currentTimestamp) {
@@ -20,9 +20,11 @@ export default class Failure {
   }
 
   private state(bucket: number) {
-    const rand = this.deterministicRand(bucket)
-    const state = (rand / 100) < this.probability
-    return state
+    return (this.deterministicRand(bucket) / 100) < this.probability
+  }
+
+  deterministicRand(number: number) {
+    return this.hash(number) % 100
   }
 
   private hash(number: number) {
@@ -30,10 +32,6 @@ export default class Failure {
     x = ((x >> 16) ^ x) * 0x45d9f3b
     x = (x >> 16) ^ x
     return x
-  }
-  
-  deterministicRand(number: number) {
-    return this.hash(number) % 100
   }
 
   currentState(currentTimestamp: number) {
