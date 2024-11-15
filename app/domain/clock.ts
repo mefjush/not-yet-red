@@ -1,7 +1,23 @@
-const TIME_SYNC_URL = "https://worldtimeapi.org/api/timezone/Utc"
+const WORLDTIMEAPI_URL = "https://worldtimeapi.org/api/timezone/Utc"
+const TIMEAPI_URL = "https://timeapi.io/api/time/current/zone?timeZone=Utc"
 
 interface ClockListener {
   nextStateTimestamp(d: number): number
+}
+
+interface TimeSyncStrategy {
+  url: string,
+  parse(json: any): string
+}
+
+const timeApiStrategy : TimeSyncStrategy = {
+  url: TIMEAPI_URL,
+  parse: (json: any) => `${json.dateTime}+00:00`
+}
+
+const worldTimeApiStrategy : TimeSyncStrategy = {
+  url: WORLDTIMEAPI_URL,
+  parse: (json: any) => json.datetime
 }
 
 let timeOffset: number | null = null
@@ -10,10 +26,15 @@ let timeSyncTry: number = 0
 function syncTime(tickCallback: (timestamp: number) => void) {
   timeSyncTry += 1
   console.log("Syncing time")
+
+  const strategy = timeApiStrategy
+
   let request = new XMLHttpRequest()
   let start = Date.now()
 
-  request.open('GET', TIME_SYNC_URL)
+  request.open('GET', strategy.url)
+  request.setRequestHeader("Accept", "application/json")
+
   request.onreadystatechange = function() {
     if (request.readyState != 4) {
       return
@@ -22,7 +43,7 @@ function syncTime(tickCallback: (timestamp: number) => void) {
     try {
       const browserNow = Date.now()
       const latency = browserNow - start
-      const timestring = JSON.parse(request.response).datetime
+      const timestring = strategy.parse(JSON.parse(request.response))
 
       if (timestring) {
         // Set the time to the **slightly old** date sent from the 

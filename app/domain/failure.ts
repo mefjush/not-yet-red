@@ -1,4 +1,4 @@
-const MAX_NEXT_TRANSITION_WAIT = 300_000
+const MAX_NEXT_TRANSITION_WAIT = 30_000
 
 export default class Failure {
   constructor(private duration: number, private probability: number, private nextTransition = 0) {
