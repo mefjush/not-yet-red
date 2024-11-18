@@ -18,7 +18,7 @@ describe('Clock', () => {
       }
     }
 
-    let clock = new Clock()
+    let clock = new Clock(0)
 
     clock.register([listener], tickCallback, 0)
   })
@@ -36,7 +36,7 @@ describe('Clock', () => {
       }
     }
 
-    let clock = new Clock()
+    let clock = new Clock(0)
 
     clock.register([lateListener, earlyListener], tickCallback, 0)
   })

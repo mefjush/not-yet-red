@@ -5,7 +5,7 @@ import { Box, Slider, Typography, Input as MuiInput, Stack, ButtonPropsColorOver
 import { styled } from '@mui/material/styles'
 
 const MInput = styled(MuiInput)({
-  width: '42px'
+  width: '65px'
 })
 
 interface ChangeEvent {

@@ -7,7 +7,7 @@ import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
 import { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
@@ -20,10 +20,13 @@ import Fullscreen from './fullscreen'
 import LightIcon from './light-icon'
 import React from 'react'
 import ShareDialog from './share-dialog'
+import syncTime from '../domain/time-sync'
 
 export default function CrossingComponent({time}: {time: number}) {
 
   const [crossingSettings, setCrossingSettings] = useStateParams(DEFAULT_CROSSING_SETTINGS, "crossing", CrossingSettingsSerDeser)
+
+  const [timeCorrection, setTimeCorrection] = useState(0)
 
   const [currentTimestamp, setCurrentTimestamp] = useState(() => time)
 
@@ -44,18 +47,24 @@ export default function CrossingComponent({time}: {time: number}) {
   const lightConfigs = lightSettings.map(lightSetting => new LightConfig(crossingSettings, lightSetting))
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
-  
+
   const wrapListener = {
     nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / crossingSettings.cycleLength) + 1) * crossingSettings.cycleLength
   }
 
+  const clock = new Clock(timeCorrection)
+  clock.register([...lights, failure, wrapListener], setCurrentTimestamp)
+
+  const initTimeSync = () => syncTime()
+    .then(correction => setTimeCorrection(correction))
+    .catch(e => setTimeCorrection(0))
+
   useEffect(() => {
-    const clock = new Clock()
-    clock.register([...lights, failure, wrapListener], setCurrentTimestamp)
+    initTimeSync()
     return () => {
       clock.unregister()
     }
-  }, [lightSettings, crossingSettings, currentTimestamp])
+  }, [])
 
   const updateLightSettings = (settings: LightSettings, index: number) => {
     const copy = [...lightSettings]
@@ -165,6 +174,16 @@ export default function CrossingComponent({time}: {time: number}) {
                 value={crossingSettings.failure.probability} 
                 onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } 
               />
+              <Input 
+                label="Time correction" 
+                id="time-correction" 
+                min={-1000} 
+                max={1000} 
+                step={10} 
+                value={timeCorrection} 
+                onChange={e => setTimeCorrection(e.target.value)} 
+              />
+              <Button onClick={initTimeSync}>Sync time</Button>
             </form>
           </CardContent>
         </Collapse>
