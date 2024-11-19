@@ -7,7 +7,7 @@ import TrafficIcon from '@mui/icons-material/Traffic'
 import CircleIcon from '@mui/icons-material/Circle'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import CrossingComponent from './components/crossing'
-import { createTheme, ThemeProvider, styled, PaletteColorOptions } from '@mui/material/styles';
+import { createTheme, ThemeProvider, styled, PaletteColorOptions } from '@mui/material/styles'
 
 import { Suspense } from 'react'
 import { orange, green, yellow, red, grey } from '@mui/material/colors';
@@ -103,7 +103,7 @@ function Content() {
           </Toolbar>
         </AppBar>
       </Box>
-      <CrossingComponent time={Date.now()}/>
+      <CrossingComponent />
       <Stack spacing={2} sx={{ p: 1, m: 1 }}>
         <Box
           display="flex"

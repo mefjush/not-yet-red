@@ -2,7 +2,7 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, PresetId, PRESETS } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem, NoSsr } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -14,6 +14,7 @@ import Tune from './tune'
 import { ExpandMore } from './expand-more'
 import PhaseControls from './phase-controls'
 import LightIcon from './light-icon'
+import React from 'react'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
@@ -58,15 +59,14 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         <Checkbox value={selected} checked={selected} onChange={e => onSelectionChange(e.target.checked)}/>
         <IconButton aria-label="fullscreen" onClick={onFullscreen}><FullscreenIcon /></IconButton>
         <IconButton aria-label="share" onClick={onShare}><ShareIcon /></IconButton>
-        {/* {deleteButton} */}
+        {deleteButton}
         <IconButton sx={{ visibility: 'hidden' }}><DeleteIcon /></IconButton>
-        {/* <Typography gutterBottom sx={{ color: 'text.secondary' }}>Light {index}</Typography> */}
         <ExpandMore
-            expand={expanded}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-            style={{marginLeft: 'auto'}}
+          expand={expanded}
+          onClick={handleExpandClick}
+          aria-expanded={expanded}
+          aria-label="show more"
+          style={{marginLeft: 'auto'}}
         >
           <ExpandMoreIcon />
         </ExpandMore>

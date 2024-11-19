@@ -22,13 +22,13 @@ import React from 'react'
 import ShareDialog from './share-dialog'
 import syncTime from '../domain/time-sync'
 
-export default function CrossingComponent({time}: {time: number}) {
+export default function CrossingComponent() {
 
   const [crossingSettings, setCrossingSettings] = useStateParams(DEFAULT_CROSSING_SETTINGS, "crossing", CrossingSettingsSerDeser)
 
   const [timeCorrection, setTimeCorrection] = useState(0)
 
-  const [currentTimestamp, setCurrentTimestamp] = useState(() => time)
+  const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
   const [expanded, setExpanded] = useState(false)
 
@@ -53,18 +53,23 @@ export default function CrossingComponent({time}: {time: number}) {
   }
 
   const clock = new Clock(timeCorrection)
-  clock.register([...lights, failure, wrapListener], setCurrentTimestamp)
 
   const initTimeSync = () => syncTime()
     .then(correction => setTimeCorrection(correction))
     .catch(e => setTimeCorrection(0))
 
+  // once
   useEffect(() => {
-    initTimeSync()
+    // initTimeSync()
+  }, [])
+
+  // after each render
+  useEffect(() => {
+    clock.register([...lights, failure, wrapListener], setCurrentTimestamp)
     return () => {
       clock.unregister()
     }
-  }, [])
+  })
 
   const updateLightSettings = (settings: LightSettings, index: number) => {
     const copy = [...lightSettings]
