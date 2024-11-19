@@ -27,9 +27,7 @@ export default class Clock {
     this.timeOffset = timeCorrection
   }
 
-  register(listeners: ClockListener[], tickCallback: (timestamp: number) => void, fixedTimeOffset: number|null = null) {
-    console.log(`Register of ${ listeners.length } listeners`)
-
+  register(listeners: ClockListener[], tickCallback: (timestamp: number) => void) {
     const currentTimestamp = Date.now() - (this.timeOffset || 0)
     const timestamps = listeners.map(listener => listener.nextStateTimestamp(currentTimestamp))
     const nextTimestamp = Math.min(...timestamps)

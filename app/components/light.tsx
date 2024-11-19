@@ -99,7 +99,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
                 mark: { style: { display: "none" } },
                 markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
               }}
-              marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]}
+              marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
             />
             <Collapse in={expanded} timeout="auto" unmountOnExit>
               <Stack direction="column" alignItems="stretch" spacing={2}>

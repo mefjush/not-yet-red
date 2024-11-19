@@ -97,7 +97,7 @@ export default function CrossingComponent({time}: {time: number}) {
     const selectedLightSettings = lightSettings.filter((ls, index) => shareMode.includes(index))
 
     const search = `?crossing=${CrossingSettingsSerDeser.serialize(crossingSettings)}&lights=${LightSettingsSerDeser.serialize(selectedLightSettings)}`
-  
+
     const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
     // const baseUrl = "http://192.168.0.106:3000" 
     return baseUrl + search
@@ -115,21 +115,21 @@ export default function CrossingComponent({time}: {time: number}) {
           />
           <IconButton 
             disabled={ selected.length == 0 } 
-            aria-label="fullscreen" 
+            aria-label='fullscreen'
             onClick={() => setFullscreenMode(selected)}
           >
             <FullscreenIcon />
           </IconButton>
           <IconButton 
             disabled={ selected.length == 0 } 
-            aria-label="share" 
+            aria-label='share'
             onClick={() => setShareMode(selected)}
           >
             <ShareIcon />
           </IconButton>
           <IconButton 
             disabled={ selected.length == 0 } 
-            aria-label="delete" 
+            aria-label='delete'
             onClick={() => onDelete(selected)}
           >
             <DeleteIcon />
@@ -152,7 +152,7 @@ export default function CrossingComponent({time}: {time: number}) {
               <Input 
                 label="Cycle length" 
                 id="cycle-length" 
-                min={10} 
+                min={10}
                 max={180}
                 value={crossingSettings.cycleLength / 1000} 
                 onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } 
@@ -161,25 +161,25 @@ export default function CrossingComponent({time}: {time: number}) {
                 label="Failure duration" 
                 id="failure-duration" 
                 min={10}
-                max={180} 
+                max={180}
                 value={crossingSettings.failure.duration / 1000} 
                 onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } 
               />
               <Input 
                 label="Failure probability" 
                 id="failure-probability" 
-                min={0} 
-                max={1} 
-                step={0.1} 
+                min={0}
+                max={1}
+                step={0.1}
                 value={crossingSettings.failure.probability} 
                 onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } 
               />
               <Input 
                 label="Time correction" 
                 id="time-correction" 
-                min={-1000} 
-                max={1000} 
-                step={10} 
+                min={-1000}
+                max={1000}
+                step={10}
                 value={timeCorrection} 
                 onChange={e => setTimeCorrection(e.target.value)} 
               />
@@ -191,17 +191,17 @@ export default function CrossingComponent({time}: {time: number}) {
 
       { lights.map((light, index) =>
         <LightComponent
-            key={index}
-            index={index}
-            currentTimestamp={currentTimestamp}
-            light={light}
-            lightConfig={lightConfigs[index]}
-            selected={selected.includes(index)}
-            onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
-            onDelete={lights.length > 1 ? () => onDelete([index]) : undefined}
-            onSelectionChange={(checked) => checked ? setSelected([...selected, index]) : setSelected(selected.filter(x => x != index))}
-            onFullscreen={() => setFullscreenMode([index])}
-            onShare={() => setShareMode([index])}
+          key={index}
+          index={index}
+          currentTimestamp={currentTimestamp}
+          light={light}
+          lightConfig={lightConfigs[index]}
+          selected={selected.includes(index)}
+          onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
+          onDelete={lights.length > 1 ? () => onDelete([index]) : undefined}
+          onSelectionChange={(checked) => checked ? setSelected([...selected, index]) : setSelected(selected.filter(x => x != index))}
+          onFullscreen={() => setFullscreenMode([index])}
+          onShare={() => setShareMode([index])}
         />
       )}
 
