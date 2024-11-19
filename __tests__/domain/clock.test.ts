@@ -20,7 +20,7 @@ describe('Clock', () => {
 
     let clock = new Clock(0)
 
-    clock.register([listener], tickCallback, 0)
+    clock.register([listener], tickCallback)
   })
 
   it('ticks on earliest timestamp', done => {
@@ -38,6 +38,6 @@ describe('Clock', () => {
 
     let clock = new Clock(0)
 
-    clock.register([lateListener, earlyListener], tickCallback, 0)
+    clock.register([lateListener, earlyListener], tickCallback)
   })
 })
