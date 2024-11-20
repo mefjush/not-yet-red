@@ -9,7 +9,7 @@ import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Tune from './tune'
 import { ExpandMore } from './expand-more'
 import PhaseControls from './phase-controls'
@@ -19,7 +19,8 @@ import React from 'react'
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
   const [expanded, setExpanded] = useState(true)
-  const [markTransition, setMarkerTransition] = useState(0)
+  const [transitionStartTime, setTransitionStartTime] = useState(-1)
+  const hasPageBeenRendered = useRef(false)
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -42,14 +43,19 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const markPosition = currentTimestamp % lightConfig.cycleLength()
 
-  const needsTransition = markTransition == markPosition
+  const needsTransition = hasPageBeenRendered && (transitionStartTime == markPosition)
 
   const transitionDuration = needsTransition ? lightConfig.cycleLength() - markPosition : 0
   const markPositionToSet = needsTransition ? lightConfig.cycleLength() : markPosition
 
   useEffect(() => {
-    setMarkerTransition(markPosition)
-  }, [markPosition])
+    if (hasPageBeenRendered.current) {
+      setTransitionStartTime(markPosition)
+    } else {
+      hasPageBeenRendered.current = true
+      setTransitionStartTime(-2)
+    }
+  }, [markPosition, hasPageBeenRendered, transitionStartTime])
 
   const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
 

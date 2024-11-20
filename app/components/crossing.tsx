@@ -60,7 +60,7 @@ export default function CrossingComponent() {
 
   // once
   useEffect(() => {
-    // initTimeSync()
+    initTimeSync()
   }, [])
 
   // after each render
