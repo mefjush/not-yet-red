@@ -6,21 +6,27 @@ export default class Clock {
 
   nextTimeout: ReturnType<typeof setTimeout> | null = null
   timeSync: ReturnType<typeof setTimeout> | null = null
-  timeOffset: number | null
+  timeCorrection: number | null
 
   constructor(timeCorrection: number) {
-    this.timeOffset = timeCorrection
+    this.timeCorrection = timeCorrection
   }
 
-  register(listeners: ClockListener[], tickCallback: (timestamp: number) => void) {
-    const currentTimestamp = Date.now() - (this.timeOffset || 0)
+  now() {
+    return Date.now() - (this.timeCorrection || 0)
+  }
+
+  register(listeners: ClockListener[]): Promise<number> {
+    const currentTimestamp = this.now()
     const timestamps = listeners.map(listener => listener.nextStateTimestamp(currentTimestamp))
     const nextTimestamp = Math.min(...timestamps)
     const timeToNextTick = Math.max(0, nextTimestamp - currentTimestamp)
 
-    this.nextTimeout = setTimeout(function() {
-      tickCallback(nextTimestamp)
-    }, timeToNextTick)
+    const that = this
+
+    return new Promise(function (resolve, reject) {
+      that.nextTimeout = setTimeout(() => resolve(nextTimestamp), timeToNextTick)
+    })
   }
 
   unregister() {

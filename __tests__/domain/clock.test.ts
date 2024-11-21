@@ -1,43 +1,25 @@
 import Clock from '../../app/domain/clock'
 
-let testListener = (fixedTimestamp: number) => ({
+const testListener = (fixedTimestamp: number) => ({
   nextStateTimestamp: (timestamp: number) => fixedTimestamp
 })
 
 describe('Clock', () => {
 
-  it('ticks on timestamp', done => {
-    let listener = testListener(10000)
-    
-    let tickCallback = (timestamp: number) => {
-      try {
-        expect(timestamp).toBe(10000)
-        done()
-      } catch (error) {
-        done(error)
-      }
-    }
+  it('ticks on timestamp', () => {
+    const listener = testListener(10000)
 
-    let clock = new Clock(0)
+    const clock = new Clock(0)
 
-    clock.register([listener], tickCallback)
+    return expect(clock.register([listener])).resolves.toBe(10000)
   })
 
-  it('ticks on earliest timestamp', done => {
-    let earlyListener = testListener(10000)
-    let lateListener = testListener(20000)
-    
-    let tickCallback = (timestamp: number) => {
-      try {
-        expect(timestamp).toBe(10000)
-        done()
-      } catch (error) {
-        done(error)
-      }
-    }
+  it('ticks on earliest timestamp', () => {
+    const earlyListener = testListener(10000)
+    const lateListener = testListener(20000)
 
-    let clock = new Clock(0)
+    const clock = new Clock(0)
 
-    clock.register([lateListener, earlyListener], tickCallback)
+    return expect(clock.register([lateListener, earlyListener])).resolves.toBe(10000)
   })
 })

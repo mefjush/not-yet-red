@@ -65,7 +65,7 @@ export default function CrossingComponent() {
 
   // after each render
   useEffect(() => {
-    clock.register([...lights, failure, wrapListener], setCurrentTimestamp)
+    clock.register([...lights, failure, wrapListener]).then(setCurrentTimestamp)
     return () => {
       clock.unregister()
     }
@@ -75,6 +75,7 @@ export default function CrossingComponent() {
     const copy = [...lightSettings]
     copy.splice(index, 1, settings)
     setLightSettings(copy)
+    setCurrentTimestamp(clock.now())
   }
 
   const onAdd = () => {
