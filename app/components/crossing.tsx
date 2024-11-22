@@ -10,7 +10,7 @@ import Input from './input'
 import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
-import { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
+import CrossingSettings, { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
 import { ExpandMore } from './expand-more'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
@@ -75,6 +75,11 @@ export default function CrossingComponent() {
     const copy = [...lightSettings]
     copy.splice(index, 1, settings)
     setLightSettings(copy)
+    setCurrentTimestamp(clock.now())
+  }
+
+  const updateCrossingSettings = (crossingSettings: CrossingSettings) => {
+    setCrossingSettings(crossingSettings)
     setCurrentTimestamp(clock.now())
   }
 
@@ -161,7 +166,7 @@ export default function CrossingComponent() {
                 min={10}
                 max={180}
                 value={crossingSettings.cycleLength / 1000} 
-                onChange={ e => setCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } 
+                onChange={ e => updateCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } 
               />
               <Input 
                 label="Failure duration" 
@@ -169,7 +174,7 @@ export default function CrossingComponent() {
                 min={10}
                 max={180}
                 value={crossingSettings.failure.duration / 1000} 
-                onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } 
+                onChange={ e => updateCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } 
               />
               <Input 
                 label="Failure probability" 
@@ -178,7 +183,7 @@ export default function CrossingComponent() {
                 max={1}
                 step={0.1}
                 value={crossingSettings.failure.probability} 
-                onChange={ e => setCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } 
+                onChange={ e => updateCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } 
               />
               <Input 
                 label="Time correction" 

@@ -8,8 +8,6 @@ const stateLookup = Object.values(State).map(state => [state, state.split('_').m
 const stateSerializationLookup = Object.fromEntries(stateLookup)
 const stateDeserializationLookup = Object.fromEntries(stateLookup.map(([k, v]) => [v, k]))
 
-console.log(stateDeserializationLookup)
-
 interface SerDeser<T> {
   serialize: (state: T) => string
   deserialize: (state: string) => T
@@ -23,7 +21,7 @@ export const BooleanSerDeser: SerDeser<boolean> = {
 export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
   serialize: (lightSettingsArray: LightSettings[]) => {
     return lightSettingsArray
-      .map(ls => ls.offset + "--" + ls.phases.map(p => stateSerializationLookup[p.state] + p.duration).join("-") + "--" + ls.presetId)
+      .map(ls => [ls.offset, ls.phases.map(p => stateSerializationLookup[p.state] + p.duration).join("-"), ls.presetId].join('--'))
       .join("---")
   },
   deserialize: (s: string) => {
@@ -44,10 +42,10 @@ export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
 
 export const CrossingSettingsSerDeser: SerDeser<CrossingSettings> = {
   serialize: (crossingSettings: CrossingSettings) => {
-    return crossingSettings.cycleLength + "-" + crossingSettings.failure.duration + "-" + crossingSettings.failure.probability
+    return [crossingSettings.cycleLength, crossingSettings.failure.duration, crossingSettings.failure.probability].join('-')
   },
   deserialize: (s: string) => {
-    let split = s.split("-")
+    const split = s.split("-")
     return {
       cycleLength: Number.parseInt(split[0]),
       failure: {
