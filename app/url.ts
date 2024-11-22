@@ -4,6 +4,12 @@ import { LightSettings, Phase, PresetId } from "./domain/light-config"
 import { State } from "./domain/state"
 import CrossingSettings from "./domain/crossing-settings"
 
+const stateLookup = Object.values(State).map(state => [state, state.split('_').map(x => x.charAt(0)).join('')])
+const stateSerializationLookup = Object.fromEntries(stateLookup)
+const stateDeserializationLookup = Object.fromEntries(stateLookup.map(([k, v]) => [v, k]))
+
+console.log(stateDeserializationLookup)
+
 interface SerDeser<T> {
   serialize: (state: T) => string
   deserialize: (state: string) => T
@@ -16,18 +22,18 @@ export const BooleanSerDeser: SerDeser<boolean> = {
 
 export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
   serialize: (lightSettingsArray: LightSettings[]) => {
-    return lightSettingsArray.map(ls => {
-      return ls.offset + "---" + ls.phases.map(p => p.state + "-" + p.duration).join("--") + "---" + ls.presetId
-    }).join("----")
+    return lightSettingsArray
+      .map(ls => ls.offset + "--" + ls.phases.map(p => stateSerializationLookup[p.state] + p.duration).join("-") + "--" + ls.presetId)
+      .join("---")
   },
   deserialize: (s: string) => {
-    return s.split("----").map(ls => {
-      let lsSplit = ls.split("---")
+    return s.split("---").map(ls => {
+      const lsSplit = ls.split("--")
       return {
         offset: Number.parseInt(lsSplit[0]), 
-        phases: lsSplit[1].split("--").map(ph => { 
-          let phSplit = ph.split("-")
-          let stateName = <keyof typeof State> phSplit[0] 
+        phases: lsSplit[1].split("-").map(ph => { 
+          const phSplit = ph.match(/[a-zA-Z_]+|[0-9]+/g) || []
+          const stateName = stateDeserializationLookup[phSplit[0] as string] as keyof typeof State 
           return new Phase(State[stateName], Number.parseInt(phSplit[1]))
         }),
         presetId: lsSplit[2] as PresetId
