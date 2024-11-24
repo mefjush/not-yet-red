@@ -65,8 +65,22 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const timeRange = lightConfig.getTimeRange(selectedPhase)
 
   const selectedPhaseRange = timeRange.toArray()
+  let dummySliderValue: number | null = null
+  if (selectedPhaseRange.length < 3) {
+    dummySliderValue = selectedPhaseRange[0]
+    selectedPhaseRange.push(dummySliderValue)
+  }
+
 
   const onPhaseSliderChange = (state: State, newRange: number[]) => {
+
+    if (dummySliderValue != null) {
+      const dummyIndex = newRange.indexOf(dummySliderValue)
+      if (dummyIndex > -1) { 
+        newRange.splice(dummyIndex, 1)
+      }
+    }
+
     const cycleLength = lightConfig.cycleLength()
     const temp = newRange.filter(x => x != 0 && x != cycleLength)
     
@@ -135,7 +149,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             />
 
             <Slider
-              disableSwap
+              // disableSwap
               value={selectedPhaseRange.map(x => x / 1000)}
               step={1}
               min={0} 
