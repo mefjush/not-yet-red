@@ -257,15 +257,13 @@ export default class LightConfig {
 
   withStateTimeRange(state: State, newTimeRange: TimeRange): LightSettings {
     const selectedPhaseIndex = this.phases.findIndex(phase => phase.state == state)
-    // const rangeStart = this.offset + this.phases.slice(0, selectedPhaseIndex).map(phase => phase.duration).reduce((sum, current) => sum + current, 0)
-    // const rangeEnd = rangeStart + this.phases[selectedPhaseIndex].duration
-    // const selectedPhaseRange = new TimeRange(rangeStart % this.cycleLength(), rangeEnd % this.cycleLength())
-    // const newOffset = selectedPhaseIndex == 0 ? this.offset + newTimeRange.start - selectedPhaseRange.start : this.offset
-
     const withNewDuration = this.withStateDuration(state, newTimeRange.duration())
-    const tempRangeStart = withNewDuration.offset + withNewDuration.phases.slice(0, selectedPhaseIndex).map(phase => phase.duration).reduce((sum, current) => sum + current, 0)
-
-    return { ...withNewDuration, offset: withNewDuration.offset + newTimeRange.start - tempRangeStart }
+    const phaseStart = withNewDuration.phases
+      .slice(0, selectedPhaseIndex)
+      .map(phase => phase.duration)
+      .reduce((sum, current) => sum + current, 0)
+    const tempRangeStart = withNewDuration.offset + phaseStart
+    return { ...withNewDuration, offset: negativeSafeMod(withNewDuration.offset + newTimeRange.start - tempRangeStart, this.cycleLength()) }
   }
 }
 
