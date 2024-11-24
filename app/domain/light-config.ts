@@ -70,6 +70,33 @@ export class Preset {
   }
 }
 
+export class TimeRange {
+  constructor(public start: number, public end: number, private cycleLength: number) {
+  }
+
+  inverted(): boolean {
+    return this.end < this.start
+  }
+
+  duration(): number {
+    if (!this.inverted()) {
+      return this.end - this.start
+    } else {
+      return this.cycleLength - this.start + this.end
+    }
+  }
+
+  toArray() {
+    const array = []
+    array.push(this.start)
+    array.push(this.end)
+    if (this.start == 0 || this.end == 0) {
+      array.push(this.cycleLength)
+    }
+    return array.toSorted()
+  }
+}
+
 export const SYMBOLS = Object.fromEntries([
   new Symbol(SymbolId.NONE, false, BlurOnIcon),
   new Symbol(SymbolId.PEDESTRIAN, false, ManIcon, DirectionsRunIcon),
@@ -123,7 +150,6 @@ export default class LightConfig {
   }
 
   withOffset(offset: number): LightSettings {
-    // let positiveOffset = negativeSafeMod(offset, this.cycleLength() + 1000)
     const roundedOffset = Math.round((offset / 1000)) * 1000
     return { offset: roundedOffset, phases: this.phases, presetId: this.preset.presetId }
   }
@@ -219,6 +245,27 @@ export default class LightConfig {
     const offsetDiff = calculateStateOffset(this.phases) - calculateStateOffset(newPhases)
 
     return { offset: negativeSafeMod(this.offset + offsetDiff, this.cycleLength()), phases: newPhases, presetId: this.preset.presetId }
+  }
+
+  getTimeRange(state: State): TimeRange {
+    const selectedPhaseIndex = this.phases.findIndex(phase => phase.state == state)
+    const start = this.offset + this.phases.slice(0, selectedPhaseIndex).map(phase => phase.duration).reduce((sum, current) => sum + current, 0)
+    const end = start + this.phases[selectedPhaseIndex].duration
+    const cycleLength = this.cycleLength()
+    return new TimeRange(start % cycleLength, end % cycleLength, cycleLength)
+  }
+
+  withStateTimeRange(state: State, newTimeRange: TimeRange): LightSettings {
+    const selectedPhaseIndex = this.phases.findIndex(phase => phase.state == state)
+    // const rangeStart = this.offset + this.phases.slice(0, selectedPhaseIndex).map(phase => phase.duration).reduce((sum, current) => sum + current, 0)
+    // const rangeEnd = rangeStart + this.phases[selectedPhaseIndex].duration
+    // const selectedPhaseRange = new TimeRange(rangeStart % this.cycleLength(), rangeEnd % this.cycleLength())
+    // const newOffset = selectedPhaseIndex == 0 ? this.offset + newTimeRange.start - selectedPhaseRange.start : this.offset
+
+    const withNewDuration = this.withStateDuration(state, newTimeRange.duration())
+    const tempRangeStart = withNewDuration.offset + withNewDuration.phases.slice(0, selectedPhaseIndex).map(phase => phase.duration).reduce((sum, current) => sum + current, 0)
+
+    return { ...withNewDuration, offset: withNewDuration.offset + newTimeRange.start - tempRangeStart }
   }
 }
 

@@ -1,8 +1,8 @@
 "use client"
 
 import TrafficLight from '../domain/traffic-light'
-import LightConfig, { LightSettings, PresetId, PRESETS } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem, NoSsr } from '@mui/material'
+import LightConfig, { LightSettings, PresetId, PRESETS, TimeRange } from '../domain/light-config'
+import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem, NoSsr, RadioGroup, FormControlLabel, Radio, duration } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -15,11 +15,13 @@ import { ExpandMore } from './expand-more'
 import PhaseControls from './phase-controls'
 import LightIcon from './light-icon'
 import React from 'react'
+import { State } from '../domain/state'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
   const [expanded, setExpanded] = useState(true)
   const [transitionStartTime, setTransitionStartTime] = useState(-1)
+  const [sliderMode, setSliderMode] = useState("offset")
   const hasPageBeenRendered = useRef(false)
 
   const handleExpandClick = () => {
@@ -58,6 +60,30 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   }, [markPosition, hasPageBeenRendered, transitionStartTime])
 
   const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
+
+  const selectedPhase: State = sliderMode == "offset" ? State.RED : State[sliderMode as keyof typeof State]
+  const timeRange = lightConfig.getTimeRange(selectedPhase)
+
+  const selectedPhaseRange = timeRange.toArray()
+
+  const onPhaseSliderChange = (state: State, newRange: number[]) => {
+    const cycleLength = lightConfig.cycleLength()
+    const temp = newRange.filter(x => x != 0 && x != cycleLength)
+    
+    if (temp.length < 2) {
+      temp.unshift(0)
+    }
+
+    const newVal = temp.find(x => x != timeRange.start && x != timeRange.end)
+
+    if (newVal === undefined) {
+      return
+    }
+
+    const newTimeRange = temp.includes(timeRange.start) ? new TimeRange(timeRange.start, newVal, cycleLength) : new TimeRange(newVal, timeRange.end, cycleLength)
+
+    onLightSettingsChange(lightConfig.withStateTimeRange(state, newTimeRange))
+  }
 
   return (
     <Card>
@@ -107,6 +133,42 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
               }}
               marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
             />
+
+            <Slider
+              disableSwap
+              value={selectedPhaseRange.map(x => x / 1000)}
+              step={1}
+              min={0} 
+              max={(lightConfig.cycleLength() / 1000)}
+              valueLabelDisplay="auto"
+              valueLabelFormat={(value) => `${value} s`}
+              onChange={(e, newValue) => onPhaseSliderChange(selectedPhase, (newValue as number[]).map(x => x * 1000))}
+              aria-label="Offset"
+              slots={{ 
+                track: Tune 
+              }}
+              slotProps={{ 
+                track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
+                rail: { style: { display: "none" } },
+                mark: { style: { display: "none" } },
+                markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
+              }}
+              marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
+            />
+
+            <RadioGroup
+              row
+              aria-labelledby="demo-radio-buttons-group-label"
+              defaultValue="offset"
+              name="radio-buttons-group"
+              value={sliderMode}
+              onChange={event => setSliderMode((event.target as HTMLInputElement).value)}
+            >
+              <FormControlLabel value="offset" control={<Radio />} label="Offset" />
+              { lightConfig.phases.map(phase => <FormControlLabel key={phase.state} value={phase.state} control={<Radio />} label={phase.stateAttributes().name} />) }
+
+            </RadioGroup>
+
             <Collapse in={expanded} timeout="auto" unmountOnExit>
               <Stack direction="column" alignItems="stretch" spacing={2}>
                 <Typography gutterBottom>
