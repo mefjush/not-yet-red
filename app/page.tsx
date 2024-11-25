@@ -60,6 +60,16 @@ declare module "@mui/material/Slider" {
   }
 }
 
+declare module "@mui/material/Radio" {
+  interface RadioPropsColorOverrides {
+    tlRed: true
+    tlYellow: true
+    tlOrange: true
+    tlGreen: true
+    tlGrey: true
+  }
+}
+
 const { palette } = createTheme();
 
 const theme = createTheme({

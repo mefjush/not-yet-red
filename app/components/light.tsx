@@ -15,7 +15,9 @@ import { ExpandMore } from './expand-more'
 import PhaseControls from './phase-controls'
 import LightIcon from './light-icon'
 import React from 'react'
-import { State } from '../domain/state'
+import { State, STATE_ATTRIBUTES } from '../domain/state'
+import KeyboardTabIcon from '@mui/icons-material/KeyboardTab'
+import LockIcon from '@mui/icons-material/Lock'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
@@ -61,7 +63,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
 
-  const selectedPhase: State = sliderMode == "offset" ? State.RED : State[sliderMode as keyof typeof State]
+  const selectedPhase: State = sliderMode == "offset" || sliderMode == "lock" ? State.RED : State[sliderMode as keyof typeof State]
   const timeRange = lightConfig.getTimeRange(selectedPhase)
 
   const selectedPhaseRange = timeRange.toArray()
@@ -99,6 +101,92 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     onLightSettingsChange(lightConfig.withStateTimeRange(state, newTimeRange))
   }
 
+  const lockedSlider = (
+    <Slider
+      disabled
+      value={lightConfig.offset / 1000}
+      step={1}
+      min={0} 
+      max={(lightConfig.cycleLength() / 1000)}
+      valueLabelDisplay="auto"
+      valueLabelFormat={(value) => `${value} s`}
+      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
+      aria-label="Offset"
+      slots={{ 
+        track: Tune 
+      }}
+      slotProps={{ 
+        track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
+        rail: { style: { display: "none" } },
+        mark: { style: { display: "none" } },
+        markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
+      }}
+      marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
+    />
+  )
+
+  const offsetSlider = (
+    <Slider
+      value={lightConfig.offset / 1000}
+      step={1}
+      min={0} 
+      max={(lightConfig.cycleLength() / 1000)}
+      valueLabelDisplay="auto"
+      valueLabelFormat={(value) => `${value} s`}
+      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
+      aria-label="Offset"
+      slots={{ 
+        track: Tune 
+      }}
+      slotProps={{ 
+        track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
+        rail: { style: { display: "none" } },
+        mark: { style: { display: "none" } },
+        markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
+      }}
+      marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
+    />
+  )
+
+  const rangeSlider = (
+    <Slider
+      value={selectedPhaseRange.map(x => x / 1000)}
+      step={1}
+      min={0} 
+      max={(lightConfig.cycleLength() / 1000)}
+      valueLabelDisplay="auto"
+      valueLabelFormat={(value) => `${value} s`}
+      onChange={(e, newValue) => onPhaseSliderChange(selectedPhase, (newValue as number[]).map(x => x * 1000))}
+      aria-label="Offset"
+      slots={{ 
+        track: Tune 
+      }}
+      slotProps={{ 
+        track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
+        rail: { style: { display: "none" } },
+        mark: { style: { display: "none" } },
+        markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
+      }}
+      marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
+      sx={{
+        color: `${STATE_ATTRIBUTES[selectedPhase].color}.main`,
+        '& .MuiSlider-thumb': {
+          borderRadius: '1px',
+        },
+      }}
+    />
+  )
+
+  const getSlider = () => {
+    switch(sliderMode) {
+      case 'offset': return offsetSlider
+      case 'lock': return lockedSlider
+      default: return rangeSlider
+    }
+  }
+
+  const theSlider = getSlider()
+  
   return (
     <Card>
       <CardActions>
@@ -124,52 +212,9 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             {lightIcon}
           </Grid>
           <Grid size={{ xs: expanded ? 12 : 9, md: 10, lg: 11 }}>
-            <Typography gutterBottom>
-              Offset
-            </Typography>
-            <Slider
-              value={lightConfig.offset / 1000}
-              step={1}
-              min={0} 
-              max={(lightConfig.cycleLength() / 1000)}
-              valueLabelDisplay="auto"
-              valueLabelFormat={(value) => `${value} s`}
-              onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
-              aria-label="Offset"
-              slots={{ 
-                track: Tune 
-              }}
-              slotProps={{ 
-                track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
-                rail: { style: { display: "none" } },
-                mark: { style: { display: "none" } },
-                markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
-              }}
-              marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
-            />
-
-            <Slider
-              // disableSwap
-              value={selectedPhaseRange.map(x => x / 1000)}
-              step={1}
-              min={0} 
-              max={(lightConfig.cycleLength() / 1000)}
-              valueLabelDisplay="auto"
-              valueLabelFormat={(value) => `${value} s`}
-              onChange={(e, newValue) => onPhaseSliderChange(selectedPhase, (newValue as number[]).map(x => x * 1000))}
-              aria-label="Offset"
-              slots={{ 
-                track: Tune 
-              }}
-              slotProps={{ 
-                track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
-                rail: { style: { display: "none" } },
-                mark: { style: { display: "none" } },
-                markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
-              }}
-              marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
-            />
-
+            
+            {theSlider}
+            
             <RadioGroup
               row
               aria-labelledby="demo-radio-buttons-group-label"
@@ -178,9 +223,16 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
               value={sliderMode}
               onChange={event => setSliderMode((event.target as HTMLInputElement).value)}
             >
-              <FormControlLabel value="offset" control={<Radio />} label="Offset" />
-              { lightConfig.phases.map(phase => <FormControlLabel key={phase.state} value={phase.state} control={<Radio />} label={phase.stateAttributes().name} />) }
-
+              <FormControlLabel value="offset" control={<Radio icon={<KeyboardTabIcon color='disabled'/>} checkedIcon={<KeyboardTabIcon color='primary'/>}/>} label='' />
+              { lightConfig.phases.map(phase => 
+                <FormControlLabel 
+                  key={phase.state} 
+                  value={phase.state} 
+                  control={<Radio color={`${phase.stateAttributes().color}`} sx={{ color: `${phase.stateAttributes().color}.main` }}/>} 
+                  label=''
+                />) 
+              }
+              <FormControlLabel value="lock" control={<Radio icon={<LockIcon color='disabled'/>} checkedIcon={<LockIcon color='primary'/>}/>} label='' />
             </RadioGroup>
 
             <Collapse in={expanded} timeout="auto" unmountOnExit>
