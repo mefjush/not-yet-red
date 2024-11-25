@@ -2,7 +2,7 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, PresetId, PRESETS, TimeRange } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem, NoSsr, RadioGroup, FormControlLabel, Radio, duration } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem, NoSsr, RadioGroup, FormControlLabel, Radio, duration, Box, Button, CardActionArea } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -18,17 +18,22 @@ import React from 'react'
 import { State, STATE_ATTRIBUTES } from '../domain/state'
 import KeyboardTabIcon from '@mui/icons-material/KeyboardTab'
 import LockIcon from '@mui/icons-material/Lock'
+import LockOpenIcon from '@mui/icons-material/LockOpen'
+import EditIcon from '@mui/icons-material/Edit'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
-  const [expanded, setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(false)
   const [transitionStartTime, setTransitionStartTime] = useState(-1)
   const [sliderMode, setSliderMode] = useState("offset")
+  const [quickEditActive, setQuickEditActive] = useState(true)
   const hasPageBeenRendered = useRef(false)
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
   }
+
+  const effectivelyExpanded = expanded // quickEditActive && expanded
 
   const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()}><DeleteIcon /></IconButton>
 
@@ -61,7 +66,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
   }, [markPosition, hasPageBeenRendered, transitionStartTime])
 
-  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
+  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ effectivelyExpanded ? '150px' : '60px' } />
 
   const selectedPhase: State = sliderMode == "offset" || sliderMode == "lock" ? State.RED : State[sliderMode as keyof typeof State]
   const timeRange = lightConfig.getTimeRange(selectedPhase)
@@ -72,7 +77,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     dummySliderValue = selectedPhaseRange[0]
     selectedPhaseRange.push(dummySliderValue)
   }
-
 
   const onPhaseSliderChange = (state: State, newRange: number[]) => {
 
@@ -122,6 +126,12 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
       }}
       marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
+      sx={{
+        color: `${STATE_ATTRIBUTES[selectedPhase].color}.main`,
+        '& .MuiSlider-thumb': {
+          display: 'none',
+        },
+      }}
     />
   )
 
@@ -178,6 +188,9 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   )
 
   const getSlider = () => {
+    if (!quickEditActive) {
+      return lockedSlider
+    }
     switch(sliderMode) {
       case 'offset': return offsetSlider
       case 'lock': return lockedSlider
@@ -187,6 +200,38 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const theSlider = getSlider()
   
+  const quickEditControls = (
+    <>
+      <RadioGroup
+        row
+        aria-labelledby="demo-radio-buttons-group-label"
+        defaultValue="offset"
+        name="radio-buttons-group"
+        value={sliderMode}
+        onChange={event => setSliderMode((event.target as HTMLInputElement).value)}
+      >
+        <FormControlLabel value="offset" control={<Radio size='small' icon={<KeyboardTabIcon color='disabled'/>} checkedIcon={<KeyboardTabIcon color='primary'/>}/>} label='' />
+        { lightConfig.phases.map(phase => 
+          <FormControlLabel 
+            key={phase.state} 
+            value={phase.state} 
+            control={<Radio size='small' color={`${phase.stateAttributes().color}`} sx={{ color: `${phase.stateAttributes().color}.main` }}/>} 
+            label=''
+          />) 
+        }
+      </RadioGroup>
+      {/* <ExpandMore
+        expand={effectivelyExpanded}
+        onClick={handleExpandClick}
+        aria-expanded={effectivelyExpanded}
+        aria-label="show more"
+        style={{marginLeft: 'auto'}}
+      >
+        <ExpandMoreIcon />
+      </ExpandMore> */}
+    </>
+  )
+
   return (
     <Card>
       <CardActions>
@@ -195,67 +240,53 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         <IconButton aria-label="share" onClick={onShare}><ShareIcon /></IconButton>
         {deleteButton}
         <IconButton sx={{ visibility: 'hidden' }}><DeleteIcon /></IconButton>
-        <ExpandMore
-          expand={expanded}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
-          style={{marginLeft: 'auto'}}
-        >
-          <ExpandMoreIcon />
-        </ExpandMore>
       </CardActions>
 
       <CardContent>
-        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
-          <Grid size={{ xs: expanded ? 12 : 12, md: 2, lg: 1 }} display="flex" justifyContent="center" alignItems="center">
-            {lightIcon}
-          </Grid>
-          <Grid size={{ xs: expanded ? 12 : 12, md: 10, lg: 11 }}>
-            
-            {theSlider}
-            
-            <RadioGroup
-              row
-              aria-labelledby="demo-radio-buttons-group-label"
-              defaultValue="offset"
-              name="radio-buttons-group"
-              value={sliderMode}
-              onChange={event => setSliderMode((event.target as HTMLInputElement).value)}
-            >
-              <FormControlLabel value="offset" control={<Radio icon={<KeyboardTabIcon color='disabled'/>} checkedIcon={<KeyboardTabIcon color='primary'/>}/>} label='' />
-              { lightConfig.phases.map(phase => 
-                <FormControlLabel 
-                  key={phase.state} 
-                  value={phase.state} 
-                  control={<Radio color={`${phase.stateAttributes().color}`} sx={{ color: `${phase.stateAttributes().color}.main` }}/>} 
-                  label=''
-                />) 
-              }
-              <FormControlLabel value="lock" control={<Radio icon={<LockIcon color='disabled'/>} checkedIcon={<LockIcon color='primary'/>}/>} label='' />
-            </RadioGroup>
-
-            <Collapse in={expanded} timeout="auto" unmountOnExit>
-              <Stack direction="column" alignItems="stretch" spacing={2}>
+        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }}>
+          <CardActionArea onClick={() => setExpanded(!expanded)}>
+            <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="center">
+              {lightIcon}
+            </Grid>
+          </CardActionArea>
+          <Grid size={{ xs: 12 }}>
+            <Stack direction="column" alignItems="stretch">
+              
+              <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
+                <Box sx={{ my: 2 }}>
+                  <Typography gutterBottom>
+                    Preset
+                  </Typography>
+                  <Select fullWidth value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
+                    { 
+                      Object.values(PRESETS).map(preset => 
+                        <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
+                      )
+                    }
+                  </Select>
+                </Box>
+                <Box sx={{ my: 2 }}>
+                  <Typography gutterBottom>
+                    Phases
+                  </Typography>
+                  {durationInputs}
+                </Box>
+              </Collapse>
+              <Box sx={{ mt: 2 }}>
                 <Typography gutterBottom>
-                  Preset
+                  Timeline
                 </Typography>
-                <Select value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
-                  { 
-                    Object.values(PRESETS).map(preset => 
-                      <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
-                    )
-                  }
-                </Select>
-                <Typography gutterBottom>
-                  Phases
-                </Typography>
-                {durationInputs}
-              </Stack>
-            </Collapse>
+                {theSlider}
+              </Box>
+            </Stack>
           </Grid>
         </Grid>
       </CardContent>
+
+      <CardActions>
+        <IconButton aria-label="Quick edit" onClick={() => setQuickEditActive(!quickEditActive)}>{ expanded || quickEditActive ? <LockOpenIcon /> : <LockIcon />}</IconButton>
+        { expanded || quickEditActive ? quickEditControls : null }
+      </CardActions>
     </Card>
   )
 }
