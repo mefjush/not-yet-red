@@ -208,10 +208,10 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
       <CardContent>
         <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={4}>
-          <Grid size={{ xs: expanded ? 12 : 3, md: 2, lg: 1 }} display="flex" justifyContent="center" alignItems="center">
+          <Grid size={{ xs: expanded ? 12 : 12, md: 2, lg: 1 }} display="flex" justifyContent="center" alignItems="center">
             {lightIcon}
           </Grid>
-          <Grid size={{ xs: expanded ? 12 : 9, md: 10, lg: 11 }}>
+          <Grid size={{ xs: expanded ? 12 : 12, md: 10, lg: 11 }}>
             
             {theSlider}
             
