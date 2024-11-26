@@ -82,8 +82,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const onPhaseSliderChange = (state: State, newRange: number[]) => {
 
-    console.log(newRange)
-
     if (dummySliderValue != null) {
       const dummyIndex = newRange.indexOf(dummySliderValue)
       if (dummyIndex > -1) { 
@@ -99,8 +97,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
 
     const newVal = temp.find(x => x != timeRange.start && x != timeRange.end)
-
-    console.log(newVal)
 
     if (newVal === undefined) {
       return

@@ -257,30 +257,19 @@ export default class LightConfig {
 
   withStateTimeRange(state: State, newTimeRange: TimeRange): LightSettings {
     const currentTimeRange = this.getTimeRange(state)
-    
-    const prioritizeStartOffset = currentTimeRange.start != newTimeRange.start
 
-    console.log(newTimeRange)
     const selectedPhaseIndex = this.phases.findIndex(phase => phase.state == state)
     const withNewDuration = this.withStateDuration(state, newTimeRange.duration())
 
-    if (prioritizeStartOffset) {
-      const phaseStart = withNewDuration.phases
-        .slice(0, selectedPhaseIndex)
-        .map(phase => phase.duration)
-        .reduce((sum, current) => sum + current, 0)
-      const finalOffset = negativeSafeMod(newTimeRange.start - phaseStart, this.cycleLength())
+    const phaseStart = withNewDuration.phases
+      .slice(0, selectedPhaseIndex)
+      .map(phase => phase.duration)
+      .reduce((sum, current) => sum + current, 0)
 
-      return { ...withNewDuration, offset: finalOffset }
-    } else {
-      const phaseEnd = withNewDuration.phases
-        .slice(0, selectedPhaseIndex)
-        .map(phase => phase.duration)
-        .reduce((sum, current) => sum + current, withNewDuration.phases[selectedPhaseIndex].duration)
-      const finalOffset = negativeSafeMod(newTimeRange.end - phaseEnd, this.cycleLength())
+    const adjustToRangeStart = currentTimeRange.start != newTimeRange.start
 
-      return { ...withNewDuration, offset: finalOffset }
-    }
+    const finalOffset = adjustToRangeStart ? newTimeRange.start - phaseStart : newTimeRange.end - (phaseStart + withNewDuration.phases[selectedPhaseIndex].duration)
+    return { ...withNewDuration, offset: negativeSafeMod(finalOffset, this.cycleLength()) }
   }
 }
 
