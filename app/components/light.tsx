@@ -12,7 +12,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useEffect, useRef, useState } from 'react'
 import Tune from './tune'
 import { ExpandMore } from './expand-more'
-import PhaseControls from './phase-controls'
+import PhaseControls, { PhaseControl } from './phase-controls'
 import LightIcon from './light-icon'
 import React from 'react'
 import { State, STATE_ATTRIBUTES } from '../domain/state'
@@ -20,6 +20,8 @@ import KeyboardTabIcon from '@mui/icons-material/KeyboardTab'
 import LockIcon from '@mui/icons-material/Lock'
 import LockOpenIcon from '@mui/icons-material/LockOpen'
 import EditIcon from '@mui/icons-material/Edit'
+import AddCircleIcon from '@mui/icons-material/AddCircle'
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
@@ -80,6 +82,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const onPhaseSliderChange = (state: State, newRange: number[]) => {
 
+    console.log(newRange)
+
     if (dummySliderValue != null) {
       const dummyIndex = newRange.indexOf(dummySliderValue)
       if (dummyIndex > -1) { 
@@ -95,6 +99,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
 
     const newVal = temp.find(x => x != timeRange.start && x != timeRange.end)
+
+    console.log(newVal)
 
     if (newVal === undefined) {
       return
@@ -180,9 +186,14 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
       sx={{
         color: `${STATE_ATTRIBUTES[selectedPhase].color}.main`,
+        pointerEvents: 'none !important',
         '& .MuiSlider-thumb': {
           borderRadius: '1px',
+          pointerEvents: 'all !important'
         },
+        '& .MuiSlider-track': {
+          pointerEvents: 'all !important'
+        }
       }}
     />
   )
@@ -199,6 +210,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   }
 
   const theSlider = getSlider()
+
+  const phase = lightConfig.phases.find(ph => ph.state == selectedPhase) || lightConfig.phases[0]
   
   const quickEditControls = (
     <>
@@ -220,6 +233,16 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           />) 
         }
       </RadioGroup>
+      <PhaseControl
+        style={{marginLeft: 'auto'}}
+        label={`${phase.stateAttributes().name} duration`} 
+        id={`light-${index}-${phase.stateAttributes().name}-duration`} 
+        min={0} 
+        max={lightConfig.cycleLength() / 1000} 
+        value={phase.duration / 1000} 
+        onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} 
+        color={phase.stateAttributes().color}
+      />
       {/* <ExpandMore
         expand={effectivelyExpanded}
         onClick={handleExpandClick}
@@ -232,6 +255,14 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     </>
   )
 
+
+  const phasesPositions = []
+  let currPosition = lightConfig.offset
+  for (let phase of lightConfig.phases) {
+    phasesPositions.push({ phase: phase, position: currPosition})
+    currPosition += phase.duration
+  }
+
   return (
     <Card>
       <CardActions>
@@ -243,7 +274,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       </CardActions>
 
       <CardContent>
-        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }}>
+        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={0}>
           <CardActionArea onClick={() => setExpanded(!expanded)}>
             <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="center">
               {lightIcon}
@@ -252,7 +283,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           <Grid size={{ xs: 12 }}>
             <Stack direction="column" alignItems="stretch">
               
-              <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
+              {/* <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
                 <Box sx={{ my: 2 }}>
                   <Typography gutterBottom>
                     Preset
@@ -271,12 +302,23 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
                   </Typography>
                   {durationInputs}
                 </Box>
-              </Collapse>
+              </Collapse> */}
               <Box sx={{ mt: 2 }}>
                 <Typography gutterBottom>
                   Timeline
                 </Typography>
                 {theSlider}
+
+                {/* <Box sx={{position: 'relative'}}>
+                { phasesPositions.map(positionConfig => 
+                  <Box sx={{ display: 'inline', position: 'absolute', top: '-74px', left: `${100 * positionConfig.position / lightConfig.cycleLength()}%` }}>
+                    <Stack direction='column'>
+                    <IconButton aria-label="plus"><AddCircleIcon sx={{ color: `${positionConfig.phase.stateAttributes().color}.main` }}/></IconButton>
+                    <IconButton aria-label="minus"><RemoveCircleIcon sx={{ color: `${positionConfig.phase.stateAttributes().color}.main` }}/></IconButton>
+                    </Stack>
+                  </Box>
+                )}
+                </Box> */}
               </Box>
             </Stack>
           </Grid>
@@ -287,6 +329,31 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         <IconButton aria-label="Quick edit" onClick={() => setQuickEditActive(!quickEditActive)}>{ expanded || quickEditActive ? <LockOpenIcon /> : <LockIcon />}</IconButton>
         { expanded || quickEditActive ? quickEditControls : null }
       </CardActions>
+
+      <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
+      <CardContent>
+      <Stack direction="column" alignItems="stretch">
+        <Box sx={{ my: 2 }}>
+          <Typography gutterBottom>
+            Preset
+          </Typography>
+          <Select fullWidth value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
+            { 
+              Object.values(PRESETS).map(preset => 
+                <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
+              )
+            }
+          </Select>
+        </Box>
+        <Box sx={{ my: 2 }}>
+          <Typography gutterBottom>
+            Phases
+          </Typography>
+          {durationInputs}
+        </Box>
+        </Stack>
+      </CardContent>
+      </Collapse>
     </Card>
   )
 }

@@ -1,5 +1,5 @@
 import { State } from '../../app/domain/state'
-import LightConfig, { TEST_LIGHT_SETTINGS, TimeRange } from '../../app/domain/light-config'
+import LightConfig, { MAXED_OUT_TEST_LIGHT_SETTINGS, TEST_LIGHT_SETTINGS, TimeRange } from '../../app/domain/light-config'
 
 const crossingSettings = {
   cycleLength: 60_000,
@@ -120,5 +120,21 @@ describe('LightConfig', () => {
 
     expect(modified.offset).toBe(12_000)
     expect(modified.phases).toContainEqual({ state: State.GREEN, duration: 28_000 })
+  })
+
+  it('dragging maxed out red right thumb results in offset change', () => {
+    const lightConfig = new LightConfig(crossingSettings, MAXED_OUT_TEST_LIGHT_SETTINGS)
+    const modified = lightConfig.withStateTimeRange(State.RED, new TimeRange(9_000, 6_000, lightConfig.cycleLength()))
+
+    expect(modified.offset).toBe(9_000)
+    expect(modified.phases).toContainEqual({ state: State.RED, duration: 56_000 })
+  })
+
+  it('dragging maxed out red left thumb results in offset change', () => {
+    const lightConfig = new LightConfig(crossingSettings, MAXED_OUT_TEST_LIGHT_SETTINGS)
+    const modified = lightConfig.withStateTimeRange(State.RED, new TimeRange(10_000, 7_000, lightConfig.cycleLength()))
+
+    expect(modified.offset).toBe(11_000)
+    expect(modified.phases).toContainEqual({ state: State.RED, duration: 56_000 })
   })
 })

@@ -87,7 +87,7 @@ function PhaseSlider({id, label, min, max, step, value, onChange, color}: {id: s
   )
 }
 
-export default function PhaseControls({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors}) {
+export function PhaseControl({id, label, min, max, step, value, onChange, color, style}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors, style?: React.CSSProperties}) {
   
   const [open, setOpen] = useState(false)
   const [longPressInterval, setLongPressInterval] = useState<NodeJS.Timeout|null>(null)
@@ -115,17 +115,12 @@ export default function PhaseControls({id, label, min, max, step, value, onChang
   const bindDec = useLongPressDiff(-1)
 
   return (
-    <Grid container spacing={2} sx={{ my: 1 }}>
-      <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-        <ButtonGroup variant="outlined" aria-label="Basic button group" fullWidth>
-          <Button {...bindDec()} color={color} variant='contained' onClick={e => onChange(fix(value - 1, min, max, step))}>-</Button>
-          <Button color={color} variant='outlined' onClick={e => setOpen(true)}>{value}</Button>
-          <Button {...bindInc()} color={color} variant='contained' onClick={e => onChange(fix(value + 1, min, max, step))}>+</Button>
-        </ButtonGroup>
-      </Grid>
-      <Grid size={{ xs: 12, md: 6, lg: 8 }} display={{ xs: 'none', md: 'block' }}>
-        <PhaseSlider id={id} label={label} min={min} max={max} step={step} value={value} onChange={onChange} color={color}/>
-      </Grid>
+    <>
+      <ButtonGroup variant="outlined" size='small' aria-label="Basic button group" style={style}>
+        <Button {...bindDec()} color={color} variant='contained' onClick={e => onChange(fix(value - 1, min, max, step))}>-</Button>
+        <Button color={color} variant='outlined' onClick={e => setOpen(true)}>{value}</Button>
+        <Button {...bindInc()} color={color} variant='contained' onClick={e => onChange(fix(value + 1, min, max, step))}>+</Button>
+      </ButtonGroup>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -139,6 +134,26 @@ export default function PhaseControls({id, label, min, max, step, value, onChang
           </Stack>
         </DialogContent>
       </Dialog>
+    </>
+  )
+}
+
+export default function PhaseControls({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors}) {
+  
+  return (
+    <Grid container spacing={2} sx={{ my: 1 }}>
+      <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+        <PhaseControl label={label} id={id} min={min} max={max} step={step} value={value} onChange={onChange} color={color}/>
+        {/* <ButtonGroup variant="outlined" aria-label="Basic button group" fullWidth>
+
+          <Button {...bindDec()} color={color} variant='contained' onClick={e => onChange(fix(value - 1, min, max, step))}>-</Button>
+          <Button color={color} variant='outlined' onClick={e => setOpen(true)}>{value}</Button>
+          <Button {...bindInc()} color={color} variant='contained' onClick={e => onChange(fix(value + 1, min, max, step))}>+</Button>
+        </ButtonGroup> */}
+      </Grid>
+      <Grid size={{ xs: 12, md: 6, lg: 8 }} display={{ xs: 'none', md: 'block' }}>
+        <PhaseSlider id={id} label={label} min={min} max={max} step={step} value={value} onChange={onChange} color={color}/>
+      </Grid>
     </Grid>
   )
 }

@@ -256,14 +256,31 @@ export default class LightConfig {
   }
 
   withStateTimeRange(state: State, newTimeRange: TimeRange): LightSettings {
+    const currentTimeRange = this.getTimeRange(state)
+    
+    const prioritizeStartOffset = currentTimeRange.start != newTimeRange.start
+
+    console.log(newTimeRange)
     const selectedPhaseIndex = this.phases.findIndex(phase => phase.state == state)
     const withNewDuration = this.withStateDuration(state, newTimeRange.duration())
-    const phaseStart = withNewDuration.phases
-      .slice(0, selectedPhaseIndex)
-      .map(phase => phase.duration)
-      .reduce((sum, current) => sum + current, 0)
-    const tempRangeStart = withNewDuration.offset + phaseStart
-    return { ...withNewDuration, offset: negativeSafeMod(withNewDuration.offset + newTimeRange.start - tempRangeStart, this.cycleLength()) }
+
+    if (prioritizeStartOffset) {
+      const phaseStart = withNewDuration.phases
+        .slice(0, selectedPhaseIndex)
+        .map(phase => phase.duration)
+        .reduce((sum, current) => sum + current, 0)
+      const finalOffset = negativeSafeMod(newTimeRange.start - phaseStart, this.cycleLength())
+
+      return { ...withNewDuration, offset: finalOffset }
+    } else {
+      const phaseEnd = withNewDuration.phases
+        .slice(0, selectedPhaseIndex)
+        .map(phase => phase.duration)
+        .reduce((sum, current) => sum + current, withNewDuration.phases[selectedPhaseIndex].duration)
+      const finalOffset = negativeSafeMod(newTimeRange.end - phaseEnd, this.cycleLength())
+
+      return { ...withNewDuration, offset: finalOffset }
+    }
   }
 }
 
@@ -284,6 +301,17 @@ export const TEST_LIGHT_SETTINGS: LightSettings = {
     new Phase(State.RED, 30_000),
     new Phase(State.RED_YELLOW, 2_000),
     new Phase(State.GREEN, 26_000),
+    new Phase(State.YELLOW, 2_000)
+  ],
+}
+
+export const MAXED_OUT_TEST_LIGHT_SETTINGS: LightSettings = {
+  ...DEFAULT_LIGHT_SETTINGS,
+  offset: 10_000,
+  phases: [
+    new Phase(State.RED, 56_000),
+    new Phase(State.RED_YELLOW, 2_000),
+    new Phase(State.GREEN, 0),
     new Phase(State.YELLOW, 2_000)
   ],
 }
