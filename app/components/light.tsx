@@ -33,8 +33,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const [quickEditActive, setQuickEditActive] = useState(true)
   const hasPageBeenRendered = useRef(false)
 
-  const sliderValues = useRef([0, 0])
-
   const handleExpandClick = () => {
     setExpanded(!expanded);
   }
@@ -79,18 +77,11 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const selectedPhaseRange = timeRange.toArray()
   
-  let dummySliderValue: number | null = negativeSafeMod(timeRange.start + Math.floor(timeRange.duration() / 2000) * 1000, lightConfig.cycleLength())
+  let offsetSliderValue: number = negativeSafeMod(timeRange.start + Math.floor(timeRange.duration() / 2000) * 1000, lightConfig.cycleLength())
 
   const onPhaseSliderChange = (state: State, newRange: number[], activeThumb: number) => {
 
     console.log(`activeThumb=${activeThumb}`)
-
-    if (dummySliderValue != null) {
-      const dummyIndex = newRange.indexOf(dummySliderValue)
-      if (dummyIndex > -1) { 
-        newRange.splice(dummyIndex, 1)
-      }
-    }
 
     const cycleLength = lightConfig.cycleLength()
     const temp = newRange.filter(x => x != 0 && x != cycleLength)
@@ -110,16 +101,18 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     onLightSettingsChange(lightConfig.withStateTimeRange(state, newTimeRange))
   }
 
+  const thumbStyle = quickEditActive ? {} : { display: 'none' }
+
   const altOffsetSlider = (
     <Slider
       disabled={!quickEditActive}
-      value={dummySliderValue / 1000}
+      value={offsetSliderValue / 1000}
       step={1}
       min={0} 
       max={(lightConfig.cycleLength() / 1000)}
       valueLabelDisplay="auto"
       valueLabelFormat={(value) => `${value} s`}
-      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(negativeSafeMod(lightConfig.offset + (newValue as number * 1000) - dummySliderValue, lightConfig.cycleLength())))}
+      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(negativeSafeMod(lightConfig.offset + (newValue as number * 1000) - offsetSliderValue, lightConfig.cycleLength())))}
       aria-label="Offset"
       slots={{ 
         track: Tune 
@@ -129,7 +122,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         rail: { style: { display: "none" } },
         mark: { style: { display: "none" } },
         markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } },
-        thumb: { style: { display: quickEditActive ? 'block' : 'none' } },
+        thumb: { style: thumbStyle },
       }}
       marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
       sx={{
@@ -161,7 +154,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       slotProps={{ 
         track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
         rail: { style: { display: "none" } },
-        thumb: { style: { width: '5px', display: quickEditActive ? 'block' : 'none' } },
+        thumb: { style: { ...thumbStyle, width: '5px' } },
       }}
       sx={{
         // paddingY: 0,
