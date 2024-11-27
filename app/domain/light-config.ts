@@ -91,7 +91,7 @@ export class TimeRange {
     array.push(this.start)
     array.push(this.end)
     if (this.start == 0 || this.end == 0) {
-      array.push(this.cycleLength)
+      // array.push(this.cycleLength)
     }
     return array.toSorted()
   }

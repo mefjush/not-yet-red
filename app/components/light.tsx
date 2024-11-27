@@ -22,14 +22,18 @@ import LockOpenIcon from '@mui/icons-material/LockOpen'
 import EditIcon from '@mui/icons-material/Edit'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
+import { negativeSafeMod } from '../utils'
+import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
   const [expanded, setExpanded] = useState(false)
   const [transitionStartTime, setTransitionStartTime] = useState(-1)
-  const [sliderMode, setSliderMode] = useState("offset")
+  const [sliderMode, setSliderMode] = useState("RED")
   const [quickEditActive, setQuickEditActive] = useState(true)
   const hasPageBeenRendered = useRef(false)
+
+  const sliderValues = useRef([0, 0])
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -74,13 +78,12 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const timeRange = lightConfig.getTimeRange(selectedPhase)
 
   const selectedPhaseRange = timeRange.toArray()
-  let dummySliderValue: number | null = null
-  if (selectedPhaseRange.length < 3) {
-    dummySliderValue = selectedPhaseRange[0]
-    selectedPhaseRange.push(dummySliderValue)
-  }
+  
+  let dummySliderValue: number | null = negativeSafeMod(timeRange.start + Math.floor(timeRange.duration() / 2000) * 1000, lightConfig.cycleLength())
 
-  const onPhaseSliderChange = (state: State, newRange: number[]) => {
+  const onPhaseSliderChange = (state: State, newRange: number[], activeThumb: number) => {
+
+    console.log(`activeThumb=${activeThumb}`)
 
     if (dummySliderValue != null) {
       const dummyIndex = newRange.indexOf(dummySliderValue)
@@ -107,16 +110,16 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     onLightSettingsChange(lightConfig.withStateTimeRange(state, newTimeRange))
   }
 
-  const lockedSlider = (
+  const altOffsetSlider = (
     <Slider
-      disabled
-      value={lightConfig.offset / 1000}
+      disabled={!quickEditActive}
+      value={dummySliderValue / 1000}
       step={1}
       min={0} 
       max={(lightConfig.cycleLength() / 1000)}
       valueLabelDisplay="auto"
       valueLabelFormat={(value) => `${value} s`}
-      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
+      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(negativeSafeMod(lightConfig.offset + (newValue as number * 1000) - dummySliderValue, lightConfig.cycleLength())))}
       aria-label="Offset"
       slots={{ 
         track: Tune 
@@ -125,62 +128,44 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
         rail: { style: { display: "none" } },
         mark: { style: { display: "none" } },
-        markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
+        markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } },
+        thumb: { style: { display: quickEditActive ? 'block' : 'none' } },
       }}
       marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
       sx={{
-        color: `${STATE_ATTRIBUTES[selectedPhase].color}.main`,
+        pointerEvents: 'none !important',
         '& .MuiSlider-thumb': {
-          display: 'none',
+          borderRadius: '1px',
+          pointerEvents: 'all !important'
         },
+        '& .MuiSlider-track': {
+          pointerEvents: 'all !important'
+        }
       }}
-    />
-  )
-
-  const offsetSlider = (
-    <Slider
-      value={lightConfig.offset / 1000}
-      step={1}
-      min={0} 
-      max={(lightConfig.cycleLength() / 1000)}
-      valueLabelDisplay="auto"
-      valueLabelFormat={(value) => `${value} s`}
-      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number * 1000))}
-      aria-label="Offset"
-      slots={{ 
-        track: Tune 
-      }}
-      slotProps={{ 
-        track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
-        rail: { style: { display: "none" } },
-        mark: { style: { display: "none" } },
-        markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
-      }}
-      marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
     />
   )
 
   const rangeSlider = (
     <Slider
+      disabled={!quickEditActive}
+      disableSwap
       value={selectedPhaseRange.map(x => x / 1000)}
       step={1}
       min={0} 
       max={(lightConfig.cycleLength() / 1000)}
       valueLabelDisplay="auto"
       valueLabelFormat={(value) => `${value} s`}
-      onChange={(e, newValue) => onPhaseSliderChange(selectedPhase, (newValue as number[]).map(x => x * 1000))}
+      onChange={(e, newValue, activeThumb) => onPhaseSliderChange(selectedPhase, (newValue as number[]).map(x => x * 1000), activeThumb)}
       aria-label="Offset"
-      slots={{ 
-        track: Tune 
-      }}
+      track={false}
       slotProps={{ 
         track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
         rail: { style: { display: "none" } },
-        mark: { style: { display: "none" } },
-        markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } }
+        thumb: { style: { width: '5px', display: quickEditActive ? 'block' : 'none' } },
       }}
-      marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
       sx={{
+        // paddingY: 0,
+        marginY: 0,
         color: `${STATE_ATTRIBUTES[selectedPhase].color}.main`,
         pointerEvents: 'none !important',
         '& .MuiSlider-thumb': {
@@ -194,19 +179,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     />
   )
 
-  const getSlider = () => {
-    if (!quickEditActive) {
-      return lockedSlider
-    }
-    switch(sliderMode) {
-      case 'offset': return offsetSlider
-      case 'lock': return lockedSlider
-      default: return rangeSlider
-    }
-  }
-
-  const theSlider = getSlider()
-
   const phase = lightConfig.phases.find(ph => ph.state == selectedPhase) || lightConfig.phases[0]
   
   const quickEditControls = (
@@ -214,12 +186,10 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       <RadioGroup
         row
         aria-labelledby="demo-radio-buttons-group-label"
-        defaultValue="offset"
         name="radio-buttons-group"
         value={sliderMode}
         onChange={event => setSliderMode((event.target as HTMLInputElement).value)}
       >
-        <FormControlLabel value="offset" control={<Radio size='small' icon={<KeyboardTabIcon color='disabled'/>} checkedIcon={<KeyboardTabIcon color='primary'/>}/>} label='' />
         { lightConfig.phases.map(phase => 
           <FormControlLabel 
             key={phase.state} 
@@ -303,7 +273,10 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
                 <Typography gutterBottom>
                   Timeline
                 </Typography>
-                {theSlider}
+                {rangeSlider}
+                {altOffsetSlider}
+   
+                
 
                 {/* <Box sx={{position: 'relative'}}>
                 { phasesPositions.map(positionConfig => 
