@@ -31,7 +31,11 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const [transitionStartTime, setTransitionStartTime] = useState(-1)
   const [sliderMode, setSliderMode] = useState("RED")
   const [quickEditActive, setQuickEditActive] = useState(true)
+  
   const hasPageBeenRendered = useRef(false)
+  const uiOffset = useRef(0)
+  const uiRightRange = useRef(0)
+
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -76,14 +80,21 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const timeRange = lightConfig.getTimeRange(selectedPhase)
 
   const selectedPhaseRange = timeRange.toArray()
+  const cycleLength = lightConfig.cycleLength()
   
-  let offsetSliderValue: number = negativeSafeMod(timeRange.start + Math.floor(timeRange.duration() / 2000) * 1000, lightConfig.cycleLength())
+  const offsetSliderValue: number = negativeSafeMod(timeRange.start + Math.floor(timeRange.duration() / 2000) * 1000, cycleLength)
+
+  console.log(`offsetSliderValue ${offsetSliderValue}`)
+  console.log(`uiOffset.current ${uiOffset.current}`)
+  
+  uiOffset.current = offsetSliderValue == negativeSafeMod(uiOffset.current, cycleLength) ? uiOffset.current : offsetSliderValue
+
+  console.log(`uiOffset.current new ${uiOffset.current}`)
 
   const onPhaseSliderChange = (state: State, newRange: number[], activeThumb: number) => {
 
     console.log(`activeThumb=${activeThumb}`)
 
-    const cycleLength = lightConfig.cycleLength()
     const temp = newRange.filter(x => x != 0 && x != cycleLength)
     
     if (temp.length < 2) {
@@ -101,18 +112,23 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     onLightSettingsChange(lightConfig.withStateTimeRange(state, newTimeRange))
   }
 
+  const onOffsetSliderChange = (newValue: number) => {
+    uiOffset.current = newValue
+    onLightSettingsChange(lightConfig.withOffset(negativeSafeMod(lightConfig.offset + newValue - offsetSliderValue, lightConfig.cycleLength())))
+  }
+
   const thumbStyle = quickEditActive ? {} : { display: 'none' }
 
-  const altOffsetSlider = (
+  const offsetSlider = (
     <Slider
       disabled={!quickEditActive}
-      value={offsetSliderValue / 1000}
+      value={uiOffset.current / 1000}
       step={1}
       min={0} 
       max={(lightConfig.cycleLength() / 1000)}
       valueLabelDisplay="auto"
       valueLabelFormat={(value) => `${value} s`}
-      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(negativeSafeMod(lightConfig.offset + (newValue as number * 1000) - offsetSliderValue, lightConfig.cycleLength())))}
+      onChange={(e, newValue) => onOffsetSliderChange(1000 * (newValue as number))}
       aria-label="Offset"
       slots={{ 
         track: Tune 
@@ -149,12 +165,11 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       valueLabelDisplay="auto"
       valueLabelFormat={(value) => `${value} s`}
       onChange={(e, newValue, activeThumb) => onPhaseSliderChange(selectedPhase, (newValue as number[]).map(x => x * 1000), activeThumb)}
-      aria-label="Offset"
+      aria-label="Range"
       track={false}
       slotProps={{ 
-        track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
         rail: { style: { display: "none" } },
-        thumb: { style: { ...thumbStyle, width: '5px' } },
+        thumb: { style: { ...thumbStyle, borderRadius: '0px', width: '5px' } },
       }}
       sx={{
         // paddingY: 0,
@@ -162,7 +177,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         color: `${STATE_ATTRIBUTES[selectedPhase].color}.main`,
         pointerEvents: 'none !important',
         '& .MuiSlider-thumb': {
-          borderRadius: '1px',
           pointerEvents: 'all !important'
         },
         '& .MuiSlider-track': {
@@ -267,7 +281,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
                   Timeline
                 </Typography>
                 {rangeSlider}
-                {altOffsetSlider}
+                {offsetSlider}
    
                 
 
