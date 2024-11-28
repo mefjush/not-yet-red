@@ -36,7 +36,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const hasPageBeenRendered = useRef(false)
   const uiOffset = useRef(0)
 
-
   const handleExpandClick = () => {
     setExpanded(!expanded);
   }
@@ -96,9 +95,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   }
 
   const onPhaseSliderChange = (state: State, newRange: number[], activeThumb: number) => {
-
-    console.log(`activeThumb=${activeThumb}`)
-
     const newValRaw = newRange[activeThumb]
 
     uiRange.current = (activeThumb == 0) != uiRange.current.inverted() ? new TimeRange(newValRaw, uiRange.current.end, cycleLength) : new TimeRange(uiRange.current.start, newValRaw, cycleLength)
@@ -117,6 +113,15 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   }
 
   const thumbStyle = quickEditActive ? {} : { display: 'none' }
+  const slideWithThumbOnly = {
+    pointerEvents: 'none !important',
+    '& .MuiSlider-thumb': {
+      pointerEvents: 'all !important'
+    },
+    '& .MuiSlider-track': {
+      pointerEvents: 'all !important'
+    }
+  }
 
   const offsetSlider = (
     <Slider
@@ -138,16 +143,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         thumb: { style: thumbStyle },
       }}
       marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
-      sx={{
-        pointerEvents: 'none !important',
-        '& .MuiSlider-thumb': {
-          borderRadius: '1px',
-          pointerEvents: 'all !important'
-        },
-        '& .MuiSlider-track': {
-          pointerEvents: 'all !important'
-        }
-      }}
+      sx={slideWithThumbOnly}
     />
   )
 
@@ -169,16 +165,10 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         thumb: { style: { ...thumbStyle, borderRadius: '0px', width: '5px' } },
       }}
       sx={{
+        ...slideWithThumbOnly,
         // paddingY: 0,
         marginY: 0,
         color: `${STATE_ATTRIBUTES[selectedPhase].color}.main`,
-        pointerEvents: 'none !important',
-        '& .MuiSlider-thumb': {
-          pointerEvents: 'all !important'
-        },
-        '& .MuiSlider-track': {
-          pointerEvents: 'all !important'
-        }
       }}
     />
   )
@@ -188,22 +178,36 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const quickEditControls = (
     <>
       <RadioGroup
-        row
+        row={!(expanded)}
         aria-labelledby="demo-radio-buttons-group-label"
         name="radio-buttons-group"
         value={sliderMode}
         onChange={event => setSliderMode((event.target as HTMLInputElement).value)}
       >
-        { lightConfig.phases.map(phase => 
-          <FormControlLabel 
-            key={phase.state} 
-            value={phase.state} 
-            control={<Radio size='small' color={`${phase.stateAttributes().color}`} sx={{ color: `${phase.stateAttributes().color}.main` }}/>} 
-            label=''
-          />) 
-        }
+        { lightConfig.phases.map(phase => {
+          const phaseControl = (
+            <PhaseControl
+              style={{marginLeft: 'auto'}}
+              label={`${phase.stateAttributes().name} duration`} 
+              id={`light-${index}-${phase.stateAttributes().name}-duration`} 
+              min={0} 
+              max={lightConfig.cycleLength() / 1000} 
+              value={phase.duration / 1000} 
+              onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} 
+              color={phase.stateAttributes().color}
+            />
+          )
+          return (
+            <FormControlLabel 
+              key={phase.state} 
+              value={phase.state} 
+              control={<Radio size='small' color={`${phase.stateAttributes().color}`} sx={{ color: `${phase.stateAttributes().color}.main` }}/>} 
+              label={expanded ? phaseControl : <></>}
+            />
+          )
+        })}
       </RadioGroup>
-      <PhaseControl
+      {/* <PhaseControl
         style={{marginLeft: 'auto'}}
         label={`${phase.stateAttributes().name} duration`} 
         id={`light-${index}-${phase.stateAttributes().name}-duration`} 
@@ -212,16 +216,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         value={phase.duration / 1000} 
         onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} 
         color={phase.stateAttributes().color}
-      />
-      {/* <ExpandMore
-        expand={effectivelyExpanded}
-        onClick={handleExpandClick}
-        aria-expanded={effectivelyExpanded}
-        aria-label="show more"
-        style={{marginLeft: 'auto'}}
-      >
-        <ExpandMoreIcon />
-      </ExpandMore> */}
+      /> */}
     </>
   )
 
@@ -274,9 +269,9 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
                 </Box>
               </Collapse> */}
               <Box sx={{ mt: 2 }}>
-                <Typography gutterBottom>
+                {/* <Typography gutterBottom>
                   Timeline
-                </Typography>
+                </Typography> */}
                 {rangeSlider}
                 {offsetSlider}
    
@@ -300,12 +295,22 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
       <CardActions>
         <IconButton aria-label="Quick edit" onClick={() => setQuickEditActive(!quickEditActive)}>{ expanded || quickEditActive ? <LockOpenIcon /> : <LockIcon />}</IconButton>
-        { expanded || quickEditActive ? quickEditControls : null }
+        { !expanded ? quickEditControls : null }
+        <ExpandMore
+          expand={effectivelyExpanded}
+          onClick={handleExpandClick}
+          aria-expanded={effectivelyExpanded}
+          aria-label="show more"
+          style={{marginLeft: 'auto'}}
+        >
+          <ExpandMoreIcon />
+        </ExpandMore>
       </CardActions>
 
       <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
       <CardContent>
       <Stack direction="column" alignItems="stretch">
+        {quickEditControls}
         <Box sx={{ my: 2 }}>
           <Typography gutterBottom>
             Preset
@@ -318,12 +323,12 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             }
           </Select>
         </Box>
-        <Box sx={{ my: 2 }}>
+        {/* <Box sx={{ my: 2 }}>
           <Typography gutterBottom>
             Phases
           </Typography>
           {durationInputs}
-        </Box>
+        </Box> */}
         </Stack>
       </CardContent>
       </Collapse>
