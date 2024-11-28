@@ -2,7 +2,7 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, PresetId, PRESETS, TimeRange } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem, NoSsr, RadioGroup, FormControlLabel, Radio, duration, Box, Button, CardActionArea, FormControl } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem, RadioGroup, FormControlLabel, Radio, Box, CardActionArea, FormControl } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -42,12 +42,14 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()}><DeleteIcon /></IconButton>
 
-  const markPosition = currentTimestamp % lightConfig.cycleLength()
+  const cycleLength = lightConfig.cycleLength()
+
+  const markPosition = currentTimestamp % cycleLength
 
   const needsTransition = hasPageBeenRendered && (transitionStartTime == markPosition)
 
-  const transitionDuration = needsTransition ? lightConfig.cycleLength() - markPosition : 0
-  const markPositionToSet = needsTransition ? lightConfig.cycleLength() : markPosition
+  const transitionDuration = needsTransition ? cycleLength - markPosition : 0
+  const markPositionToSet = needsTransition ? cycleLength : markPosition
 
   const modCycle = (val: number) => negativeSafeMod(val, cycleLength)
 
@@ -62,9 +64,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ effectivelyExpanded ? '150px' : '60px' } />
 
-  const cycleLength = lightConfig.cycleLength()
-
-  const selectedPhase: State = sliderMode == "offset" || sliderMode == "lock" ? State.RED : State[sliderMode as keyof typeof State]
+  const selectedPhase: State = State[sliderMode as keyof typeof State]
   const timeRange = lightConfig.getTimeRange(selectedPhase)
   
   const uiRange = useRef(timeRange)
@@ -163,19 +163,19 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         { lightConfig.phases.map(phase => {
           const phaseControl = (
             <PhaseControl
-              label={`${phase.stateAttributes().name} duration`} 
-              id={`light-${index}-${phase.stateAttributes().name}-duration`} 
               min={0} 
-              max={lightConfig.cycleLength() / 1000} 
+              max={cycleLength / 1000} 
               value={phase.duration / 1000} 
-              onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} 
+              onChange={e => {
+                setSliderMode(phase.state)
+                onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))
+              }} 
               color={phase.stateAttributes().color}
             />
           )
           return (
-            <Stack direction='row'>
+            <Stack direction='row' key={phase.state}>
               <FormControlLabel 
-                key={phase.state} 
                 value={phase.state} 
                 control={<Radio size='small' color={`${phase.stateAttributes().color}`} sx={{ color: `${phase.stateAttributes().color}.main` }}/>} 
                 label=''
@@ -209,7 +209,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       </CardActions>
 
       <CardContent>
-        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={0}>
+        <Grid container sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }} spacing={0}>
           <CardActionArea onClick={() => setExpanded(!expanded)}>
             <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="center">
               {lightIcon}
@@ -226,6 +226,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         </Grid>
 
         { expanded ? null : quickEditControls }
+        
         <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
           <Grid container spacing={2}>
             <Grid size={{xs: 12, md: 4, lg: 3}}>

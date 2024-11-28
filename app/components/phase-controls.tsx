@@ -1,15 +1,9 @@
 "use client"
 
-import { Slider, Input as MuiInput, Stack, ButtonGroup, Button, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material'
-import { styled } from '@mui/material/styles'
-import Grid from '@mui/material/Grid2'
-import { KeyboardEvent, FocusEvent, useState, useRef } from 'react'
+import { ButtonGroup, Button, TextField } from '@mui/material'
+import { useState, useRef } from 'react'
 import { TrafficLightColors } from '../domain/state'
 import { useLongPress } from 'use-long-press'
-
-const MInput = styled(MuiInput)`
-  width: 50px
-`
 
 interface ChangeEvent {
   target: {
@@ -70,61 +64,7 @@ function DelayedTextField({value, onChange}: {value: number, onChange: ((v: numb
   )
 }
 
-function PhaseSlider({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors}) {
-
-  const [tempValue, setTempValue] = useState<string|null>(null)
-
-  const handleSliderChange = (event: Event, newValue: number | number[]) => {
-    onChange(fix(newValue as number, min, max, step))
-  }
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTempValue(event.target.value)
-  }
-
-  const handleOnBlur = (event: FocusEvent<HTMLInputElement>) => {
-    if (tempValue != null) {
-      onChange(fix(Number.parseInt(tempValue || ''), min, max, step))
-      setTempValue(null)
-    }
-  }
-
-  const handleOnKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      event.currentTarget.blur()
-    }
-  }
-
-  return (
-    <Stack direction="row" spacing={2}>
-      <Slider
-        color={color}
-        value={typeof value === 'number' ? value : 0}
-        step={step || 1}
-        min={min}
-        max={max}
-        onChange={handleSliderChange}
-        aria-labelledby={id}
-      />
-      <MInput
-        value={tempValue != null ? tempValue : value}
-        size="small"
-        onChange={handleInputChange}
-        onKeyDown={handleOnKeyDown}
-        onBlur={handleOnBlur}
-        inputProps={{
-          step: (step || 1),
-          min: min,
-          max: max,
-          type: 'number',
-          'aria-labelledby': id
-        }}
-      />
-    </Stack>
-  )
-}
-
-export function PhaseControl({id, label, min, max, step, value, onChange, color, style}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors, style?: React.CSSProperties}) {
+export function PhaseControl({min, max, step, value, onChange, color, style}: {min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors, style?: React.CSSProperties}) {
   
   const [longPressInterval, setLongPressInterval] = useState<NodeJS.Timeout|null>(null)
   
