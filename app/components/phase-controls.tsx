@@ -53,13 +53,19 @@ function DelayedTextField({value, onChange}: {value: number, onChange: ((v: numb
       slotProps={{
         input: {
           style: {
-            WebkitAppearance: 'none', 
-            MozAppearance: 'textfield',
             borderRadius: 0,
-            textAlign: 'center'
           }
+        }
+      }}
+      sx={{
+        '& input': {
+          textAlign: 'center',
+          '-moz-appearance': 'textfield'
         },
-      }}  
+        '& input::-webkit-inner-spin-button': {
+          '-webkit-appearance': 'none', 
+        }
+      }}
     />
   )
 }
