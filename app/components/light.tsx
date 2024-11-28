@@ -89,37 +89,31 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     uiRange.current = new TimeRange(timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end, cycleLength)
   }
 
-  // const selectedPhaseRange = [timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end]
-  
-  const offsetSliderValue: number = negativeSafeMod(timeRange.start + Math.floor(timeRange.duration() / 2000) * 1000, cycleLength)
-
-  console.log(`offsetSliderValue ${offsetSliderValue}`)
-  console.log(`uiOffset.current ${uiOffset.current}`)
-  
+  const offsetSliderValue: number = negativeSafeMod(timeRange.start + timeRange.duration() / 2, cycleLength)
   const offsetChanged = offsetSliderValue != negativeSafeMod(uiOffset.current, cycleLength)
   if (offsetChanged) {
     uiOffset.current = offsetSliderValue
   }
-
-  console.log(`uiOffset.current new ${uiOffset.current}`)
 
   const onPhaseSliderChange = (state: State, newRange: number[], activeThumb: number) => {
 
     console.log(`activeThumb=${activeThumb}`)
 
     const newValRaw = newRange[activeThumb]
-    const newVal = negativeSafeMod(newValRaw, cycleLength)
-
-    const newTimeRange = (activeThumb == 0) != uiRange.current.inverted() ? new TimeRange(newVal, timeRange.end, cycleLength) : new TimeRange(timeRange.start, newVal, cycleLength)
 
     uiRange.current = (activeThumb == 0) != uiRange.current.inverted() ? new TimeRange(newValRaw, uiRange.current.end, cycleLength) : new TimeRange(uiRange.current.start, newValRaw, cycleLength)
+
+    const newTimeRange = new TimeRange(negativeSafeMod(uiRange.current.start, cycleLength), negativeSafeMod(uiRange.current.end, cycleLength), cycleLength) 
 
     onLightSettingsChange(lightConfig.withStateTimeRange(state, newTimeRange))
   }
 
   const onOffsetSliderChange = (newValue: number) => {
-    uiOffset.current = newValue
-    onLightSettingsChange(lightConfig.withOffset(negativeSafeMod(lightConfig.offset + newValue - offsetSliderValue, lightConfig.cycleLength())))
+    const modResult = (timeRange.duration() / 1000) % 2 == 0 ? 0 : 500
+    if (newValue % 1000 == modResult && 0 <= newValue && newValue <= cycleLength) {
+      uiOffset.current = newValue
+      onLightSettingsChange(lightConfig.withOffset(negativeSafeMod(lightConfig.offset + newValue - offsetSliderValue, lightConfig.cycleLength())))
+    }
   }
 
   const thumbStyle = quickEditActive ? {} : { display: 'none' }
@@ -127,13 +121,11 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const offsetSlider = (
     <Slider
       disabled={!quickEditActive}
-      value={uiOffset.current / 1000}
-      step={1}
+      value={uiOffset.current}
+      step={500}
       min={0} 
-      max={(lightConfig.cycleLength() / 1000)}
-      valueLabelDisplay="auto"
-      valueLabelFormat={(value) => `${value} s`}
-      onChange={(e, newValue) => onOffsetSliderChange(1000 * (newValue as number))}
+      max={cycleLength}
+      onChange={(e, newValue) => onOffsetSliderChange((newValue as number))}
       aria-label="Offset"
       slots={{ 
         track: Tune 
@@ -145,7 +137,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } },
         thumb: { style: thumbStyle },
       }}
-      marks={[{ value: markPositionToSet / 1000, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
+      marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
       sx={{
         pointerEvents: 'none !important',
         '& .MuiSlider-thumb': {
