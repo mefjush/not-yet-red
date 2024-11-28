@@ -31,7 +31,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const [expanded, setExpanded] = useState(false)
   const [transitionStartTime, setTransitionStartTime] = useState(-1)
   const [sliderMode, setSliderMode] = useState("RED")
-  const [quickEditActive, setQuickEditActive] = useState(true)
   
   const hasPageBeenRendered = useRef(false)
   const uiOffset = useRef(0)
@@ -40,22 +39,9 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     setExpanded(!expanded);
   }
 
-  const effectivelyExpanded = expanded // quickEditActive && expanded
+  const effectivelyExpanded = expanded
 
   const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()}><DeleteIcon /></IconButton>
-
-  let durationInputs = lightConfig.phases.toSorted((a, b) => a.stateAttributes().priority - b.stateAttributes().priority).reverse().map(phase => (
-    <PhaseControls 
-      key={`light-${index}-${phase.stateAttributes().name}-duration`} 
-      label={`${phase.stateAttributes().name} duration`} 
-      id={`light-${index}-${phase.stateAttributes().name}-duration`} 
-      min={0} 
-      max={lightConfig.cycleLength() / 1000} 
-      value={phase.duration / 1000} 
-      onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} 
-      color={phase.stateAttributes().color}
-    />
-  ))
 
   const markPosition = currentTimestamp % lightConfig.cycleLength()
 
@@ -112,7 +98,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
   }
 
-  const thumbStyle = quickEditActive ? {} : { display: 'none' }
   const slideWithThumbOnly = {
     pointerEvents: 'none !important',
     '& .MuiSlider-thumb': {
@@ -123,9 +108,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
   }
 
-  const offsetSlider = (
+  const middleOffsetSlider = (
     <Slider
-      disabled={!quickEditActive}
       value={uiOffset.current}
       step={500}
       min={0} 
@@ -140,7 +124,28 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         rail: { style: { display: "none" } },
         mark: { style: { display: "none" } },
         markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } },
-        thumb: { style: thumbStyle },
+      }}
+      marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
+      sx={slideWithThumbOnly}
+    />
+  )
+
+  const classicOffsetSlider = (
+    <Slider
+      value={lightConfig.offset}
+      step={1000}
+      min={0} 
+      max={cycleLength}
+      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset((newValue as number)))}
+      aria-label="Offset"
+      slots={{ 
+        track: Tune 
+      }}
+      slotProps={{ 
+        track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
+        rail: { style: { display: "none" } },
+        mark: { style: { display: "none" } },
+        markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } },
       }}
       marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
       sx={slideWithThumbOnly}
@@ -149,7 +154,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const rangeSlider = (
     <Slider
-      disabled={!quickEditActive}
       disableSwap
       value={[uiRange.current.start / 1000, uiRange.current.end / 1000]}
       step={1}
@@ -162,19 +166,19 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       track={false}
       slotProps={{ 
         rail: { style: { display: "none" } },
-        thumb: { style: { ...thumbStyle, borderRadius: '0px', width: '5px' } },
+        thumb: { style: { borderRadius: '0px', width: '5px' } },
       }}
       sx={{
         ...slideWithThumbOnly,
-        // paddingY: 0,
-        marginY: 0,
+        paddingY: 0,
+        // marginY: 0,
+        marginTop: '-30px',
+        marginBottom: 0,
         color: `${STATE_ATTRIBUTES[selectedPhase].color}.main`,
       }}
     />
   )
 
-  const phase = lightConfig.phases.find(ph => ph.state == selectedPhase) || lightConfig.phases[0]
-  
   const quickEditControls = (
     <>
       <RadioGroup
@@ -207,16 +211,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           )
         })}
       </RadioGroup>
-      {/* <PhaseControl
-        style={{marginLeft: 'auto'}}
-        label={`${phase.stateAttributes().name} duration`} 
-        id={`light-${index}-${phase.stateAttributes().name}-duration`} 
-        min={0} 
-        max={lightConfig.cycleLength() / 1000} 
-        value={phase.duration / 1000} 
-        onChange={e => onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))} 
-        color={phase.stateAttributes().color}
-      /> */}
     </>
   )
 
@@ -236,66 +230,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         <IconButton aria-label="share" onClick={onShare}><ShareIcon /></IconButton>
         {deleteButton}
         <IconButton sx={{ visibility: 'hidden' }}><DeleteIcon /></IconButton>
-      </CardActions>
-
-      <CardContent>
-        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={0}>
-          <CardActionArea onClick={() => setExpanded(!expanded)}>
-            <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="center">
-              {lightIcon}
-            </Grid>
-          </CardActionArea>
-          <Grid size={{ xs: 12 }}>
-            <Stack direction="column" alignItems="stretch">
-              
-              {/* <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
-                <Box sx={{ my: 2 }}>
-                  <Typography gutterBottom>
-                    Preset
-                  </Typography>
-                  <Select fullWidth value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
-                    { 
-                      Object.values(PRESETS).map(preset => 
-                        <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
-                      )
-                    }
-                  </Select>
-                </Box>
-                <Box sx={{ my: 2 }}>
-                  <Typography gutterBottom>
-                    Phases
-                  </Typography>
-                  {durationInputs}
-                </Box>
-              </Collapse> */}
-              <Box sx={{ mt: 2 }}>
-                {/* <Typography gutterBottom>
-                  Timeline
-                </Typography> */}
-                {rangeSlider}
-                {offsetSlider}
-   
-                
-
-                {/* <Box sx={{position: 'relative'}}>
-                { phasesPositions.map(positionConfig => 
-                  <Box sx={{ display: 'inline', position: 'absolute', top: '-74px', left: `${100 * positionConfig.position / lightConfig.cycleLength()}%` }}>
-                    <Stack direction='column'>
-                    <IconButton aria-label="plus"><AddCircleIcon sx={{ color: `${positionConfig.phase.stateAttributes().color}.main` }}/></IconButton>
-                    <IconButton aria-label="minus"><RemoveCircleIcon sx={{ color: `${positionConfig.phase.stateAttributes().color}.main` }}/></IconButton>
-                    </Stack>
-                  </Box>
-                )}
-                </Box> */}
-              </Box>
-            </Stack>
-          </Grid>
-        </Grid>
-      </CardContent>
-
-      <CardActions>
-        <IconButton aria-label="Quick edit" onClick={() => setQuickEditActive(!quickEditActive)}>{ expanded || quickEditActive ? <LockOpenIcon /> : <LockIcon />}</IconButton>
-        { !expanded ? quickEditControls : null }
         <ExpandMore
           expand={effectivelyExpanded}
           onClick={handleExpandClick}
@@ -307,31 +241,49 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         </ExpandMore>
       </CardActions>
 
-      <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
       <CardContent>
-      <Stack direction="column" alignItems="stretch">
-        {quickEditControls}
-        <Box sx={{ my: 2 }}>
-          <Typography gutterBottom>
-            Preset
-          </Typography>
-          <Select fullWidth value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
-            { 
-              Object.values(PRESETS).map(preset => 
-                <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
-              )
-            }
-          </Select>
-        </Box>
-        {/* <Box sx={{ my: 2 }}>
-          <Typography gutterBottom>
-            Phases
-          </Typography>
-          {durationInputs}
-        </Box> */}
-        </Stack>
+        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={0}>
+          <CardActionArea onClick={() => setExpanded(!expanded)}>
+            <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="center">
+              {lightIcon}
+            </Grid>
+          </CardActionArea>
+          <Grid size={{ xs: 12 }}>
+            <Stack direction="column" alignItems="stretch">
+              <Box sx={{ mt: 2 }}>
+                {/* <Typography gutterBottom>
+                  Timeline
+                </Typography> */}
+                {/* {offsetSlider} */}
+                {classicOffsetSlider}
+                {rangeSlider}
+              </Box>
+            </Stack>
+          </Grid>
+        </Grid>
       </CardContent>
-      </Collapse>
+
+
+      <CardContent>
+        {quickEditControls}
+        <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
+          <Stack direction="column" alignItems="stretch">
+            <Box sx={{ my: 2 }}>
+              <Typography gutterBottom>
+                Preset
+              </Typography>
+              <Select fullWidth value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
+                { 
+                  Object.values(PRESETS).map(preset => 
+                    <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
+                  )
+                }
+              </Select>
+            </Box>
+          </Stack>
+        </Collapse>
+      </CardContent>
+
     </Card>
   )
 }
