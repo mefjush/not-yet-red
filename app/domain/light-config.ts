@@ -85,16 +85,6 @@ export class TimeRange {
       return this.cycleLength - this.start + this.end
     }
   }
-
-  toArray() {
-    const array = []
-    array.push(this.start)
-    array.push(this.end)
-    if (this.start == 0 || this.end == 0) {
-      // array.push(this.cycleLength)
-    }
-    return array.toSorted()
-  }
 }
 
 export const SYMBOLS = Object.fromEntries([

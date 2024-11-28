@@ -24,6 +24,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { negativeSafeMod } from '../utils'
 import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom'
+import { time } from 'console'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
@@ -34,7 +35,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   
   const hasPageBeenRendered = useRef(false)
   const uiOffset = useRef(0)
-  const uiRightRange = useRef(0)
 
 
   const handleExpandClick = () => {
@@ -76,18 +76,30 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ effectivelyExpanded ? '150px' : '60px' } />
 
+  const cycleLength = lightConfig.cycleLength()
+
   const selectedPhase: State = sliderMode == "offset" || sliderMode == "lock" ? State.RED : State[sliderMode as keyof typeof State]
   const timeRange = lightConfig.getTimeRange(selectedPhase)
+  
+  const uiRange = useRef(timeRange)
 
-  const selectedPhaseRange = timeRange.toArray()
-  const cycleLength = lightConfig.cycleLength()
+  const timeRangeChanged = !(timeRange.start == negativeSafeMod(uiRange.current.start, cycleLength) && timeRange.end == negativeSafeMod(uiRange.current.end, cycleLength))
+
+  if (timeRangeChanged) {
+    uiRange.current = new TimeRange(timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end, cycleLength)
+  }
+
+  // const selectedPhaseRange = [timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end]
   
   const offsetSliderValue: number = negativeSafeMod(timeRange.start + Math.floor(timeRange.duration() / 2000) * 1000, cycleLength)
 
   console.log(`offsetSliderValue ${offsetSliderValue}`)
   console.log(`uiOffset.current ${uiOffset.current}`)
   
-  uiOffset.current = offsetSliderValue == negativeSafeMod(uiOffset.current, cycleLength) ? uiOffset.current : offsetSliderValue
+  const offsetChanged = offsetSliderValue != negativeSafeMod(uiOffset.current, cycleLength)
+  if (offsetChanged) {
+    uiOffset.current = offsetSliderValue
+  }
 
   console.log(`uiOffset.current new ${uiOffset.current}`)
 
@@ -95,19 +107,12 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
     console.log(`activeThumb=${activeThumb}`)
 
-    const temp = newRange.filter(x => x != 0 && x != cycleLength)
-    
-    if (temp.length < 2) {
-      temp.unshift(0)
-    }
+    const newValRaw = newRange[activeThumb]
+    const newVal = negativeSafeMod(newValRaw, cycleLength)
 
-    const newVal = temp.find(x => x != timeRange.start && x != timeRange.end)
+    const newTimeRange = (activeThumb == 0) != uiRange.current.inverted() ? new TimeRange(newVal, timeRange.end, cycleLength) : new TimeRange(timeRange.start, newVal, cycleLength)
 
-    if (newVal === undefined) {
-      return
-    }
-
-    const newTimeRange = temp.includes(timeRange.start) ? new TimeRange(timeRange.start, newVal, cycleLength) : new TimeRange(newVal, timeRange.end, cycleLength)
+    uiRange.current = (activeThumb == 0) != uiRange.current.inverted() ? new TimeRange(newValRaw, uiRange.current.end, cycleLength) : new TimeRange(uiRange.current.start, newValRaw, cycleLength)
 
     onLightSettingsChange(lightConfig.withStateTimeRange(state, newTimeRange))
   }
@@ -158,7 +163,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     <Slider
       disabled={!quickEditActive}
       disableSwap
-      value={selectedPhaseRange.map(x => x / 1000)}
+      value={[uiRange.current.start / 1000, uiRange.current.end / 1000]}
       step={1}
       min={0} 
       max={(lightConfig.cycleLength() / 1000)}
