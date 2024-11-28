@@ -24,7 +24,6 @@ import AddCircleIcon from '@mui/icons-material/AddCircle'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { negativeSafeMod } from '../utils'
 import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom'
-import { time } from 'console'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
@@ -50,6 +49,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const transitionDuration = needsTransition ? lightConfig.cycleLength() - markPosition : 0
   const markPositionToSet = needsTransition ? lightConfig.cycleLength() : markPosition
 
+  const modCycle = (val: number) => negativeSafeMod(val, cycleLength)
+
   useEffect(() => {
     if (hasPageBeenRendered.current) {
       setTransitionStartTime(markPosition)
@@ -68,14 +69,14 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   
   const uiRange = useRef(timeRange)
 
-  const timeRangeChanged = !(timeRange.start == negativeSafeMod(uiRange.current.start, cycleLength) && timeRange.end == negativeSafeMod(uiRange.current.end, cycleLength))
+  const timeRangeChanged = !(timeRange.start == modCycle(uiRange.current.start) && timeRange.end == modCycle(uiRange.current.end))
 
   if (timeRangeChanged) {
     uiRange.current = new TimeRange(timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end, cycleLength)
   }
 
-  const offsetSliderValue: number = negativeSafeMod(timeRange.start + timeRange.duration() / 2, cycleLength)
-  const offsetChanged = offsetSliderValue != negativeSafeMod(uiOffset.current, cycleLength)
+  const offsetSliderValue: number = modCycle(timeRange.start + timeRange.duration() / 2)
+  const offsetChanged = offsetSliderValue != modCycle(uiOffset.current)
   if (offsetChanged) {
     uiOffset.current = offsetSliderValue
   }
@@ -85,17 +86,9 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
     uiRange.current = (activeThumb == 0) != uiRange.current.inverted() ? new TimeRange(newValRaw, uiRange.current.end, cycleLength) : new TimeRange(uiRange.current.start, newValRaw, cycleLength)
 
-    const newTimeRange = new TimeRange(negativeSafeMod(uiRange.current.start, cycleLength), negativeSafeMod(uiRange.current.end, cycleLength), cycleLength) 
+    const newTimeRange = new TimeRange(modCycle(uiRange.current.start), modCycle(uiRange.current.end), cycleLength) 
 
     onLightSettingsChange(lightConfig.withStateTimeRange(state, newTimeRange))
-  }
-
-  const onOffsetSliderChange = (newValue: number) => {
-    const modResult = (timeRange.duration() / 1000) % 2 == 0 ? 0 : 500
-    if (newValue % 1000 == modResult && 0 <= newValue && newValue <= cycleLength) {
-      uiOffset.current = newValue
-      onLightSettingsChange(lightConfig.withOffset(negativeSafeMod(lightConfig.offset + newValue - offsetSliderValue, lightConfig.cycleLength())))
-    }
   }
 
   const slideWithThumbOnly = {
@@ -107,28 +100,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       pointerEvents: 'all !important'
     }
   }
-
-  // const middleOffsetSlider = (
-  //   <Slider
-  //     value={uiOffset.current}
-  //     step={500}
-  //     min={0} 
-  //     max={cycleLength}
-  //     onChange={(e, newValue) => onOffsetSliderChange((newValue as number))}
-  //     aria-label="Offset"
-  //     slots={{ 
-  //       track: Tune 
-  //     }}
-  //     slotProps={{ 
-  //       track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
-  //       rail: { style: { display: "none" } },
-  //       mark: { style: { display: "none" } },
-  //       markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } },
-  //     }}
-  //     marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
-  //     sx={slideWithThumbOnly}
-  //   />
-  // )
 
   const classicOffsetSlider = (
     <Slider
@@ -155,13 +126,13 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const rangeSlider = (
     <Slider
       disableSwap
-      value={[uiRange.current.start / 1000, uiRange.current.end / 1000]}
-      step={1}
+      value={[uiRange.current.start, uiRange.current.end]}
+      step={1000}
       min={0} 
-      max={(lightConfig.cycleLength() / 1000)}
+      max={(cycleLength)}
       valueLabelDisplay="auto"
-      valueLabelFormat={(value) => `${value} s`}
-      onChange={(e, newValue, activeThumb) => onPhaseSliderChange(selectedPhase, (newValue as number[]).map(x => x * 1000), activeThumb)}
+      valueLabelFormat={(value) => `${value / 1000} s`}
+      onChange={(e, newValue, activeThumb) => onPhaseSliderChange(selectedPhase, newValue as number[], activeThumb)}
       aria-label="Range"
       track={false}
       slotProps={{ 
@@ -215,17 +186,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         })}
         </Stack>
       </RadioGroup>
-
     </FormControl>
   )
-
-
-  const phasesPositions = []
-  let currPosition = lightConfig.offset
-  for (let phase of lightConfig.phases) {
-    phasesPositions.push({ phase: phase, position: currPosition})
-    currPosition += phase.duration
-  }
 
   return (
     <Card>
@@ -256,20 +218,13 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           <Grid size={{ xs: 12 }}>
             <Stack direction="column" alignItems="stretch">
               <Box sx={{ mt: 2 }}>
-                {/* <Typography gutterBottom>
-                  Timeline
-                </Typography> */}
-                {/* {offsetSlider} */}
                 {classicOffsetSlider}
                 {rangeSlider}
               </Box>
             </Stack>
           </Grid>
         </Grid>
-      </CardContent>
 
-
-      <CardContent>
         { expanded ? null : quickEditControls }
         <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
           <Grid container spacing={2}>
@@ -294,7 +249,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           </Grid>
         </Collapse>
       </CardContent>
-
     </Card>
   )
 }
