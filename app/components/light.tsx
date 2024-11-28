@@ -24,6 +24,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { negativeSafeMod } from '../utils'
 import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom'
+import { Height } from '@mui/icons-material'
 
 export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
 
@@ -97,11 +98,11 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       pointerEvents: 'all !important'
     },
     '& .MuiSlider-track': {
-      pointerEvents: 'all !important'
+      pointerEvents: 'none !important'
     }
   }
 
-  const classicOffsetSlider = (
+  const offsetSlider = (
     <Slider
       value={lightConfig.offset}
       step={1000}
@@ -123,6 +124,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     />
   )
 
+  const trackStyle = uiRange.current.inverted() ? { backgroundColor: 'white', height: '2px' } : { height: '1px' }
+
   const rangeSlider = (
     <Slider
       disableSwap
@@ -130,23 +133,24 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       step={1000}
       min={0} 
       max={(cycleLength)}
-      valueLabelDisplay="auto"
-      valueLabelFormat={(value) => `${value / 1000} s`}
       onChange={(e, newValue, activeThumb) => onPhaseSliderChange(selectedPhase, newValue as number[], activeThumb)}
       aria-label="Range"
-      track={false}
+      track={uiRange.current.inverted() ? 'inverted' : 'normal'}
       slotProps={{ 
-        rail: { style: { display: "none" } },
-        thumb: { style: { borderRadius: '0px', width: '5px' } },
+        track: { style: { ...trackStyle, border: 'none' } },
+        rail: { style: { display: uiRange.current.inverted() ? 'inline' : 'none', height: '1px' } },
+        thumb: { style: { borderRadius: '0px', width: '1px', marginTop: '10px' } },
+        mark: { style: { display: "none" } },
+        markLabel: { style: { marginTop: '-36px' } },
       }}
       sx={{
         ...slideWithThumbOnly,
-        paddingY: 0,
+        // paddingBottom: 0,
         // marginY: 0,
-        marginTop: '-30px',
         marginBottom: 0,
         color: `${STATE_ATTRIBUTES[selectedPhase].color}.main`,
       }}
+      marks={[{ value: modCycle((timeRange.start + (timeRange.duration()) / 2)), label: `${timeRange.duration() / 1000} s` }]}
     />
   )
 
@@ -218,8 +222,8 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           <Grid size={{ xs: 12 }}>
             <Stack direction="column" alignItems="stretch">
               <Box sx={{ mt: 2 }}>
-                {classicOffsetSlider}
                 {rangeSlider}
+                {offsetSlider}
               </Box>
             </Stack>
           </Grid>

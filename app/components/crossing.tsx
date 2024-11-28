@@ -7,7 +7,7 @@ import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
 import CrossingSettings, { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
@@ -21,6 +21,7 @@ import LightIcon from './light-icon'
 import React from 'react'
 import ShareDialog from './share-dialog'
 import syncTime from '../domain/time-sync'
+import SyncAltIcon from '@mui/icons-material/SyncAlt'
 
 export default function CrossingComponent() {
 
@@ -50,6 +51,12 @@ export default function CrossingComponent() {
 
   const wrapListener = {
     nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / crossingSettings.cycleLength) + 1) * crossingSettings.cycleLength
+  }
+
+  const [selectedTab, setSelectedTab] = React.useState(0)
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setSelectedTab(newValue)
   }
 
   const clock = new Clock(timeCorrection)
@@ -199,6 +206,12 @@ export default function CrossingComponent() {
           </CardContent>
         </Collapse>
       </Card>
+
+      <Tabs value={selectedTab} onChange={handleTabChange} aria-label="basic tabs example">
+        <Tab label={<ShareIcon />} />
+        <Tab label={<FullscreenIcon />} />
+        <Tab label={<SyncAltIcon />} />
+      </Tabs>
 
       { lights.map((light, index) =>
         <LightComponent
