@@ -2,7 +2,7 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, PresetId, PRESETS, TimeRange } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem, NoSsr, RadioGroup, FormControlLabel, Radio, duration, Box, Button, CardActionArea } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Slider, Typography, SliderComponentsPropsOverrides, Checkbox, Select, MenuItem, NoSsr, RadioGroup, FormControlLabel, Radio, duration, Box, Button, CardActionArea, FormControl } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -12,7 +12,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useEffect, useRef, useState } from 'react'
 import Tune from './tune'
 import { ExpandMore } from './expand-more'
-import PhaseControls, { PhaseControl } from './phase-controls'
+import { PhaseControl } from './phase-controls'
 import LightIcon from './light-icon'
 import React from 'react'
 import { State, STATE_ATTRIBUTES } from '../domain/state'
@@ -108,27 +108,27 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     }
   }
 
-  const middleOffsetSlider = (
-    <Slider
-      value={uiOffset.current}
-      step={500}
-      min={0} 
-      max={cycleLength}
-      onChange={(e, newValue) => onOffsetSliderChange((newValue as number))}
-      aria-label="Offset"
-      slots={{ 
-        track: Tune 
-      }}
-      slotProps={{ 
-        track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
-        rail: { style: { display: "none" } },
-        mark: { style: { display: "none" } },
-        markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } },
-      }}
-      marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
-      sx={slideWithThumbOnly}
-    />
-  )
+  // const middleOffsetSlider = (
+  //   <Slider
+  //     value={uiOffset.current}
+  //     step={500}
+  //     min={0} 
+  //     max={cycleLength}
+  //     onChange={(e, newValue) => onOffsetSliderChange((newValue as number))}
+  //     aria-label="Offset"
+  //     slots={{ 
+  //       track: Tune 
+  //     }}
+  //     slotProps={{ 
+  //       track: { lightConfig: lightConfig, onLightSettingsChange: onLightSettingsChange } as SliderComponentsPropsOverrides,
+  //       rail: { style: { display: "none" } },
+  //       mark: { style: { display: "none" } },
+  //       markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } },
+  //     }}
+  //     marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
+  //     sx={slideWithThumbOnly}
+  //   />
+  // )
 
   const classicOffsetSlider = (
     <Slider
@@ -180,7 +180,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   )
 
   const quickEditControls = (
-    <>
+    <FormControl fullWidth>
       <RadioGroup
         row={!(expanded)}
         aria-labelledby="demo-radio-buttons-group-label"
@@ -188,10 +188,10 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         value={sliderMode}
         onChange={event => setSliderMode((event.target as HTMLInputElement).value)}
       >
+        <Stack direction={ expanded ? 'column' : 'row' } spacing={ expanded ? 1 : 0 }>
         { lightConfig.phases.map(phase => {
           const phaseControl = (
             <PhaseControl
-              style={{marginLeft: 'auto'}}
               label={`${phase.stateAttributes().name} duration`} 
               id={`light-${index}-${phase.stateAttributes().name}-duration`} 
               min={0} 
@@ -202,16 +202,21 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             />
           )
           return (
-            <FormControlLabel 
-              key={phase.state} 
-              value={phase.state} 
-              control={<Radio size='small' color={`${phase.stateAttributes().color}`} sx={{ color: `${phase.stateAttributes().color}.main` }}/>} 
-              label={expanded ? phaseControl : <></>}
-            />
+            <Stack direction='row'>
+              <FormControlLabel 
+                key={phase.state} 
+                value={phase.state} 
+                control={<Radio size='small' color={`${phase.stateAttributes().color}`} sx={{ color: `${phase.stateAttributes().color}.main` }}/>} 
+                label=''
+              />
+              { expanded ? phaseControl : null }
+            </Stack>
           )
         })}
+        </Stack>
       </RadioGroup>
-    </>
+
+    </FormControl>
   )
 
 
@@ -265,22 +270,28 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
 
       <CardContent>
-        {quickEditControls}
+        { expanded ? null : quickEditControls }
         <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
-          <Stack direction="column" alignItems="stretch">
-            <Box sx={{ my: 2 }}>
+          <Grid container spacing={2}>
+            <Grid size={{xs: 12, md: 4, lg: 3}}>
+              <Typography gutterBottom>
+                Phases
+              </Typography>
+              {quickEditControls}
+            </Grid>
+            <Grid size={{xs: 12, md: 4, lg: 3}}>
               <Typography gutterBottom>
                 Preset
               </Typography>
-              <Select fullWidth value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
+              <Select fullWidth size='small' value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
                 { 
                   Object.values(PRESETS).map(preset => 
                     <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
                   )
                 }
               </Select>
-            </Box>
-          </Stack>
+            </Grid>
+          </Grid>
         </Collapse>
       </CardContent>
 

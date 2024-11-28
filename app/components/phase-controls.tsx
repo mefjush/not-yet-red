@@ -1,9 +1,9 @@
 "use client"
 
-import { Slider, Input as MuiInput, Stack, ButtonGroup, Button, Dialog, DialogTitle, DialogContent } from '@mui/material'
+import { Slider, Input as MuiInput, Stack, ButtonGroup, Button, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import Grid from '@mui/material/Grid2'
-import { KeyboardEvent, FocusEvent, useState } from 'react'
+import { KeyboardEvent, FocusEvent, useState, useRef } from 'react'
 import { TrafficLightColors } from '../domain/state'
 import { useLongPress } from 'use-long-press'
 
@@ -31,6 +31,43 @@ const fix = (inVal: number, min?: number, max?: number, step?: number) => {
     outVal = Math.round(inVal * 100) / 100
   }
   return toEvent(outVal)
+}
+
+function DelayedTextField({value, onChange}: {value: number, onChange: ((v: number) => void)}) {
+
+  const lastLegalValue = useRef(value)
+  const [uiValue, setUiValue] = useState(value + '')
+
+  if (lastLegalValue.current != value) {
+    setUiValue(value + '')
+    lastLegalValue.current = value
+  }
+
+  return (
+    <TextField
+      value={uiValue}
+      onChange={e => {
+        setUiValue(e.target.value)
+        const val = Number.parseInt(e.target.value)
+        if (!Number.isNaN(val)) {
+          onChange(val)
+        }
+      }}
+      variant="outlined" 
+      size='small' 
+      type="number"
+      slotProps={{
+        input: {
+          style: {
+            WebkitAppearance: 'none', 
+            MozAppearance: 'textfield',
+            borderRadius: 0,
+            textAlign: 'center'
+          }
+        },
+      }}  
+    />
+  )
 }
 
 function PhaseSlider({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors}) {
@@ -89,7 +126,6 @@ function PhaseSlider({id, label, min, max, step, value, onChange, color}: {id: s
 
 export function PhaseControl({id, label, min, max, step, value, onChange, color, style}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors, style?: React.CSSProperties}) {
   
-  const [open, setOpen] = useState(false)
   const [longPressInterval, setLongPressInterval] = useState<NodeJS.Timeout|null>(null)
   
   const clearLongPressInterval = () => {
@@ -116,44 +152,11 @@ export function PhaseControl({id, label, min, max, step, value, onChange, color,
 
   return (
     <>
-      <ButtonGroup variant="outlined" size='small' aria-label="Basic button group" style={style}>
+      <ButtonGroup fullWidth variant="outlined" size='small' aria-label="Basic button group" style={style}>
         <Button {...bindDec()} color={color} variant='contained' onClick={e => onChange(fix(value - 1, min, max, step))}>-</Button>
-        <Button color={color} variant='outlined' onClick={e => setOpen(true)}>{value}</Button>
+        <DelayedTextField value={value} onChange={val => onChange(fix(val, min, max, step))} />
         <Button {...bindInc()} color={color} variant='contained' onClick={e => onChange(fix(value + 1, min, max, step))}>+</Button>
       </ButtonGroup>
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        fullWidth
-      >
-        <DialogTitle>Set {label}</DialogTitle>
-        <DialogContent>
-          <Stack direction="column" spacing={1}>
-            <PhaseSlider id={id} label={label} min={min} max={max} step={step} value={value} onChange={onChange} color={color} />
-            <Button onClick={e => setOpen(false)}>OK</Button>
-          </Stack>
-        </DialogContent>
-      </Dialog>
     </>
-  )
-}
-
-export default function PhaseControls({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors}) {
-  
-  return (
-    <Grid container spacing={2} sx={{ my: 1 }}>
-      <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-        <PhaseControl label={label} id={id} min={min} max={max} step={step} value={value} onChange={onChange} color={color}/>
-        {/* <ButtonGroup variant="outlined" aria-label="Basic button group" fullWidth>
-
-          <Button {...bindDec()} color={color} variant='contained' onClick={e => onChange(fix(value - 1, min, max, step))}>-</Button>
-          <Button color={color} variant='outlined' onClick={e => setOpen(true)}>{value}</Button>
-          <Button {...bindInc()} color={color} variant='contained' onClick={e => onChange(fix(value + 1, min, max, step))}>+</Button>
-        </ButtonGroup> */}
-      </Grid>
-      <Grid size={{ xs: 12, md: 6, lg: 8 }} display={{ xs: 'none', md: 'block' }}>
-        <PhaseSlider id={id} label={label} min={min} max={max} step={step} value={value} onChange={onChange} color={color}/>
-      </Grid>
-    </Grid>
   )
 }
