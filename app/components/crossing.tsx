@@ -7,7 +7,7 @@ import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab, Dialog, Slide, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText, Divider } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
 import CrossingSettings, { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
@@ -107,7 +107,7 @@ export default function CrossingComponent() {
     setSelected(b ? lights.map((l, i) => i) : [])
   }
 
-  const getShareUrl = function() {
+  const getShareUrl = () => {
     if (shareMode.length == 0) {
       return ""
     } 
@@ -245,7 +245,6 @@ export default function CrossingComponent() {
         open={shareMode.length > 0}
         onClose={() => setShareMode([])}
       />
-
       <Fab color="primary" aria-label="add" onClick={onAdd} style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}>
         <AddIcon />
       </Fab>
