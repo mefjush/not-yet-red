@@ -84,11 +84,11 @@ const theme = createTheme({
 
 function Content() {
 
-  const logos = [
-    <CircleIcon key={1} color='disabled' />,
-    <CircleIcon key={2} color='action' />,
-    <CircleOutlinedIcon key={3} color='disabled' />,
-  ]
+  // const logos = [
+  //   <CircleIcon key={1} color='disabled' />,
+  //   <CircleIcon key={2} color='action' />,
+  //   <CircleOutlinedIcon key={3} color='disabled' />,
+  // ]
 
   return (
     <>
@@ -105,7 +105,7 @@ function Content() {
               <MenuIcon />
             </IconButton> */}
             <IconButton size="large" edge="start" href="/">
-              {logos}
+              <TrafficIcon style={{ color: 'white' }}/>
             </IconButton>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Traffic Lights
@@ -121,7 +121,7 @@ function Content() {
           alignItems="center"
         >
           <IconButton size="large" edge="start" href="/">
-            {logos}
+            <TrafficIcon />
           </IconButton> 
           <p>2024 <strong>Traffic Lights</strong> by mefju</p>
         </Box>

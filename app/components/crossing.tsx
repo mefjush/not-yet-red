@@ -33,7 +33,7 @@ export default function CrossingComponent() {
 
   const [expanded, setExpanded] = useState(false)
 
-  const [quickEditEnabled, setQuickEditEnabled] = useState(false)
+  const [quickEditEnabled, setQuickEditEnabled] = useState(true)
 
   const [selected, setSelected] = useState<number[]>([])
 
@@ -209,11 +209,12 @@ export default function CrossingComponent() {
         </Collapse>
       </Card>
 
-      <Tabs value={selectedTab} onChange={handleTabChange} aria-label="basic tabs example">
+      {/* <Tabs value={selectedTab} onChange={handleTabChange} aria-label="basic tabs example">
+        <Tab label={<SettingsIcon />} />
         <Tab label={<ShareIcon />} />
         <Tab label={<FullscreenIcon />} />
         <Tab label={<SyncAltIcon />} />
-      </Tabs>
+      </Tabs> */}
 
       { lights.map((light, index) =>
         <LightComponent
@@ -230,6 +231,7 @@ export default function CrossingComponent() {
           onShare={() => setShareMode([index])}
           quickEditEnabled={quickEditEnabled}
           toggleQuickEdit={() => setQuickEditEnabled(!quickEditEnabled)}
+          selectedTab={selectedTab}
         />
       )}
 

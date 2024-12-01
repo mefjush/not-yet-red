@@ -27,18 +27,6 @@ export default function LightSettingsComponent({ lightConfig, onLightSettingsCha
         </Typography>
         {quickEditControls}
       </Grid>
-      <Grid size={{xs: 12, md: 4, lg: 3}}>
-        <Typography gutterBottom>
-          Preset
-        </Typography>
-        <Select fullWidth size='small' value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
-          { 
-            Object.values(PRESETS).map(preset => 
-              <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
-            )
-          }
-        </Select>
-      </Grid>
     </Grid>
   )
 }

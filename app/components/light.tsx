@@ -35,7 +35,7 @@ import { TransitionProps } from '@mui/material/transitions'
 import Timeline from './timeline'
 import LightSettingsComponent from './light-settings'
 
-export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare, quickEditEnabled, toggleQuickEdit }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void, quickEditEnabled: boolean, toggleQuickEdit: () => void }) {
+export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare, quickEditEnabled, toggleQuickEdit, selectedTab }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void, quickEditEnabled: boolean, toggleQuickEdit: () => void, selectedTab: number }) {
 
   const [expanded, setExpanded] = useState(false)
   const [selectedState, setSelectedState] = useState(State.RED)
@@ -89,13 +89,27 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     </IconButton>
   )
 
+  const checkbox = (
+    <Checkbox 
+      value={selected} 
+      checked={selected}
+      onClick={e => e.stopPropagation()}
+      onChange={e => {
+        onSelectionChange(e.target.checked)
+      }}
+      onTouchStart={(event) => event.stopPropagation()}
+      onMouseDown={(event) => event.stopPropagation()}
+    />
+  )
+
   const bottomActions = quickEditEnabled && (
     <CardActions>
       <Box sx={{ ml: 1 }}>
       { quickEditControls }
       </Box>
       <Box style={{marginLeft: 'auto'}}>
-        <Button onClick={toggleQuickEdit}>ok</Button>
+        {/* <Button onClick={toggleQuickEdit}>ok</Button> */}
+        {editButton}
       </Box>
     </CardActions>
   )
@@ -115,21 +129,12 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   return (
     <>
       <Card>
-        <CardActionArea disabled={false} component="a" onClick={() => setExpanded(!expanded)}>
+        <CardActionArea disabled={false} component="a" onClick={() => onSelectionChange(!selected)}>
           <CardActions disableSpacing sx={{ alignItems: 'flex-start' }}>
-            <Checkbox 
-              value={selected} 
-              checked={selected}
-              onClick={e => e.stopPropagation()}
-              onChange={e => {
-                onSelectionChange(e.target.checked)
-              }}
-              onTouchStart={(event) => event.stopPropagation()}
-              onMouseDown={(event) => event.stopPropagation()}
-            />
+            {checkbox}
             {/* <Box style={{ visibility: 'hidden' }}>{editButton}</Box> to make sure the traffic light is centered */}
             <Box style={{ marginLeft: 'auto' }}>{lightIcon}</Box>
-            <Box style={{ marginLeft: 'auto' }}>{editButton}</Box> 
+            <Box style={{ marginLeft: 'auto', visibility: 'hidden' }}>{editButton}</Box> 
           </CardActions>
         </CardActionArea> 
 
@@ -146,7 +151,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
-            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+            <Typography sx={{ flex: 1 }} variant="h6" component="div">
               Light Settings
             </Typography>
             <Button autoFocus color="inherit" onClick={handleClose}>
@@ -161,8 +166,22 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
           { deleteButton }
         </CardActions>
 
-        <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-          <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={0}>
+        <Stack spacing={2} sx={{ p: 3 }}>
+          <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={2}>
+
+            <Grid size={{xs: 12, md: 4, lg: 3}}>
+              <Typography gutterBottom>
+                Preset
+              </Typography>
+              <Select fullWidth size='small' value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
+                { 
+                  Object.values(PRESETS).map(preset => 
+                    <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
+                  )
+                }
+              </Select>
+            </Grid>
+
             <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="center">
               {lightIcon}
             </Grid>
