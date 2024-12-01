@@ -33,6 +33,8 @@ export default function CrossingComponent() {
 
   const [expanded, setExpanded] = useState(false)
 
+  const [quickEditEnabled, setQuickEditEnabled] = useState(false)
+
   const [selected, setSelected] = useState<number[]>([])
 
   const [fullscreenMode, setFullscreenMode] = useState<number[]>([])
@@ -226,6 +228,8 @@ export default function CrossingComponent() {
           onSelectionChange={(checked) => checked ? setSelected([...selected, index]) : setSelected(selected.filter(x => x != index))}
           onFullscreen={() => setFullscreenMode([index])}
           onShare={() => setShareMode([index])}
+          quickEditEnabled={quickEditEnabled}
+          toggleQuickEdit={() => setQuickEditEnabled(!quickEditEnabled)}
         />
       )}
 

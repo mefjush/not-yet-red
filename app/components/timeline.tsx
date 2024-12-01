@@ -1,7 +1,7 @@
 "use client"
 
 import LightConfig, { LightSettings, TimeRange } from '../domain/light-config'
-import { Slider, SliderComponentsPropsOverrides } from '@mui/material'
+import { Box, Slider, SliderComponentsPropsOverrides } from '@mui/material'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { useEffect, useRef, useState } from 'react'
 import Tune from './tune'
@@ -9,7 +9,7 @@ import React from 'react'
 import { State, STATE_ATTRIBUTES } from '../domain/state'
 import { negativeSafeMod } from '../utils'
 
-export default function Timeline({ currentTimestamp, lightConfig, onLightSettingsChange, selectedState }: { currentTimestamp: number, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, selectedState?: State }) {
+export default function Timeline({ currentTimestamp, lightConfig, onLightSettingsChange, selectedState, editable }: { currentTimestamp: number, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, selectedState?: State, editable: boolean }) {
 
   const [transitionStartTime, setTransitionStartTime] = useState(-1)
   
@@ -71,8 +71,11 @@ export default function Timeline({ currentTimestamp, lightConfig, onLightSetting
     }
   }
 
+  const thumbStyle = editable ? {} : { display: 'none' }
+
   const offsetSlider = (
     <Slider
+      disabled={!editable}
       value={lightConfig.offset}
       step={1000}
       min={0} 
@@ -87,6 +90,7 @@ export default function Timeline({ currentTimestamp, lightConfig, onLightSetting
         rail: { style: { display: "none" } },
         mark: { style: { display: "none" } },
         markLabel: { style: { transitionDuration: `${transitionDuration}ms`, transitionTimingFunction: 'linear' } },
+        thumb: { style: thumbStyle }
       }}
       marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
       sx={slideWithThumbOnly}
@@ -123,12 +127,12 @@ export default function Timeline({ currentTimestamp, lightConfig, onLightSetting
     />
   )
 
-  const rangeSlider = selectedState ? getRangeSlider(selectedState) : null
+  const rangeSlider = editable && selectedState ? getRangeSlider(selectedState) : null
 
   return (
-    <>
+    <Box sx={{ my: 2 }}>
       {rangeSlider}
       {offsetSlider}
-    </>
+    </Box>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import TrafficLight from '../domain/traffic-light'
-import { Stack, Avatar, AvatarProps } from '@mui/material'
+import { Stack, Avatar, AvatarProps, Box } from '@mui/material'
 import { styled, alpha, Palette, PaletteColor } from "@mui/material/styles"
 import { SegmentColor } from '../domain/state'
 import LightConfig, { SymbolId, SYMBOLS } from '../domain/light-config'
@@ -79,21 +79,23 @@ export default function LightIcon({ currentTimestamp, light, lightConfig, height
   })
 
   return (
-    <Stack 
-      direction='column' 
-      spacing={`${Math.round(heightValue * 0.01)}${heightUnit}`} 
-      sx={{ 
-        padding: `${Math.round(heightValue * 0.06)}${heightUnit}`, 
-        borderRadius: `${Math.round(heightValue * 0.1)}${heightUnit}`, 
-        border: `${0.015 * segmentSize}${heightUnit} solid black`,
-        transitionDuration: TRANSITION_DURATION,
-        backgroundColor: '#131313',
-        boxShadow: 3
-      }}
-      justifyContent="center"
-      alignItems="center"
-    >
-      {segmentStates}
-    </Stack>
+    <Box sx={{ py: 2 }}>
+      <Stack 
+        direction='column' 
+        spacing={`${Math.round(heightValue * 0.01)}${heightUnit}`} 
+        sx={{ 
+          padding: `${Math.round(heightValue * 0.06)}${heightUnit}`, 
+          borderRadius: `${Math.round(heightValue * 0.1)}${heightUnit}`, 
+          border: `${0.015 * segmentSize}${heightUnit} solid black`,
+          transitionDuration: TRANSITION_DURATION,
+          backgroundColor: '#131313',
+          boxShadow: 3
+        }}
+        justifyContent="center"
+        alignItems="center"
+      >
+        {segmentStates}
+      </Stack>
+    </Box>
   )
 }

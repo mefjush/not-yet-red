@@ -2,7 +2,7 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, PresetId, PRESETS } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Typography, Checkbox, Select, MenuItem, RadioGroup, FormControlLabel, Radio, Box, CardActionArea, FormControl } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Typography, Checkbox, Select, MenuItem, RadioGroup, FormControlLabel, Radio, Box, CardActionArea, FormControl, CardHeader, CardMedia } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ShareIcon from '@mui/icons-material/Share'
@@ -35,20 +35,21 @@ import { TransitionProps } from '@mui/material/transitions'
 import Timeline from './timeline'
 import LightSettingsComponent from './light-settings'
 
-export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void }) {
+export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare, quickEditEnabled, toggleQuickEdit }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void, quickEditEnabled: boolean, toggleQuickEdit: () => void }) {
 
   const [expanded, setExpanded] = useState(false)
   const [selectedState, setSelectedState] = useState(State.RED)
   
   const handleExpandClick = () => {
-    setExpanded(!expanded);
+    setExpanded(!expanded)
   }
 
-  const effectivelyExpanded = expanded
+  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => {
+    toggleQuickEdit()
+    onDelete()
+  }}><DeleteIcon /></IconButton>
 
-  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => onDelete()}><DeleteIcon /></IconButton>
-
-  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ effectivelyExpanded ? '150px' : '60px' } />
+  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
 
   const quickEditControls = (
     <PhaseControls
@@ -56,7 +57,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       onLightSettingsChange={onLightSettingsChange}
       setSelectedState={setSelectedState}
       selectedState={selectedState}
-      expanded={effectivelyExpanded}
+      expanded={expanded}
     />
   )
 
@@ -71,113 +72,119 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
 
   const handleClose = () => setExpanded(false)
 
-  const theCard = (
-    <Card>
-      <CardActions>
-        { effectivelyExpanded || <Checkbox value={selected} checked={selected} onChange={e => onSelectionChange(e.target.checked)}/>}
-        { effectivelyExpanded && <IconButton aria-label="fullscreen" onClick={onFullscreen}><FullscreenIcon /></IconButton>}
-        { effectivelyExpanded && <IconButton aria-label="share" onClick={onShare}><ShareIcon /></IconButton>}
-        { effectivelyExpanded && deleteButton }
-        <ExpandMore
-          expand={effectivelyExpanded}
-          onClick={handleExpandClick}
-          aria-expanded={effectivelyExpanded}
-          aria-label="show more"
-          style={{marginLeft: 'auto'}}
-        >
-          <ExpandMoreIcon />
-        </ExpandMore>
-      </CardActions>
+  const editButton = (
+    <IconButton 
+      disabled={false}
+      aria-label="edit" 
+      onTouchStart={(event) => event.stopPropagation()}
+      onMouseDown={(event) => event.stopPropagation()}
+    
+      onClick={(event) => {
+        // Prevent CardActionArea Click
+        event.preventDefault()
+        handleExpandClick()
+      }}
+    >
+      <EditIcon />
+    </IconButton>
+  )
 
-      <CardContent>
-        <Grid container sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }} spacing={0}>
-          <CardActionArea onClick={() => setExpanded(!expanded)}>
+  const bottomActions = quickEditEnabled && (
+    <CardActions>
+      <Box sx={{ ml: 1 }}>
+      { quickEditControls }
+      </Box>
+      <Box style={{marginLeft: 'auto'}}>
+        <Button onClick={toggleQuickEdit}>ok</Button>
+      </Box>
+    </CardActions>
+  )
+
+  const theContent = (
+    <CardContent>
+      <Timeline 
+        currentTimestamp={currentTimestamp} 
+        lightConfig={lightConfig} 
+        onLightSettingsChange={onLightSettingsChange} 
+        selectedState={selectedState}
+        editable={quickEditEnabled}
+      />
+    </CardContent>
+  ) 
+
+  return (
+    <>
+      <Card>
+        <CardActionArea disabled={false} component="a" onClick={() => setExpanded(!expanded)}>
+          <CardActions disableSpacing sx={{ alignItems: 'flex-start' }}>
+            <Checkbox 
+              value={selected} 
+              checked={selected}
+              onClick={e => e.stopPropagation()}
+              onChange={e => {
+                onSelectionChange(e.target.checked)
+              }}
+              onTouchStart={(event) => event.stopPropagation()}
+              onMouseDown={(event) => event.stopPropagation()}
+            />
+            {/* <Box style={{ visibility: 'hidden' }}>{editButton}</Box> to make sure the traffic light is centered */}
+            <Box style={{ marginLeft: 'auto' }}>{lightIcon}</Box>
+            <Box style={{ marginLeft: 'auto' }}>{editButton}</Box> 
+          </CardActions>
+        </CardActionArea> 
+
+        { quickEditEnabled ? theContent : <CardActionArea disabled={quickEditEnabled} component="a" onClick={toggleQuickEdit}>{theContent}</CardActionArea> }
+        {bottomActions}
+
+      </Card>
+
+      <Dialog
+        fullScreen
+        open={expanded}
+        onClose={handleClose}
+        // TransitionComponent={Transition}
+      >
+        <AppBar sx={{ position: 'relative' }}>
+          <Toolbar>
+            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+              Light Settings
+            </Typography>
+            <Button autoFocus color="inherit" onClick={handleClose}>
+              ok
+            </Button>
+          </Toolbar>
+        </AppBar>
+        
+        <CardActions>
+          <IconButton aria-label="fullscreen" onClick={onFullscreen}><FullscreenIcon /></IconButton>
+          <IconButton aria-label="share" onClick={onShare}><ShareIcon /></IconButton>
+          { deleteButton }
+        </CardActions>
+
+        <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+          <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={0}>
             <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="center">
               {lightIcon}
             </Grid>
-          </CardActionArea>
-          <Grid size={{ xs: 12 }}>
-            <Stack direction="column" alignItems="stretch">
-              <Box sx={{ mt: 2 }}>
-                <Timeline 
-                  currentTimestamp={currentTimestamp} 
-                  lightConfig={lightConfig} 
-                  onLightSettingsChange={onLightSettingsChange} 
-                  selectedState={selectedState}
-                />
-              </Box>
-            </Stack>
+            <Grid size={{ xs: 12 }}>
+              <Timeline 
+                currentTimestamp={currentTimestamp} 
+                lightConfig={lightConfig} 
+                onLightSettingsChange={onLightSettingsChange} 
+                selectedState={selectedState}
+                editable={true}
+              />
+            </Grid>
           </Grid>
-        </Grid>
 
-        { expanded ? null : quickEditControls }
-        
-        {/* <Collapse in={effectivelyExpanded} timeout="auto" unmountOnExit>
           <LightSettingsComponent
             lightConfig={lightConfig}
             onLightSettingsChange={onLightSettingsChange}
             setSelectedState={setSelectedState}
             selectedState={selectedState}
           />
-        </Collapse> */}
-      </CardContent>
-    </Card>
-  )
-
-  return (
-    <>
-      {theCard}
-      <Dialog
-        fullScreen
-        open={effectivelyExpanded}
-        onClose={handleClose}
-        // TransitionComponent={Transition}
-      >
-        <AppBar sx={{ position: 'relative' }}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={handleClose}
-              aria-label="close"
-            >
-              <CloseIcon />
-            </IconButton>
-            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-              Sound
-            </Typography>
-            <Button autoFocus color="inherit" onClick={handleClose}>
-              save
-            </Button>
-          </Toolbar>
-        </AppBar>
-        
-        <Grid container sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }} spacing={0}>
-          <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="center">
-            {lightIcon}
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <Stack direction="column" alignItems="stretch">
-              <Box sx={{ mt: 2 }}>
-                <Timeline 
-                  currentTimestamp={currentTimestamp} 
-                  lightConfig={lightConfig} 
-                  onLightSettingsChange={onLightSettingsChange} 
-                  selectedState={selectedState}
-                />
-              </Box>
-            </Stack>
-          </Grid>
-        </Grid>
-
-        <LightSettingsComponent
-          lightConfig={lightConfig}
-          onLightSettingsChange={onLightSettingsChange}
-          setSelectedState={setSelectedState}
-          selectedState={selectedState}
-        />
+        </Stack>
       </Dialog>
     </>
-    
   )
 }
