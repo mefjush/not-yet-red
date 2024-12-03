@@ -1,6 +1,6 @@
 "use client"
 
-import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Checkbox, Button } from '@mui/material'
+import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Checkbox, Button, FormControlLabel } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
 import TrafficIcon from '@mui/icons-material/Traffic'
@@ -107,6 +107,7 @@ function Content() {
       <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
         Traffic Lights
       </Typography>
+      
       <IconButton
         size="large"
         color="inherit"
@@ -124,7 +125,7 @@ function Content() {
       </IconButton>
       <IconButton
         size="large"
-        edge="end"
+        // edge="end"
         color="inherit"
         aria-label="fullscreen"
         onClick={(e) => {
@@ -141,37 +142,61 @@ function Content() {
     </>
   )
 
+  const checkbox = (
+    <Checkbox 
+      edge="start"
+      size='medium'
+      checked={totalCount == selectedCount} 
+      indeterminate={selectedCount != totalCount && selectedCount > 0} 
+      aria-label='select all'
+      onChange={e => {
+        childRef?.current?.handleSelectAll(e.target.checked)
+      }}
+      color='default'
+      sx={{
+        color: 'white'
+      }}
+    />
+  )
+
+  const action = ((uiMode == 'fullscreen') ? childRef?.current?.enterFullscreen : childRef?.current?.enterShareDialog) || (() => {})
+  const icon = (uiMode == 'fullscreen') ? <FullscreenIcon /> : <ShareIcon />
+
   const selectionToolbarElements = (
     <>
-      <Checkbox 
-        edge="start"
-        size='medium'
-        checked={totalCount == selectedCount} 
-        indeterminate={selectedCount != totalCount && selectedCount > 0} 
-        aria-label='select all'
-        onChange={e => {
-          childRef?.current?.handleSelectAll(e.target.checked)
-        }}
-        color='default'
+      <IconButton 
+        size="large" 
+        edge="start" 
+        color='inherit' 
+        onClick={action}
+      >
+        {icon}
+      </IconButton>
+
+      <Box sx={{ flexGrow: 1 }}></Box>
+
+      <FormControlLabel 
+        control={checkbox}
+        label="Select all"
+        labelPlacement='end'
       />
-      <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-        Select all
-      </Typography>
       
-      <Button color='inherit' onClick={e => {
-        setUiMode('none')
-        setSelectionMode(false)
-      }}>
+      <Button 
+        color='inherit' 
+        onClick={e => {
+          setUiMode('none')
+          setSelectionMode(false)
+        }}
+      >
         cancel
       </Button>
-      <Button color='inherit' onClick={e => {
-        setSelectionMode(false)
-        if (uiMode == 'fullscreen') {
-          childRef?.current?.enterFullscreen()
-        } else {
-          childRef?.current?.enterShareDialog()
-        }
-      }}>
+      <Button 
+        color='inherit' 
+        onClick={e => {
+          setSelectionMode(false)
+          action()
+        }}
+      >
         ok
       </Button>
     </>
@@ -179,11 +204,10 @@ function Content() {
 
   const toolbarElements = selectionMode ? selectionToolbarElements : baseToolbarElements
 
-
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
+        <AppBar position="fixed">
           <Toolbar>
             {/* <IconButton
               size="large"
@@ -232,6 +256,7 @@ function Content() {
             {toolbarElements}
           </Toolbar>
         </AppBar>
+        <Toolbar />
       </Box>
       <CrossingComponent 
         ref={childRef}

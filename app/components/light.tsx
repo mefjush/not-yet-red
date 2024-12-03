@@ -153,7 +153,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         onClose={handleClose}
         // TransitionComponent={Transition}
       >
-        <AppBar sx={{ position: 'relative' }}>
+        <AppBar position='fixed'>
           <Toolbar>
             <Typography sx={{ flex: 1 }} variant="h6" component="div">
               Light Settings
@@ -163,6 +163,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
             </Button>
           </Toolbar>
         </AppBar>
+        <Toolbar />
         
         <CardActions>
           <IconButton aria-label="fullscreen" onClick={onFullscreen}><FullscreenIcon /></IconButton>
