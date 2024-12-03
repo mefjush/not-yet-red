@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, ReactNode, forwardRef, useImperativeHandle } from 'react'
+import { useState, useEffect, ReactNode, forwardRef, useImperativeHandle, Ref } from 'react'
 import LightComponent from './light'
 import Clock from '../domain/clock'
 import TrafficLight from '../domain/traffic-light'
@@ -25,7 +25,17 @@ import SyncAltIcon from '@mui/icons-material/SyncAlt'
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
 
-export default forwardRef(function CrossingComponent({ onToolbarChange, selectionMode, onSelectionChanged }: { onToolbarChange: (replace: boolean, e: React.JSX.Element) => void, selectionMode: boolean, onSelectionChanged: (total: number, selected: number) => void }, ref) {
+export interface RefObject {
+  
+  handleSelectAll(value: boolean): void
+
+  enterFullscreen(): void
+
+  enterShareDialog(): void
+
+}
+
+export default forwardRef(function CrossingComponent({ selectionMode, onSelectionChanged }: { selectionMode: boolean, onSelectionChanged: (total: number, selected: number) => void }, ref: Ref<RefObject>) {
 
   const [crossingSettings, setCrossingSettings] = useStateParams(DEFAULT_CROSSING_SETTINGS, "crossing", CrossingSettingsSerDeser)
 
@@ -43,8 +53,6 @@ export default forwardRef(function CrossingComponent({ onToolbarChange, selectio
 
   const [shareMode, setShareMode] = useState<number[]>([])
 
-  const [batchMode, setBatchMode] = useState<BatchMode>('none')
-
   const [lightSettings, setLightSettings] = useStateParams([DEFAULT_LIGHT_SETTINGS], "lights", LightSettingsSerDeser)
 
   const failure = new Failure(crossingSettings.failure.duration, crossingSettings.failure.probability)
@@ -58,8 +66,7 @@ export default forwardRef(function CrossingComponent({ onToolbarChange, selectio
 
   useImperativeHandle(ref, () => ({
 
-    getAlert(value: boolean) {
-      // alert("getAlert from Child");
+    handleSelectAll(value: boolean) {
       onAllSelectionChanged(value)
     },
 
@@ -108,73 +115,8 @@ export default forwardRef(function CrossingComponent({ onToolbarChange, selectio
     />
   )
 
-  const batchModeToolbarElements = () => (
-    <>
-      {checkbox()}
-      <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-        Select all
-      </Typography>
-      
-      <Button color='inherit' onClick={e => {
-        setBatchMode('none')
-        // onToolbarChange(false, baseToolbarElements())
-      }}>
-        cancel
-      </Button>
-      <Button color='inherit' onClick={e => {
-        if (batchMode == 'fullscreen') {
-          setFullscreenMode(selected)
-        } else {
-          setShareMode(selected)
-        }
-        setBatchMode('none')
-        // onToolbarChange(false, baseToolbarElements())
-      }}>
-        ok
-      </Button>
-    </>
-  )
-  
-  const baseToolbarElements = () => (
-    <>
-      <IconButton 
-        aria-label='share'
-        onClick={() => {
-          if (lightConfigs.length > 1) {
-            setBatchMode('share')
-            // onToolbarChange(true, batchModeToolbarElements())
-          } else {
-            setShareMode(lightConfigs.map((x, i) => i))
-          }
-        }}
-        color='inherit'
-      >
-        <ShareIcon />
-      </IconButton>
-      <IconButton 
-        aria-label='fullscreen'
-        onClick={() => {
-          if (lightConfigs.length > 1) {
-            setBatchMode('fullscreen')
-            // onToolbarChange(true, batchModeToolbarElements())
-          } else {
-            setFullscreenMode(lightConfigs.map((x, i) => i))
-          }
-        }}
-        color='inherit'
-      >
-        <FullscreenIcon />
-      </IconButton>
-    </> 
-  )
-
-  // const toolbarElements = () => batchMode == 'none' ? baseToolbarElements() : batchModeToolbarElements()
-
-  // const toolbarReplace = () => batchMode != 'none'
-
   // once
   useEffect(() => {
-    // onToolbarChange(toolbarReplace(), toolbarElements())
     onSelectionChanged(lightConfigs.length, selected.length)
     initTimeSync()
   }, [])
@@ -203,7 +145,6 @@ export default forwardRef(function CrossingComponent({ onToolbarChange, selectio
     const updatedLightSettings = [...lightSettings, DEFAULT_LIGHT_SETTINGS]
     setLightSettings(updatedLightSettings)
     onSelectionChanged(updatedLightSettings.length, selected.length)
-    // onToolbarChange(toolbarReplace(), toolbarElements())
   }
 
   const onDelete = (indicesToDelete: number[]) => {
@@ -211,7 +152,6 @@ export default forwardRef(function CrossingComponent({ onToolbarChange, selectio
     const updatedLightSettings = [...lightSettings].filter((ls, i) => !indicesToDelete.includes(i))
     setLightSettings(updatedLightSettings)
     onSelectionChanged(updatedLightSettings.length, 0)
-    // onToolbarChange(toolbarReplace(), toolbarElements())
   }
 
   const handleExpandClick = () => {
@@ -220,7 +160,6 @@ export default forwardRef(function CrossingComponent({ onToolbarChange, selectio
 
   const onAllSelectionChanged = (b: boolean) => {
     setSelected(b ? lights.map((l, i) => i) : [])
-    // onToolbarChange(toolbarReplace(), toolbarElements())
   }
 
   const getShareUrl = () => {
@@ -236,7 +175,6 @@ export default forwardRef(function CrossingComponent({ onToolbarChange, selectio
     // const baseUrl = "http://192.168.0.106:3000" 
     return baseUrl + search
   }  
-
 
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>

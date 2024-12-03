@@ -8,7 +8,7 @@ import CircleIcon from '@mui/icons-material/Circle'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import CrossingComponent, { BatchMode } from './components/crossing'
+import CrossingComponent, { BatchMode, RefObject } from './components/crossing'
 import { createTheme, ThemeProvider, styled, PaletteColorOptions } from '@mui/material/styles'
 
 import { Suspense, useRef, useState } from 'react'
@@ -86,13 +86,15 @@ const theme = createTheme({
 
 function Content() {
 
-  // const logos = [
-  //   <CircleIcon key={1} color='disabled' />,
-  //   <CircleIcon key={2} color='action' />,
-  //   <CircleOutlinedIcon key={3} color='disabled' />,
-  // ]
+  const [totalCount, setTotalCount] = useState(0)
+  const [selectedCount, setSelectedCount] = useState(0)
 
-  const toolbarPrefix = (
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [uiMode, setUiMode] = useState<BatchMode>('none')
+  
+  const childRef = useRef<RefObject>(null)
+
+  const baseToolbarElements = (
     <>
       <IconButton 
         size="large" 
@@ -105,21 +107,6 @@ function Content() {
       <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
         Traffic Lights
       </Typography>
-    </>
-  )
-
-  const [totalCount, setTotalCount] = useState(0)
-  const [selectedCount, setSelectedCount] = useState(0)
-
-  const [selectionMode, setSelectionMode] = useState(false)
-  const [uiMode, setUiMode] = useState<BatchMode>('none')
-  
-
-  const childRef = useRef()
-
-  const baseToolbarElements = (
-    <>
-      {toolbarPrefix}
       <IconButton
         size="large"
         color="inherit"
@@ -129,7 +116,7 @@ function Content() {
             setSelectionMode(true)
             setUiMode('share')
           } else {
-            childRef.current.enterShareDialog()
+            childRef?.current?.enterShareDialog()
           }
         }}
       >
@@ -145,7 +132,7 @@ function Content() {
             setSelectionMode(true)
             setUiMode('fullscreen')
           } else {
-            childRef.current.enterFullscreen()
+            childRef?.current?.enterFullscreen()
           }
         }}
       >
@@ -163,7 +150,7 @@ function Content() {
         indeterminate={selectedCount != totalCount && selectedCount > 0} 
         aria-label='select all'
         onChange={e => {
-          childRef.current.getAlert(e.target.checked)
+          childRef?.current?.handleSelectAll(e.target.checked)
         }}
         color='default'
       />
@@ -180,9 +167,9 @@ function Content() {
       <Button color='inherit' onClick={e => {
         setSelectionMode(false)
         if (uiMode == 'fullscreen') {
-          childRef.current.enterFullscreen()
+          childRef?.current?.enterFullscreen()
         } else {
-          childRef.current.enterShareDialog()
+          childRef?.current?.enterShareDialog()
         }
       }}>
         ok
@@ -248,14 +235,10 @@ function Content() {
       </Box>
       <CrossingComponent 
         ref={childRef}
-        uiMode={uiMode}
         selectionMode={selectionMode}
         onSelectionChanged={(updatedTotalCount, updatedSelectedCount) => {
           setSelectedCount(updatedSelectedCount)
           setTotalCount(updatedTotalCount)
-        }}
-        onToolbarChange={(replace, elements) => {
-         
         }}
       />
       <Stack spacing={2} sx={{ p: 1, m: 1 }}>
