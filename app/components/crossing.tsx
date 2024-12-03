@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, ReactNode, forwardRef, useImperativeHandle, Ref } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle, Ref } from 'react'
 import LightComponent from './light'
 import Clock from '../domain/clock'
 import TrafficLight from '../domain/traffic-light'
@@ -9,23 +9,23 @@ import Failure from '../domain/failure'
 import Input from './input'
 import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab, Dialog, Slide, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText, Divider, FormControlLabel, CardHeader, Avatar } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
+import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser, IntSerDeser } from '../url'
 import CrossingSettings, { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
-import { ExpandMore } from './expand-more'
-import ShareIcon from '@mui/icons-material/Share'
-import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import SettingsIcon from '@mui/icons-material/Settings'
-import DeleteIcon from '@mui/icons-material/Delete'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import Fullscreen from './fullscreen'
 import LightIcon from './light-icon'
 import React from 'react'
 import ShareDialog from './share-dialog'
 import syncTime from '../domain/time-sync'
-import SyncAltIcon from '@mui/icons-material/SyncAlt'
 import ExpandDialog from './expand-dialog'
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
+
+// Browser back button on expand (share dialog?)
+// Offline usage
+// Wake lock fix
+// More presets (icons in the preset list)
 
 export interface RefObject {
   
@@ -69,11 +69,9 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
 
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
-  const [quickEditEnabled, setQuickEditEnabled] = useState(true)
-
   const [selected, _setSelected] = useState<number[]>([])
 
-  const [expanded, setExpanded] = useState<number | null>(null)
+  const [expanded, setExpanded] = useStateParams<number | null>(null, "expand", IntSerDeser)
 
   const [fullscreenMode, setFullscreenMode] = useState<number[]>([])
 
@@ -191,7 +189,6 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
     // const baseUrl = "http://192.168.0.106:3000" 
     return baseUrl + search
   }  
-
 
   const expandDialog = expanded == null ? null : (
     <ExpandDialog

@@ -18,6 +18,11 @@ export const BooleanSerDeser: SerDeser<boolean> = {
   deserialize: (s: string) => s === 'true'
 }
 
+export const IntSerDeser: SerDeser<number|null> = {
+  serialize: (s: number|null) => `${s}`,
+  deserialize: (s: string) => s == 'null' ? null : Number.parseInt(s)
+}
+
 export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
   serialize: (lightSettingsArray: LightSettings[]) => {
     return lightSettingsArray
