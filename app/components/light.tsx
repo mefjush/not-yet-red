@@ -41,8 +41,10 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
 
   const [expanded, setExpanded] = useState(false)
   const [selectedState, setSelectedState] = useState(State.RED)
+  const [lightSettingsSnapshot, setLightSettingsSnapshot] = useState<LightSettings | null>(null)
   
   const handleExpandClick = () => {
+    setLightSettingsSnapshot(lightConfig.toLightSettings())
     setExpanded(!expanded)
   }
 
@@ -72,7 +74,20 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
     return <Slide direction="up" ref={ref} {...props} />
   })
 
-  const handleClose = () => setExpanded(false)
+  const handleClose = (commit: boolean) => {
+    if (!commit && lightSettingsSnapshot) {
+      onLightSettingsChange(lightSettingsSnapshot)
+    }
+    setExpanded(false)
+  }
+
+  const changePreset = (presetId: PresetId) => {
+    const supportedStates = PRESETS[presetId].states
+    if (!supportedStates.includes(selectedState)) {
+      setSelectedState(supportedStates[0])
+    }
+    onLightSettingsChange(lightConfig.withPreset(presetId))
+  }
 
   const editButton = (
     <IconButton 
@@ -146,7 +161,7 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
       <Dialog
         fullScreen
         open={expanded}
-        onClose={handleClose}
+        // onClose={handleClose}
         // TransitionComponent={Transition}
       >
         <AppBar position='fixed'>
@@ -175,7 +190,12 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
               <Typography gutterBottom>
                 Preset
               </Typography>
-              <Select fullWidth size='small' value={lightConfig.preset.presetId} onChange={event => onLightSettingsChange(lightConfig.withPreset(event.target.value as PresetId))}>
+              <Select 
+                fullWidth 
+                size='small' 
+                value={lightConfig.preset.presetId} 
+                onChange={event => changePreset(event.target.value as PresetId)}
+              >
                 { 
                   Object.values(PRESETS).map(preset => 
                     <MenuItem key={preset.presetId} value={preset.presetId}>{preset.name}</MenuItem>
@@ -208,8 +228,8 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
 
             <Grid size={{xs: 12}}>
               <Stack direction={'row'} spacing={2} sx={{ mt: 4 }}>
-                <Button variant='outlined' onClick={handleClose} fullWidth>Cancel</Button>
-                <Button variant='contained' onClick={handleClose} fullWidth>Save</Button>
+                <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>Cancel</Button>
+                <Button variant='contained' onClick={() => handleClose(true)} fullWidth>Save</Button>
               </Stack>
             </Grid>
 
