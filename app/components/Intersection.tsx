@@ -19,6 +19,7 @@ import React from 'react'
 import ShareDialog from './ShareDialog'
 import timeSync from '../domain/timeSync'
 import ExpandDialog from './ExpandDialog'
+import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
 
@@ -208,12 +209,13 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
       <Card>
         <CardActions>
           <Tabs value={selectedTab} aria-label="basic tabs example">
-            <Tab icon={<SettingsIcon />} label='Intersection' iconPosition='start' {...a11yProps(0)} />
-            <Tab icon={<AccessTimeIcon />} label='Time' iconPosition='start' {...a11yProps(1)} />
+            <Tab label='Settings' iconPosition='start' disabled={true} {...a11yProps(0)}/>
+            <Tab icon={<GridGoldenratioIcon />} label='Intersection' iconPosition='top' {...a11yProps(1)} />
+            <Tab icon={<AccessTimeIcon />} label='Time' iconPosition='top' {...a11yProps(2)} />
           </Tabs>
         </CardActions>
 
-        <CustomTabPanel value={selectedTab} index={0}>
+        <CustomTabPanel value={selectedTab} index={1}>
           <CardContent>
             <Input 
               label="Cycle length" 
@@ -242,7 +244,7 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
             />
           </CardContent>
         </CustomTabPanel>
-        <CustomTabPanel value={selectedTab} index={1}>
+        <CustomTabPanel value={selectedTab} index={2}>
           <CardContent>
             <Input 
               label="Time correction" 

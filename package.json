@@ -31,6 +31,7 @@
     "use-long-press": "^3.2.0"
   },
   "devDependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^14.1.2",
     "@types/dom-screen-wake-lock": "^1.0.1",

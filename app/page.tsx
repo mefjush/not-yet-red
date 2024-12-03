@@ -10,9 +10,10 @@ import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import IntersectionComponent, { BatchMode, RefObject } from './components/Intersection'
 import { createTheme, ThemeProvider, styled, PaletteColorOptions } from '@mui/material/styles'
+import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 
 import { Suspense, useRef, useState } from 'react'
-import { orange, green, yellow, red, grey } from '@mui/material/colors';
+import { orange, green, yellow, red, grey } from '@mui/material/colors'
 
 //https://mui.com/material-ui/customization/palette/
 declare module "@mui/material/styles" {
@@ -140,7 +141,7 @@ function Content() {
             color='inherit' 
             href="/"
           >
-            <TrafficIcon />
+            <GridGoldenratioIcon />
           </IconButton>
           <Typography variant="h6" component="div" noWrap>
             Intersection
@@ -167,7 +168,7 @@ function Content() {
           size="large"
           color="inherit"
           aria-label="fullscreen"
-          edge={selectionMode && 'start'}
+          edge={selectionMode ? 'start' : 'end'}
           onClick={buttonAction('fullscreen')}
         >
           <FullscreenIcon />
@@ -183,6 +184,7 @@ function Content() {
             label="Select all"
             labelPlacement='end'
             style={{ whiteSpace: 'nowrap' }}
+            sx={{ marginLeft: 1 }}
           />
 
           <Button 
@@ -207,14 +209,12 @@ function Content() {
 
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="fixed">
-          <Toolbar>
-            {toolbarElements}
-          </Toolbar>
-        </AppBar>
-        <Toolbar />
-      </Box>
+      <AppBar position="fixed">
+        <Toolbar>
+          {toolbarElements}
+        </Toolbar>
+      </AppBar>
+      <Toolbar />
       <IntersectionComponent 
         ref={childRef}
         selectionMode={selectionMode}
