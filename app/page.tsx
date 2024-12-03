@@ -1,15 +1,17 @@
 "use client"
 
-import { AppBar, Box, IconButton, Toolbar, Typography, Stack } from '@mui/material'
+import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Checkbox, Button } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
 import TrafficIcon from '@mui/icons-material/Traffic'
 import CircleIcon from '@mui/icons-material/Circle'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
-import CrossingComponent from './components/crossing'
+import ShareIcon from '@mui/icons-material/Share'
+import FullscreenIcon from '@mui/icons-material/Fullscreen'
+import CrossingComponent, { BatchMode } from './components/crossing'
 import { createTheme, ThemeProvider, styled, PaletteColorOptions } from '@mui/material/styles'
 
-import { Suspense } from 'react'
+import { Suspense, useRef, useState } from 'react'
 import { orange, green, yellow, red, grey } from '@mui/material/colors';
 
 //https://mui.com/material-ui/customization/palette/
@@ -90,6 +92,107 @@ function Content() {
   //   <CircleOutlinedIcon key={3} color='disabled' />,
   // ]
 
+  const toolbarPrefix = (
+    <>
+      <IconButton 
+        size="large" 
+        edge="start" 
+        color='inherit' 
+        href="/"
+      >
+        <TrafficIcon />
+      </IconButton>
+      <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        Traffic Lights
+      </Typography>
+    </>
+  )
+
+  const [totalCount, setTotalCount] = useState(0)
+  const [selectedCount, setSelectedCount] = useState(0)
+
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [uiMode, setUiMode] = useState<BatchMode>('none')
+  
+
+  const childRef = useRef()
+
+  const baseToolbarElements = (
+    <>
+      {toolbarPrefix}
+      <IconButton
+        size="large"
+        color="inherit"
+        aria-label="share"
+        onClick={(e) => {
+          if (totalCount > 1) {
+            setSelectionMode(true)
+            setUiMode('share')
+          } else {
+            childRef.current.enterShareDialog()
+          }
+        }}
+      >
+        <ShareIcon />
+      </IconButton>
+      <IconButton
+        size="large"
+        edge="end"
+        color="inherit"
+        aria-label="fullscreen"
+        onClick={(e) => {
+          if (totalCount > 1) {
+            setSelectionMode(true)
+            setUiMode('fullscreen')
+          } else {
+            childRef.current.enterFullscreen()
+          }
+        }}
+      >
+        <FullscreenIcon />
+      </IconButton>
+    </>
+  )
+
+  const selectionToolbarElements = (
+    <>
+      <Checkbox 
+        edge="start"
+        size='medium'
+        checked={totalCount == selectedCount} 
+        indeterminate={selectedCount != totalCount && selectedCount > 0} 
+        aria-label='select all'
+        onChange={e => {
+          childRef.current.getAlert(e.target.checked)
+        }}
+        color='default'
+      />
+      <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        Select all
+      </Typography>
+      
+      <Button color='inherit' onClick={e => {
+        setUiMode('none')
+        setSelectionMode(false)
+      }}>
+        cancel
+      </Button>
+      <Button color='inherit' onClick={e => {
+        setSelectionMode(false)
+        if (uiMode == 'fullscreen') {
+          childRef.current.enterFullscreen()
+        } else {
+          childRef.current.enterShareDialog()
+        }
+      }}>
+        ok
+      </Button>
+    </>
+  )
+
+  const toolbarElements = selectionMode ? selectionToolbarElements : baseToolbarElements
+
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -100,20 +203,61 @@ function Content() {
               edge="start"
               color="inherit"
               aria-label="menu"
-              sx={{ mr: 2 }}
+              
             >
               <MenuIcon />
             </IconButton> */}
-            <IconButton size="large" edge="start" href="/">
-              <TrafficIcon style={{ color: 'white' }}/>
+            {/* <IconButton 
+              size="large" 
+              edge="start" 
+              color='inherit' 
+              href="/"
+            >
+              <TrafficIcon />
             </IconButton>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Traffic Lights
-            </Typography>
+            </Typography> */}
+            {/* <IconButton
+              size="large"
+              color="inherit"
+              aria-label="share"
+              onClick={(e) => {
+                if (totalCount > 1) {
+                  setBatchMode('share')
+                } else {
+                  
+                }
+              }}
+            >
+              <ShareIcon />
+            </IconButton>
+            <IconButton
+              size="large"
+              edge="end"
+              color="inherit"
+              aria-label="fullscreen"
+              onClick={(e) => setBatchMode('fullscreen')}
+            >
+              <FullscreenIcon />
+            </IconButton> */}
+
+            {toolbarElements}
           </Toolbar>
         </AppBar>
       </Box>
-      <CrossingComponent />
+      <CrossingComponent 
+        ref={childRef}
+        uiMode={uiMode}
+        selectionMode={selectionMode}
+        onSelectionChanged={(updatedTotalCount, updatedSelectedCount) => {
+          setSelectedCount(updatedSelectedCount)
+          setTotalCount(updatedTotalCount)
+        }}
+        onToolbarChange={(replace, elements) => {
+         
+        }}
+      />
       <Stack spacing={2} sx={{ p: 1, m: 1 }}>
         <Box
           display="flex"

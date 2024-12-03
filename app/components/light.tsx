@@ -34,8 +34,9 @@ import Slide from '@mui/material/Slide'
 import { TransitionProps } from '@mui/material/transitions'
 import Timeline from './timeline'
 import LightSettingsComponent from './light-settings'
+import { BatchMode } from './crossing'
 
-export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare, quickEditEnabled, toggleQuickEdit, selectedTab }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void, quickEditEnabled: boolean, toggleQuickEdit: () => void, selectedTab: number }) {
+export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare, quickEditEnabled, toggleQuickEdit, selectionMode }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void, quickEditEnabled: boolean, toggleQuickEdit: () => void, selectionMode: boolean }) {
 
   const [expanded, setExpanded] = useState(false)
   const [selectedState, setSelectedState] = useState(State.RED)
@@ -109,7 +110,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       </Box>
       <Box style={{marginLeft: 'auto'}}>
         {/* <Button onClick={toggleQuickEdit}>ok</Button> */}
-        {editButton}
+        {/* {editButton} */}
       </Box>
     </CardActions>
   )
@@ -126,12 +127,15 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     </CardContent>
   ) 
 
+  const actionIcon = !selectionMode ? editButton : checkbox
+  const actionFunction = !selectionMode ? handleExpandClick : (() => onSelectionChange(!selected))
+
   return (
     <>
       <Card>
-        <CardActionArea disabled={false} component="a" onClick={() => onSelectionChange(!selected)}>
+        <CardActionArea disabled={false} component="a" onClick={actionFunction}>
           <CardActions disableSpacing sx={{ alignItems: 'flex-start' }}>
-            {checkbox}
+            {actionIcon}
             {/* <Box style={{ visibility: 'hidden' }}>{editButton}</Box> to make sure the traffic light is centered */}
             <Box style={{ marginLeft: 'auto' }}>{lightIcon}</Box>
             <Box style={{ marginLeft: 'auto', visibility: 'hidden' }}>{editButton}</Box> 

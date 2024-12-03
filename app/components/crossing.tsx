@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactNode, forwardRef, useImperativeHandle } from 'react'
 import LightComponent from './light'
 import Clock from '../domain/clock'
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab, Dialog, Slide, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText, Divider } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab, Dialog, Slide, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText, Divider, FormControlLabel } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
 import CrossingSettings, { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
@@ -23,7 +23,9 @@ import ShareDialog from './share-dialog'
 import syncTime from '../domain/time-sync'
 import SyncAltIcon from '@mui/icons-material/SyncAlt'
 
-export default function CrossingComponent() {
+export type BatchMode = 'none' | 'share' | 'fullscreen'
+
+export default forwardRef(function CrossingComponent({ onToolbarChange, selectionMode, onSelectionChanged }: { onToolbarChange: (replace: boolean, e: React.JSX.Element) => void, selectionMode: boolean, onSelectionChanged: (total: number, selected: number) => void }, ref) {
 
   const [crossingSettings, setCrossingSettings] = useStateParams(DEFAULT_CROSSING_SETTINGS, "crossing", CrossingSettingsSerDeser)
 
@@ -35,11 +37,13 @@ export default function CrossingComponent() {
 
   const [quickEditEnabled, setQuickEditEnabled] = useState(true)
 
-  const [selected, setSelected] = useState<number[]>([])
+  const [selected, _setSelected] = useState<number[]>([])
 
   const [fullscreenMode, setFullscreenMode] = useState<number[]>([])
 
   const [shareMode, setShareMode] = useState<number[]>([])
+
+  const [batchMode, setBatchMode] = useState<BatchMode>('none')
 
   const [lightSettings, setLightSettings] = useStateParams([DEFAULT_LIGHT_SETTINGS], "lights", LightSettingsSerDeser)
 
@@ -50,6 +54,24 @@ export default function CrossingComponent() {
   const lightConfigs = lightSettings.map(lightSetting => new LightConfig(crossingSettings, lightSetting))
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
+
+
+  useImperativeHandle(ref, () => ({
+
+    getAlert(value: boolean) {
+      // alert("getAlert from Child");
+      onAllSelectionChanged(value)
+    },
+
+    enterFullscreen() {
+      setFullscreenMode(lightConfigs.length > 1 ? selected : [0])
+    },
+
+    enterShareDialog() {
+      setShareMode(lightConfigs.length > 1 ? selected : [0])
+    }
+
+  }));
 
   const wrapListener = {
     nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / crossingSettings.cycleLength) + 1) * crossingSettings.cycleLength
@@ -66,9 +88,94 @@ export default function CrossingComponent() {
   const initTimeSync = () => syncTime()
     .then(correction => setTimeCorrection(correction))
     .catch(e => setTimeCorrection(0))
+  
+  const setSelected = (idx: number[]) => {
+    _setSelected(idx)
+    onSelectionChanged(lightConfigs.length, idx.length)
+  }
+
+  const checkbox = () => (
+    <Checkbox 
+      edge="start"
+      size='medium'
+      checked={selected.length == lightSettings.length} 
+      indeterminate={selected.length != lightSettings.length && selected.length > 0} 
+      aria-label='select all'
+      onChange={e => {
+        onAllSelectionChanged(e.target.checked)
+      }}
+      color='default'
+    />
+  )
+
+  const batchModeToolbarElements = () => (
+    <>
+      {checkbox()}
+      <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        Select all
+      </Typography>
+      
+      <Button color='inherit' onClick={e => {
+        setBatchMode('none')
+        // onToolbarChange(false, baseToolbarElements())
+      }}>
+        cancel
+      </Button>
+      <Button color='inherit' onClick={e => {
+        if (batchMode == 'fullscreen') {
+          setFullscreenMode(selected)
+        } else {
+          setShareMode(selected)
+        }
+        setBatchMode('none')
+        // onToolbarChange(false, baseToolbarElements())
+      }}>
+        ok
+      </Button>
+    </>
+  )
+  
+  const baseToolbarElements = () => (
+    <>
+      <IconButton 
+        aria-label='share'
+        onClick={() => {
+          if (lightConfigs.length > 1) {
+            setBatchMode('share')
+            // onToolbarChange(true, batchModeToolbarElements())
+          } else {
+            setShareMode(lightConfigs.map((x, i) => i))
+          }
+        }}
+        color='inherit'
+      >
+        <ShareIcon />
+      </IconButton>
+      <IconButton 
+        aria-label='fullscreen'
+        onClick={() => {
+          if (lightConfigs.length > 1) {
+            setBatchMode('fullscreen')
+            // onToolbarChange(true, batchModeToolbarElements())
+          } else {
+            setFullscreenMode(lightConfigs.map((x, i) => i))
+          }
+        }}
+        color='inherit'
+      >
+        <FullscreenIcon />
+      </IconButton>
+    </> 
+  )
+
+  // const toolbarElements = () => batchMode == 'none' ? baseToolbarElements() : batchModeToolbarElements()
+
+  // const toolbarReplace = () => batchMode != 'none'
 
   // once
   useEffect(() => {
+    // onToolbarChange(toolbarReplace(), toolbarElements())
+    onSelectionChanged(lightConfigs.length, selected.length)
     initTimeSync()
   }, [])
 
@@ -93,12 +200,18 @@ export default function CrossingComponent() {
   }
 
   const onAdd = () => {
-    setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
+    const updatedLightSettings = [...lightSettings, DEFAULT_LIGHT_SETTINGS]
+    setLightSettings(updatedLightSettings)
+    onSelectionChanged(updatedLightSettings.length, selected.length)
+    // onToolbarChange(toolbarReplace(), toolbarElements())
   }
 
   const onDelete = (indicesToDelete: number[]) => {
     setSelected([])
-    setLightSettings([...lightSettings].filter((ls, i) => !indicesToDelete.includes(i)))
+    const updatedLightSettings = [...lightSettings].filter((ls, i) => !indicesToDelete.includes(i))
+    setLightSettings(updatedLightSettings)
+    onSelectionChanged(updatedLightSettings.length, 0)
+    // onToolbarChange(toolbarReplace(), toolbarElements())
   }
 
   const handleExpandClick = () => {
@@ -107,6 +220,7 @@ export default function CrossingComponent() {
 
   const onAllSelectionChanged = (b: boolean) => {
     setSelected(b ? lights.map((l, i) => i) : [])
+    // onToolbarChange(toolbarReplace(), toolbarElements())
   }
 
   const getShareUrl = () => {
@@ -123,9 +237,10 @@ export default function CrossingComponent() {
     return baseUrl + search
   }  
 
+
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-      <Card sx={{ position: 'sticky', top: '2px', zIndex: 100 }}>
+      {/* <Card sx={{ position: 'sticky', top: '2px', zIndex: 100 }}>
         <CardActions>
           <Checkbox 
             checked={selected.length == lightSettings.length} 
@@ -207,7 +322,7 @@ export default function CrossingComponent() {
             </form>
           </CardContent>
         </Collapse>
-      </Card>
+      </Card> */}
 
       {/* <Tabs value={selectedTab} onChange={handleTabChange} aria-label="basic tabs example">
         <Tab label={<SettingsIcon />} />
@@ -215,6 +330,7 @@ export default function CrossingComponent() {
         <Tab label={<FullscreenIcon />} />
         <Tab label={<SyncAltIcon />} />
       </Tabs> */}
+
 
       { lights.map((light, index) =>
         <LightComponent
@@ -231,7 +347,7 @@ export default function CrossingComponent() {
           onShare={() => setShareMode([index])}
           quickEditEnabled={quickEditEnabled}
           toggleQuickEdit={() => setQuickEditEnabled(!quickEditEnabled)}
-          selectedTab={selectedTab}
+          selectionMode={selectionMode}
         />
       )}
 
@@ -257,3 +373,4 @@ export default function CrossingComponent() {
     </Stack>
   )
 }
+)
