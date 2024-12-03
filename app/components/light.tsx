@@ -2,7 +2,7 @@
 
 import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings } from '../domain/light-config'
-import { IconButton, Card, CardActions, CardContent, Stack, Collapse, Typography, Checkbox, Box, CardActionArea } from '@mui/material'
+import { IconButton, Card, CardActions, CardContent, Checkbox, Box, CardActionArea } from '@mui/material'
 import { useState } from 'react'
 import PhaseControls from './phase-controls'
 import LightIcon from './light-icon'
@@ -10,8 +10,9 @@ import React from 'react'
 import { State } from '../domain/state'
 import EditIcon from '@mui/icons-material/Edit'
 import Timeline from './timeline'
+import DeleteIcon from '@mui/icons-material/Delete'
 
-export default function LightComponent({ currentTimestamp, light, lightConfig, selected, expanded, onLightSettingsChange, onSelectionChange, quickEditEnabled, toggleQuickEdit, selectionMode, setExpanded }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, expanded: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onSelectionChange: (b: boolean) => void, quickEditEnabled: boolean, toggleQuickEdit: () => void, selectionMode: boolean, setExpanded: () => void }) {
+export default function LightComponent({ currentTimestamp, light, lightConfig, selected, expanded, onLightSettingsChange, onSelectionChange, selectionMode, setExpanded, onDelete }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, expanded: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onSelectionChange: (b: boolean) => void, selectionMode: boolean, setExpanded: () => void, onDelete?: () => void }) {
 
   const [selectedState, setSelectedState] = useState(State.RED)
   
@@ -57,11 +58,17 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
     />
   )
 
-  const bottomActions = quickEditEnabled && (
+  const bottomActions = (
     <CardActions>
       <Box sx={{ ml: 1 }}>
-        { quickEditControls }
+        {quickEditControls}
       </Box>
+      <IconButton 
+        style={{ marginLeft: 'auto' }}
+        onClick={onDelete}
+      >
+        <DeleteIcon />
+      </IconButton>
     </CardActions>
   )
 
@@ -72,7 +79,7 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
         lightConfig={lightConfig} 
         onLightSettingsChange={onLightSettingsChange} 
         selectedState={selectedState}
-        editable={quickEditEnabled}
+        editable={true}
       />
     </CardContent>
   ) 
@@ -91,7 +98,7 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
           </CardActions>
         </CardActionArea> 
 
-        { quickEditEnabled ? theContent : <CardActionArea disabled={quickEditEnabled} component="a" onClick={toggleQuickEdit}>{theContent}</CardActionArea> }
+        {theContent}
         {bottomActions}
 
       </Card>

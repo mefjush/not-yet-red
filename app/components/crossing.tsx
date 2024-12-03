@@ -81,6 +81,8 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
 
   const [lightSettings, setLightSettings] = useStateParams([DEFAULT_LIGHT_SETTINGS], "lights", LightSettingsSerDeser)
 
+  const [selectedTab, setSelectedTab] = React.useState<number | false>(false)
+
   const failure = new Failure(crossingSettings.failure.duration, crossingSettings.failure.probability)
 
   const hasFailed = failure.currentState(currentTimestamp)
@@ -88,8 +90,6 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
   const lightConfigs = lightSettings.map(lightSetting => new LightConfig(crossingSettings, lightSetting))
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
-
-  const [selectedTab, setSelectedTab] = React.useState<number | false>(0)
 
   useImperativeHandle(ref, () => ({
 
@@ -164,6 +164,7 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
     const updatedLightSettings = [...lightSettings, DEFAULT_LIGHT_SETTINGS]
     setLightSettings(updatedLightSettings)
     onSelectionChanged(updatedLightSettings.length, selected.length)
+    setExpanded(updatedLightSettings.length - 1)
   }
 
   const onDelete = (indicesToDelete: number[]) => {
@@ -200,7 +201,6 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
       light={lights[expanded]}
       lightConfig={lightConfigs[expanded]}
       onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, expanded)}
-      onDelete={lights.length > 1 ? () => onDelete([expanded]) : undefined}
       onFullscreen={() => setFullscreenMode([expanded])}
       onShare={() => setShareMode([expanded])}
     />
@@ -270,11 +270,10 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
           selected={selected.includes(index)}
           onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
           onSelectionChange={(checked) => checked ? setSelected([...selected, index]) : setSelected(selected.filter(x => x != index))}
-          quickEditEnabled={quickEditEnabled}
-          toggleQuickEdit={() => setQuickEditEnabled(!quickEditEnabled)}
           selectionMode={selectionMode}
           setExpanded={() => setExpanded(index)}
           expanded={index === expanded}
+          onDelete={() => onDelete([index])}
         />
       )}
 

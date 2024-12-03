@@ -1,7 +1,6 @@
 import { IconButton, Dialog, Button, AppBar, Toolbar, Typography, Stack, Select, MenuItem } from '@mui/material'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Grid from '@mui/material/Grid2'
-import DeleteIcon from '@mui/icons-material/Delete'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
@@ -12,19 +11,14 @@ import { State } from '../domain/state'
 import LightIcon from './light-icon'
 import TrafficLight from '../domain/traffic-light'
 
-export default function ExpandDialog({ open, onClose, onDelete, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light }: { open: boolean, onClose: () => void, onDelete?: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight }) {
+export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight }) {
 
-  const [lightSettingsSnapshot, setLightSettingsSnapshot] = useState<LightSettings | null>(null)
   const [selectedState, setSelectedState] = useState(State.RED)
-
-  const deleteButton = onDelete == null ? <></> : <IconButton color='inherit' aria-label="delete" edge='end' onClick={() => {
-    onClose()
-    onDelete()
-  }}><DeleteIcon /></IconButton>
+  const lightSettingsSnapshot = useRef(lightConfig.toLightSettings())
 
   const handleClose = (commit: boolean) => {
-    if (!commit && lightSettingsSnapshot) {
-      onLightSettingsChange(lightSettingsSnapshot)
+    if (!commit) {
+      onLightSettingsChange(lightSettingsSnapshot.current)
     }
     onClose()
   }
@@ -37,7 +31,14 @@ export default function ExpandDialog({ open, onClose, onDelete, onFullscreen, on
     onLightSettingsChange(lightConfig.withPreset(presetId))
   }
 
-  const lightIcon = <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ open ? '150px' : '60px' } />
+  const lightIcon = (
+    <LightIcon 
+      currentTimestamp={currentTimestamp} 
+      light={light} 
+      lightConfig={lightConfig}
+      height={ open ? '150px' : '60px' } 
+    />
+  )
 
   return (
     <Dialog
@@ -56,9 +57,8 @@ export default function ExpandDialog({ open, onClose, onDelete, onFullscreen, on
           <Typography sx={{ flex: 1 }} variant="h6" component="div">
             Traffic Light
           </Typography>
-          <IconButton color='inherit' aria-label="fullscreen" onClick={onFullscreen}><FullscreenIcon /></IconButton>
           <IconButton color='inherit' aria-label="share" onClick={onShare}><ShareIcon /></IconButton>
-          { deleteButton }
+          <IconButton color='inherit' aria-label="fullscreen" onClick={onFullscreen} edge='end'><FullscreenIcon /></IconButton>
         </Toolbar>
       </AppBar>
       <Toolbar />
