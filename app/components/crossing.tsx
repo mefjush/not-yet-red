@@ -23,6 +23,7 @@ import React from 'react'
 import ShareDialog from './share-dialog'
 import syncTime from '../domain/time-sync'
 import SyncAltIcon from '@mui/icons-material/SyncAlt'
+import ExpandDialog from './expand-dialog'
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
 
@@ -68,11 +69,11 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
 
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
-  const [expanded, setExpanded] = useState(false)
-
   const [quickEditEnabled, setQuickEditEnabled] = useState(true)
 
   const [selected, _setSelected] = useState<number[]>([])
+
+  const [expanded, setExpanded] = useState<number | null>(null)
 
   const [fullscreenMode, setFullscreenMode] = useState<number[]>([])
 
@@ -190,6 +191,21 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
     return baseUrl + search
   }  
 
+
+  const expandDialog = expanded == null ? null : (
+    <ExpandDialog
+      open={expanded != null}
+      onClose={() => setExpanded(null)}
+      currentTimestamp={currentTimestamp}
+      light={lights[expanded]}
+      lightConfig={lightConfigs[expanded]}
+      onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, expanded)}
+      onDelete={lights.length > 1 ? () => onDelete([expanded]) : undefined}
+      onFullscreen={() => setFullscreenMode([expanded])}
+      onShare={() => setShareMode([expanded])}
+    />
+  ) 
+
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
       <Card>
@@ -253,13 +269,12 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
           lightConfig={lightConfigs[index]}
           selected={selected.includes(index)}
           onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
-          onDelete={lights.length > 1 ? () => onDelete([index]) : undefined}
           onSelectionChange={(checked) => checked ? setSelected([...selected, index]) : setSelected(selected.filter(x => x != index))}
-          onFullscreen={() => setFullscreenMode([index])}
-          onShare={() => setShareMode([index])}
           quickEditEnabled={quickEditEnabled}
           toggleQuickEdit={() => setQuickEditEnabled(!quickEditEnabled)}
           selectionMode={selectionMode}
+          setExpanded={() => setExpanded(index)}
+          expanded={index === expanded}
         />
       )}
 
@@ -279,6 +294,9 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
         open={shareMode.length > 0}
         onClose={() => setShareMode([])}
       />
+
+      {expandDialog}
+
       <Fab color="primary" aria-label="add" onClick={onAdd} style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}>
         <AddIcon />
       </Fab>
