@@ -1,6 +1,6 @@
 import { Box, Button, Stack } from "@mui/material"
 import { negativeSafeMod } from "../utils"
-import LightConfig, {LightSettings, Phase} from "../domain/light-config"
+import LightConfig, {LightSettings, Phase} from "../domain/LightConfig"
 
 export default function Tune({lightConfig, onLightSettingsChange}: {lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void}) {
 

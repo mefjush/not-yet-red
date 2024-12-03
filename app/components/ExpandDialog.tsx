@@ -4,12 +4,12 @@ import Grid from '@mui/material/Grid2'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import LightSettingsComponent from './light-settings'
-import Timeline from './timeline'
-import LightConfig, { LightSettings, PresetId, PRESETS } from '../domain/light-config'
-import { State } from '../domain/state'
-import LightIcon from './light-icon'
-import TrafficLight from '../domain/traffic-light'
+import LightSettingsComponent from './LightSettings'
+import Timeline from './Timeline'
+import LightConfig, { LightSettings, PresetId, PRESETS } from '../domain/LightConfig'
+import { State } from '../domain/State'
+import LightHead from './LightHead'
+import TrafficLight from '../domain/TrafficLight'
 
 export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight }) {
 
@@ -31,8 +31,8 @@ export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onL
     onLightSettingsChange(lightConfig.withPreset(presetId))
   }
 
-  const lightIcon = (
-    <LightIcon 
+  const lightHead = (
+    <LightHead 
       currentTimestamp={currentTimestamp} 
       light={light} 
       lightConfig={lightConfig}
@@ -85,7 +85,7 @@ export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onL
           </Grid>
 
           <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="center">
-            {lightIcon}
+            {lightHead}
           </Grid>
           <Grid size={{ xs: 12 }}>
             <Timeline 

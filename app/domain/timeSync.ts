@@ -13,7 +13,7 @@ const worldTimeApiStrategy: TimeSyncStrategy = {
   parse: (json: any) => json.datetime
 }
 
-export default function syncTime(): Promise<number> {
+export default function timeSync(): Promise<number> {
   return new Promise(function (resolve, reject) {
     console.log("Syncing time")
 

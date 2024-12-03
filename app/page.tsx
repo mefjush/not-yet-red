@@ -8,7 +8,7 @@ import CircleIcon from '@mui/icons-material/Circle'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import CrossingComponent, { BatchMode, RefObject } from './components/crossing'
+import IntersectionComponent, { BatchMode, RefObject } from './components/Intersection'
 import { createTheme, ThemeProvider, styled, PaletteColorOptions } from '@mui/material/styles'
 
 import { Suspense, useRef, useState } from 'react'
@@ -143,7 +143,7 @@ function Content() {
             <TrafficIcon />
           </IconButton>
           <Typography variant="h6" component="div" noWrap>
-            Crossing
+            Intersection
           </Typography>
         </Stack>
       </Collapse>
@@ -215,7 +215,7 @@ function Content() {
         </AppBar>
         <Toolbar />
       </Box>
-      <CrossingComponent 
+      <IntersectionComponent 
         ref={childRef}
         selectionMode={selectionMode}
         onSelectionChanged={(updatedTotalCount, updatedSelectedCount) => {

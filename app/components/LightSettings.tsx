@@ -1,10 +1,10 @@
 "use client"
 
-import LightConfig, { LightSettings, PresetId, PRESETS } from '../domain/light-config'
+import LightConfig, { LightSettings, PresetId, PRESETS } from '../domain/LightConfig'
 import { Typography, Select, MenuItem } from '@mui/material'
-import PhaseControls from './phase-controls'
+import PhaseControls from './PhaseControls'
 import React from 'react'
-import { State } from '../domain/state'
+import { State } from '../domain/State'
 import Grid from '@mui/material/Grid2'
 
 export default function LightSettingsComponent({ lightConfig, onLightSettingsChange, setSelectedState, selectedState }: { lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, setSelectedState: (state: State) => void, selectedState?: State }) {

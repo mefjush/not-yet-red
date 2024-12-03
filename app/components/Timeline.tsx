@@ -1,12 +1,12 @@
 "use client"
 
-import LightConfig, { LightSettings, TimeRange } from '../domain/light-config'
+import LightConfig, { LightSettings, TimeRange } from '../domain/LightConfig'
 import { Box, Slider, SliderComponentsPropsOverrides } from '@mui/material'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { useEffect, useRef, useState } from 'react'
-import Tune from './tune'
+import Tune from './Tune'
 import React from 'react'
-import { State, STATE_ATTRIBUTES } from '../domain/state'
+import { State, STATE_ATTRIBUTES } from '../domain/State'
 import { negativeSafeMod } from '../utils'
 
 export default function Timeline({ currentTimestamp, lightConfig, onLightSettingsChange, selectedState, editable }: { currentTimestamp: number, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, selectedState?: State, editable: boolean }) {

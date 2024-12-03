@@ -1,6 +1,6 @@
-import { DEFAULT_CROSSING_SETTINGS } from "../app/domain/crossing-settings"
-import { DEFAULT_LIGHT_SETTINGS } from "../app/domain/light-config"
-import { CrossingSettingsSerDeser, LightSettingsSerDeser } from "../app/url"
+import { DEFAULT_INTERSECTION_SETTINGS } from "../app/domain/IntersectionSettings"
+import { DEFAULT_LIGHT_SETTINGS } from "../app/domain/LightConfig"
+import { IntersectionSettingsSerDeser, LightSettingsSerDeser } from "../app/url"
 
 describe('Url', () => {
   it('serializes LightSettings back and forth', () => {
@@ -11,11 +11,11 @@ describe('Url', () => {
     expect(LightSettingsSerDeser.deserialize(serialized)).toEqual([DEFAULT_LIGHT_SETTINGS])
   })
 
-  it('serializes CrossingSettings back and forth', () => {
-    let serialized = CrossingSettingsSerDeser.serialize(DEFAULT_CROSSING_SETTINGS)
+  it('serializes IntersectionSettings back and forth', () => {
+    let serialized = IntersectionSettingsSerDeser.serialize(DEFAULT_INTERSECTION_SETTINGS)
 
     console.log(serialized)
 
-    expect(CrossingSettingsSerDeser.deserialize(serialized)).toEqual(DEFAULT_CROSSING_SETTINGS)
+    expect(IntersectionSettingsSerDeser.deserialize(serialized)).toEqual(DEFAULT_INTERSECTION_SETTINGS)
   })
 })

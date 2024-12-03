@@ -2,9 +2,9 @@
 
 import { ButtonGroup, Button, TextField, FormControl, RadioGroup, Stack, FormControlLabel, Radio } from '@mui/material'
 import { useState, useRef } from 'react'
-import { State, TrafficLightColors } from '../domain/state'
+import { State, TrafficLightColors } from '../domain/State'
 import { useLongPress } from 'use-long-press'
-import LightConfig, { LightSettings } from '../domain/light-config'
+import LightConfig, { LightSettings } from '../domain/LightConfig'
 
 interface ChangeEvent {
   target: {

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { LightSettings, Phase, PresetId } from "./domain/light-config"
-import { State } from "./domain/state"
-import CrossingSettings from "./domain/crossing-settings"
+import { LightSettings, Phase, PresetId } from "./domain/LightConfig"
+import { State } from "./domain/State"
+import IntersectionSettings from "./domain/IntersectionSettings"
 
 const stateLookup = Object.values(State).map(state => [state, state.split('_').map(x => x.charAt(0)).join('')])
 const stateSerializationLookup = Object.fromEntries(stateLookup)
@@ -45,9 +45,9 @@ export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
   }
 }
 
-export const CrossingSettingsSerDeser: SerDeser<CrossingSettings> = {
-  serialize: (crossingSettings: CrossingSettings) => {
-    return [crossingSettings.cycleLength, crossingSettings.failure.duration, crossingSettings.failure.probability].join('-')
+export const IntersectionSettingsSerDeser: SerDeser<IntersectionSettings> = {
+  serialize: (intersectionSettings: IntersectionSettings) => {
+    return [intersectionSettings.cycleLength, intersectionSettings.failure.duration, intersectionSettings.failure.probability].join('-')
   },
   deserialize: (s: string) => {
     const split = s.split("-")

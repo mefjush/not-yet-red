@@ -1,4 +1,4 @@
-import Clock from '../../app/domain/clock'
+import Clock from '../../app/domain/Clock'
 
 const testListener = (fixedTimestamp: number) => ({
   nextStateTimestamp: (timestamp: number) => fixedTimestamp

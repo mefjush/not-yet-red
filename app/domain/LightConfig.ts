@@ -1,5 +1,5 @@
-import { SegmentColor, State, STATE_ATTRIBUTES, StateAttributes } from "./state"
-import CrossingSettings from "./crossing-settings"
+import { SegmentColor, State, STATE_ATTRIBUTES, StateAttributes } from "./State"
+import IntersectionSettings from "./IntersectionSettings"
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun'
 import { SvgIconComponent } from "@mui/icons-material"
 import BlurOnIcon from '@mui/icons-material/BlurOn'
@@ -127,15 +127,15 @@ const sortByPriority = (a: Phase, b: Phase) => a.stateAttributes().priority - b.
 
 export default class LightConfig {
 
-  crossingSettings: CrossingSettings
+  intersectionSettings: IntersectionSettings
   offset: number
   phases: Phase[]
   preset: Preset
 
-  constructor(crossingSettings: CrossingSettings, lightSettings: LightSettings) {
-    this.crossingSettings = crossingSettings
+  constructor(intersectionSettings: IntersectionSettings, lightSettings: LightSettings) {
+    this.intersectionSettings = intersectionSettings
     this.offset = lightSettings.offset
-    this.phases = this.rescale(crossingSettings, lightSettings).phases
+    this.phases = this.rescale(intersectionSettings, lightSettings).phases
     this.preset = PRESETS[lightSettings.presetId]
   }
 
@@ -155,7 +155,7 @@ export default class LightConfig {
   }
 
   cycleLength() {
-    return this.crossingSettings.cycleLength
+    return this.intersectionSettings.cycleLength
   }
 
   isFixable(phase: Phase): boolean {
@@ -166,9 +166,9 @@ export default class LightConfig {
     return Math.round(duration / 1000) * 1000
   }
 
-  rescale(crossingSettings: CrossingSettings, lightSettings: LightSettings): LightSettings {
+  rescale(intersectionSettings: IntersectionSettings, lightSettings: LightSettings): LightSettings {
     let phasesLength = lightSettings.phases.reduce((acc, phase) => acc + phase.duration, 0)
-    let diff = crossingSettings.cycleLength - phasesLength
+    let diff = intersectionSettings.cycleLength - phasesLength
 
     if (Math.abs(diff) == 0) {
       return lightSettings

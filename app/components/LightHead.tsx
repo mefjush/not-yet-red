@@ -1,10 +1,10 @@
 "use client"
 
-import TrafficLight from '../domain/traffic-light'
+import TrafficLight from '../domain/TrafficLight'
 import { Stack, Avatar, AvatarProps, Box } from '@mui/material'
 import { styled, alpha, Palette, PaletteColor } from "@mui/material/styles"
-import { SegmentColor } from '../domain/state'
-import LightConfig, { SymbolId, SYMBOLS } from '../domain/light-config'
+import { SegmentColor } from '../domain/State'
+import LightConfig, { SymbolId, SYMBOLS } from '../domain/LightConfig'
 import { createElement } from 'react'
 
 const TRANSITION_DURATION = '300ms'
@@ -28,7 +28,7 @@ const StyledImgAvatar = styled(Avatar)<AvatarProps>(
   }
 )
 
-export default function LightIcon({ currentTimestamp, light, lightConfig, height }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, height: string }) {
+export default function LightHead({ currentTimestamp, light, lightConfig, height }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, height: string }) {
 
   const segments: SegmentColor[] = lightConfig.preset.colors
 

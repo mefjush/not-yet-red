@@ -1,4 +1,4 @@
-import Failure from '../../app/domain/failure'
+import Failure from '../../app/domain/Failure'
 
 describe('Failure', () => {
 

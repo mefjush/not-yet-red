@@ -1,24 +1,24 @@
 "use client"
 
 import { useState, useEffect, forwardRef, useImperativeHandle, Ref } from 'react'
-import LightComponent from './light'
-import Clock from '../domain/clock'
-import TrafficLight from '../domain/traffic-light'
-import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
-import Failure from '../domain/failure'
-import Input from './input'
+import LightComponent from './Light'
+import Clock from '../domain/Clock'
+import TrafficLight from '../domain/TrafficLight'
+import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/LightConfig'
+import Failure from '../domain/Failure'
+import Input from './Input'
 import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab, Dialog, Slide, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText, Divider, FormControlLabel, CardHeader, Avatar } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser, IntSerDeser } from '../url'
-import CrossingSettings, { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
+import useStateParams, { LightSettingsSerDeser, IntersectionSettingsSerDeser, IntSerDeser } from '../url'
+import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
 import SettingsIcon from '@mui/icons-material/Settings'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import Fullscreen from './fullscreen'
-import LightIcon from './light-icon'
+import Fullscreen from './Fullscreen'
+import LightHead from './LightHead'
 import React from 'react'
-import ShareDialog from './share-dialog'
-import syncTime from '../domain/time-sync'
-import ExpandDialog from './expand-dialog'
+import ShareDialog from './ShareDialog'
+import timeSync from '../domain/timeSync'
+import ExpandDialog from './ExpandDialog'
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
 
@@ -61,9 +61,9 @@ function CustomTabPanel(props: TabPanelProps) {
   )
 }
 
-export default forwardRef(function CrossingComponent({ selectionMode, onSelectionChanged }: { selectionMode: boolean, onSelectionChanged: (total: number, selected: number) => void }, ref: Ref<RefObject>) {
+export default forwardRef(function IntersectionComponent({ selectionMode, onSelectionChanged }: { selectionMode: boolean, onSelectionChanged: (total: number, selected: number) => void }, ref: Ref<RefObject>) {
 
-  const [crossingSettings, setCrossingSettings] = useStateParams(DEFAULT_CROSSING_SETTINGS, "crossing", CrossingSettingsSerDeser)
+  const [intersectionSettings, setIntersectionSettings] = useStateParams(DEFAULT_INTERSECTION_SETTINGS, "intersection", IntersectionSettingsSerDeser)
 
   const [timeCorrection, setTimeCorrection] = useState(0)
 
@@ -81,11 +81,11 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
 
   const [selectedTab, setSelectedTab] = React.useState<number | false>(false)
 
-  const failure = new Failure(crossingSettings.failure.duration, crossingSettings.failure.probability)
+  const failure = new Failure(intersectionSettings.failure.duration, intersectionSettings.failure.probability)
 
   const hasFailed = failure.currentState(currentTimestamp)
 
-  const lightConfigs = lightSettings.map(lightSetting => new LightConfig(crossingSettings, lightSetting))
+  const lightConfigs = lightSettings.map(lightSetting => new LightConfig(intersectionSettings, lightSetting))
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
 
@@ -106,7 +106,7 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
   }));
 
   const wrapListener = {
-    nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / crossingSettings.cycleLength) + 1) * crossingSettings.cycleLength
+    nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / intersectionSettings.cycleLength) + 1) * intersectionSettings.cycleLength
   }
 
   const handleTabChange = (newValue: number) => {
@@ -123,7 +123,7 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
 
   const clock = new Clock(timeCorrection)
 
-  const initTimeSync = () => syncTime()
+  const initTimeSync = () => timeSync()
     .then(correction => setTimeCorrection(correction))
     .catch(e => setTimeCorrection(0))
   
@@ -153,8 +153,8 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
     setCurrentTimestamp(clock.now())
   }
 
-  const updateCrossingSettings = (crossingSettings: CrossingSettings) => {
-    setCrossingSettings(crossingSettings)
+  const updateIntersectionSettings = (intersectionSettings: IntersectionSettings) => {
+    setIntersectionSettings(intersectionSettings)
     setCurrentTimestamp(clock.now())
   }
 
@@ -183,7 +183,7 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
 
     const selectedLightSettings = lightSettings.filter((ls, index) => shareMode.includes(index))
 
-    const search = `?crossing=${CrossingSettingsSerDeser.serialize(crossingSettings)}&lights=${LightSettingsSerDeser.serialize(selectedLightSettings)}`
+    const search = `?intersection=${IntersectionSettingsSerDeser.serialize(intersectionSettings)}&lights=${LightSettingsSerDeser.serialize(selectedLightSettings)}`
 
     const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
     // const baseUrl = "http://192.168.0.106:3000" 
@@ -208,7 +208,7 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
       <Card>
         <CardActions>
           <Tabs value={selectedTab} aria-label="basic tabs example">
-            <Tab icon={<SettingsIcon />} label='Crossing' iconPosition='start' {...a11yProps(0)} />
+            <Tab icon={<SettingsIcon />} label='Intersection' iconPosition='start' {...a11yProps(0)} />
             <Tab icon={<AccessTimeIcon />} label='Time' iconPosition='start' {...a11yProps(1)} />
           </Tabs>
         </CardActions>
@@ -220,16 +220,16 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
               id="cycle-length" 
               min={10}
               max={180}
-              value={crossingSettings.cycleLength / 1000} 
-              onChange={ e => updateCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } 
+              value={intersectionSettings.cycleLength / 1000} 
+              onChange={ e => updateIntersectionSettings({ ...intersectionSettings, cycleLength: Number(e.target.value) * 1000 }) } 
             />
             <Input 
               label="Failure duration" 
               id="failure-duration" 
               min={10}
               max={180}
-              value={crossingSettings.failure.duration / 1000} 
-              onChange={ e => updateCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } 
+              value={intersectionSettings.failure.duration / 1000} 
+              onChange={ e => updateIntersectionSettings({ ...intersectionSettings, failure: { probability: intersectionSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } 
             />
             <Input 
               label="Failure probability" 
@@ -237,8 +237,8 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
               min={0}
               max={1}
               step={0.1}
-              value={crossingSettings.failure.probability} 
-              onChange={ e => updateCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } 
+              value={intersectionSettings.failure.probability} 
+              onChange={ e => updateIntersectionSettings({ ...intersectionSettings, failure: { duration: intersectionSettings.failure.duration, probability: Number(e.target.value) } }) } 
             />
           </CardContent>
         </CustomTabPanel>
@@ -280,7 +280,7 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
       >
         { lights.filter((light, index) => fullscreenMode.includes(index)).map((light, index) =>
           <Box key={`fullscreen-light-${index}`} sx={{ mx: 2 }}>
-            <LightIcon currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} height='95vh'/>
+            <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} height='95vh'/>
           </Box>
         )}
       </Fullscreen>
