@@ -7,7 +7,7 @@ import TrafficLight from '../domain/traffic-light'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/light-config'
 import Failure from '../domain/failure'
 import Input from './input'
-import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab, Dialog, Slide, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText, Divider, FormControlLabel } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab, Dialog, Slide, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText, Divider, FormControlLabel, CardHeader, Avatar } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import useStateParams, { LightSettingsSerDeser, CrossingSettingsSerDeser } from '../url'
 import CrossingSettings, { DEFAULT_CROSSING_SETTINGS } from '../domain/crossing-settings'
@@ -16,6 +16,7 @@ import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import SettingsIcon from '@mui/icons-material/Settings'
 import DeleteIcon from '@mui/icons-material/Delete'
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import Fullscreen from './fullscreen'
 import LightIcon from './light-icon'
 import React from 'react'
@@ -33,6 +34,30 @@ export interface RefObject {
 
   enterShareDialog(): void
 
+}
+
+interface TabPanelProps {
+  children?: React.ReactNode
+  index: number
+  value: number | false
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
+
+  return (
+    <Collapse in={value == index} unmountOnExit>
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && <Box>{children}</Box>}
+      </div>
+    </Collapse>
+  )
 }
 
 export default forwardRef(function CrossingComponent({ selectionMode, onSelectionChanged }: { selectionMode: boolean, onSelectionChanged: (total: number, selected: number) => void }, ref: Ref<RefObject>) {
@@ -63,6 +88,7 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
 
+  const [selectedTab, setSelectedTab] = React.useState<number | false>(0)
 
   useImperativeHandle(ref, () => ({
 
@@ -84,10 +110,16 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
     nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / crossingSettings.cycleLength) + 1) * crossingSettings.cycleLength
   }
 
-  const [selectedTab, setSelectedTab] = React.useState(0)
+  const handleTabChange = (newValue: number) => {
+    setSelectedTab(newValue === selectedTab ? false : newValue)
+  }
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setSelectedTab(newValue)
+  function a11yProps(index: number) {
+    return {
+      id: `simple-tab-${index}`,
+      'aria-controls': `simple-tabpanel-${index}`,
+      onClick: () => handleTabChange(index),
+    }
   }
 
   const clock = new Clock(timeCorrection)
@@ -101,23 +133,9 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
     onSelectionChanged(lightConfigs.length, idx.length)
   }
 
-  const checkbox = () => (
-    <Checkbox 
-      edge="start"
-      size='medium'
-      checked={selected.length == lightSettings.length} 
-      indeterminate={selected.length != lightSettings.length && selected.length > 0} 
-      aria-label='select all'
-      onChange={e => {
-        onAllSelectionChanged(e.target.checked)
-      }}
-      color='default'
-    />
-  )
-
   // once
   useEffect(() => {
-    onSelectionChanged(lightConfigs.length, selected.length)
+    onSelectionChanged(lightConfigs.length, selected.length) // to render the toolbar
     initTimeSync()
   }, [])
 
@@ -154,10 +172,6 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
     onSelectionChanged(updatedLightSettings.length, 0)
   }
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  }
-
   const onAllSelectionChanged = (b: boolean) => {
     setSelected(b ? lights.map((l, i) => i) : [])
   }
@@ -178,102 +192,62 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
 
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-      {/* <Card sx={{ position: 'sticky', top: '2px', zIndex: 100 }}>
+      <Card>
         <CardActions>
-          <Checkbox 
-            checked={selected.length == lightSettings.length} 
-            indeterminate={selected.length != lightSettings.length && selected.length > 0} 
-            aria-label='select all'
-            onChange={e => onAllSelectionChanged(e.target.checked)} 
-          />
-          <IconButton 
-            disabled={ selected.length == 0 } 
-            aria-label='fullscreen'
-            onClick={() => setFullscreenMode(selected)}
-          >
-            <FullscreenIcon />
-          </IconButton>
-          <IconButton 
-            disabled={ selected.length == 0 } 
-            aria-label='share'
-            onClick={() => setShareMode(selected)}
-          >
-            <ShareIcon />
-          </IconButton>
-          <IconButton 
-            disabled={ selected.length == 0 } 
-            aria-label='delete'
-            onClick={() => onDelete(selected)}
-          >
-            <DeleteIcon />
-          </IconButton>
-
-          <ExpandMore
-              expand={expanded}
-              onClick={handleExpandClick}
-              aria-expanded={expanded}
-              aria-label="show more"
-              style={{marginLeft: 'auto'}}
-            >
-              <SettingsIcon />
-            </ExpandMore>
+          <Tabs value={selectedTab} aria-label="basic tabs example">
+            <Tab icon={<SettingsIcon />} label='Crossing' iconPosition='start' {...a11yProps(0)} />
+            <Tab icon={<AccessTimeIcon />} label='Time' iconPosition='start' {...a11yProps(1)} />
+          </Tabs>
         </CardActions>
 
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <CustomTabPanel value={selectedTab} index={0}>
           <CardContent>
-            <form>
-              <Input 
-                label="Cycle length" 
-                id="cycle-length" 
-                min={10}
-                max={180}
-                value={crossingSettings.cycleLength / 1000} 
-                onChange={ e => updateCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } 
-              />
-              <Input 
-                label="Failure duration" 
-                id="failure-duration" 
-                min={10}
-                max={180}
-                value={crossingSettings.failure.duration / 1000} 
-                onChange={ e => updateCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } 
-              />
-              <Input 
-                label="Failure probability" 
-                id="failure-probability" 
-                min={0}
-                max={1}
-                step={0.1}
-                value={crossingSettings.failure.probability} 
-                onChange={ e => updateCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } 
-              />
-              <Input 
-                label="Time correction" 
-                id="time-correction" 
-                min={-1000}
-                max={1000}
-                step={10}
-                value={timeCorrection} 
-                onChange={e => setTimeCorrection(e.target.value)} 
-              />
-              <Button onClick={initTimeSync}>Sync time</Button>
-            </form>
+            <Input 
+              label="Cycle length" 
+              id="cycle-length" 
+              min={10}
+              max={180}
+              value={crossingSettings.cycleLength / 1000} 
+              onChange={ e => updateCrossingSettings({ ...crossingSettings, cycleLength: Number(e.target.value) * 1000 }) } 
+            />
+            <Input 
+              label="Failure duration" 
+              id="failure-duration" 
+              min={10}
+              max={180}
+              value={crossingSettings.failure.duration / 1000} 
+              onChange={ e => updateCrossingSettings({ ...crossingSettings, failure: { probability: crossingSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } 
+            />
+            <Input 
+              label="Failure probability" 
+              id="failure-probability" 
+              min={0}
+              max={1}
+              step={0.1}
+              value={crossingSettings.failure.probability} 
+              onChange={ e => updateCrossingSettings({ ...crossingSettings, failure: { duration: crossingSettings.failure.duration, probability: Number(e.target.value) } }) } 
+            />
           </CardContent>
-        </Collapse>
-      </Card> */}
-
-      {/* <Tabs value={selectedTab} onChange={handleTabChange} aria-label="basic tabs example">
-        <Tab label={<SettingsIcon />} />
-        <Tab label={<ShareIcon />} />
-        <Tab label={<FullscreenIcon />} />
-        <Tab label={<SyncAltIcon />} />
-      </Tabs> */}
-
+        </CustomTabPanel>
+        <CustomTabPanel value={selectedTab} index={1}>
+          <CardContent>
+            <Input 
+              label="Time correction" 
+              id="time-correction" 
+              min={-1000}
+              max={1000}
+              step={10}
+              value={timeCorrection} 
+              onChange={e => setTimeCorrection(e.target.value)} 
+            />
+            <Button variant='outlined' onClick={initTimeSync}>Sync time</Button>
+          </CardContent>
+        </CustomTabPanel>
+      </Card>
 
       { lights.map((light, index) =>
         <LightComponent
           key={index}
-          index={index}
           currentTimestamp={currentTimestamp}
           light={light}
           lightConfig={lightConfigs[index]}
@@ -310,5 +284,4 @@ export default forwardRef(function CrossingComponent({ selectionMode, onSelectio
       </Fab>
     </Stack>
   )
-}
-)
+})

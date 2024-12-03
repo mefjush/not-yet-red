@@ -1,6 +1,6 @@
 "use client"
 
-import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Checkbox, Button, FormControlLabel } from '@mui/material'
+import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Checkbox, Button, FormControlLabel, Collapse } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
 import TrafficIcon from '@mui/icons-material/Traffic'
@@ -94,54 +94,6 @@ function Content() {
   
   const childRef = useRef<RefObject>(null)
 
-  const baseToolbarElements = (
-    <>
-      <IconButton 
-        size="large" 
-        edge="start" 
-        color='inherit' 
-        href="/"
-      >
-        <TrafficIcon />
-      </IconButton>
-      <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-        Traffic Lights
-      </Typography>
-      
-      <IconButton
-        size="large"
-        color="inherit"
-        aria-label="share"
-        onClick={(e) => {
-          if (totalCount > 1) {
-            setSelectionMode(true)
-            setUiMode('share')
-          } else {
-            childRef?.current?.enterShareDialog()
-          }
-        }}
-      >
-        <ShareIcon />
-      </IconButton>
-      <IconButton
-        size="large"
-        // edge="end"
-        color="inherit"
-        aria-label="fullscreen"
-        onClick={(e) => {
-          if (totalCount > 1) {
-            setSelectionMode(true)
-            setUiMode('fullscreen')
-          } else {
-            childRef?.current?.enterFullscreen()
-          }
-        }}
-      >
-        <FullscreenIcon />
-      </IconButton>
-    </>
-  )
-
   const checkbox = (
     <Checkbox 
       edge="start"
@@ -159,100 +111,105 @@ function Content() {
     />
   )
 
-  const action = ((uiMode == 'fullscreen') ? childRef?.current?.enterFullscreen : childRef?.current?.enterShareDialog) || (() => {})
-  const icon = (uiMode == 'fullscreen') ? <FullscreenIcon /> : <ShareIcon />
+  const buttonAction = (uiMode: BatchMode) => {
+    return () => {
+      const refObj = childRef?.current
+      const enter = (uiMode == 'fullscreen' ? refObj?.enterFullscreen : refObj?.enterShareDialog) || (() => {})
 
-  const selectionToolbarElements = (
+      if (selectionMode) {
+        setSelectionMode(false)
+        enter()
+      } else {
+        if (totalCount > 1) {
+          setSelectionMode(true)
+          setUiMode(uiMode)
+        } else {
+          enter()
+        }
+      }
+    }
+  }
+
+  const toolbarElements = (
     <>
-      <IconButton 
-        size="large" 
-        edge="start" 
-        color='inherit' 
-        onClick={action}
-      >
-        {icon}
-      </IconButton>
-
-      <Box sx={{ flexGrow: 1 }}></Box>
-
-      <FormControlLabel 
-        control={checkbox}
-        label="Select all"
-        labelPlacement='end'
-      />
+      <Collapse orientation='horizontal' in={!selectionMode}>
+        <Stack direction='row' display={'flex'} sx={{ alignItems: "center" }}>
+          <IconButton 
+            size="large" 
+            edge="start" 
+            color='inherit' 
+            href="/"
+          >
+            <TrafficIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" noWrap>
+            Crossing
+          </Typography>
+        </Stack>
+      </Collapse>
       
-      <Button 
-        color='inherit' 
-        onClick={e => {
-          setUiMode('none')
-          setSelectionMode(false)
-        }}
-      >
-        cancel
-      </Button>
-      <Button 
-        color='inherit' 
-        onClick={e => {
-          setSelectionMode(false)
-          action()
-        }}
-      >
-        ok
-      </Button>
+      { selectionMode || <Box sx={{ flexGrow: 1 }}></Box> }
+
+      { (!selectionMode || uiMode == 'share') && 
+        <IconButton
+          size="large"
+          color="inherit"
+          aria-label="share"
+          edge={selectionMode && 'start'}
+          onClick={buttonAction('share')}
+        >
+          <ShareIcon />
+        </IconButton>
+      }
+
+      { (!selectionMode || uiMode == 'fullscreen') && 
+        <IconButton
+          size="large"
+          color="inherit"
+          aria-label="fullscreen"
+          edge={selectionMode && 'start'}
+          onClick={buttonAction('fullscreen')}
+        >
+          <FullscreenIcon />
+        </IconButton>
+      }
+
+      { selectionMode && <Box sx={{ flexGrow: 1 }}></Box> }
+
+      <Collapse in={selectionMode} orientation='horizontal' unmountOnExit>
+        <Stack direction={'row'}>
+          <FormControlLabel
+            control={checkbox}
+            label="Select all"
+            labelPlacement='end'
+            style={{ whiteSpace: 'nowrap' }}
+          />
+
+          <Button 
+            color='inherit' 
+            onClick={e => {
+              setUiMode('none')
+              setSelectionMode(false)
+            }}
+          >
+            cancel
+          </Button>
+          <Button 
+            color='inherit' 
+            onClick={buttonAction(uiMode)}
+          >
+            ok
+          </Button>
+        </Stack>
+      </Collapse>
     </>
   )
-
-  const toolbarElements = selectionMode ? selectionToolbarElements : baseToolbarElements
 
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="fixed">
           <Toolbar>
-            {/* <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              
-            >
-              <MenuIcon />
-            </IconButton> */}
-            {/* <IconButton 
-              size="large" 
-              edge="start" 
-              color='inherit' 
-              href="/"
-            >
-              <TrafficIcon />
-            </IconButton>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Traffic Lights
-            </Typography> */}
-            {/* <IconButton
-              size="large"
-              color="inherit"
-              aria-label="share"
-              onClick={(e) => {
-                if (totalCount > 1) {
-                  setBatchMode('share')
-                } else {
-                  
-                }
-              }}
-            >
-              <ShareIcon />
-            </IconButton>
-            <IconButton
-              size="large"
-              edge="end"
-              color="inherit"
-              aria-label="fullscreen"
-              onClick={(e) => setBatchMode('fullscreen')}
-            >
-              <FullscreenIcon />
-            </IconButton> */}
-
             {toolbarElements}
           </Toolbar>
         </AppBar>

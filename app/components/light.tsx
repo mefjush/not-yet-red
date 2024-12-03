@@ -35,8 +35,9 @@ import { TransitionProps } from '@mui/material/transitions'
 import Timeline from './timeline'
 import LightSettingsComponent from './light-settings'
 import { BatchMode } from './crossing'
+import SettingsIcon from '@mui/icons-material/Settings'
 
-export default function LightComponent({ index, currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare, quickEditEnabled, toggleQuickEdit, selectionMode }: { index: number, currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void, quickEditEnabled: boolean, toggleQuickEdit: () => void, selectionMode: boolean }) {
+export default function LightComponent({ currentTimestamp, light, lightConfig, selected, onLightSettingsChange, onDelete, onSelectionChange, onFullscreen, onShare, quickEditEnabled, toggleQuickEdit, selectionMode }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onDelete?: () => void, onSelectionChange: (b: boolean) => void, onFullscreen: () => void, onShare: () => void, quickEditEnabled: boolean, toggleQuickEdit: () => void, selectionMode: boolean }) {
 
   const [expanded, setExpanded] = useState(false)
   const [selectedState, setSelectedState] = useState(State.RED)
@@ -45,7 +46,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
     setExpanded(!expanded)
   }
 
-  const deleteButton = onDelete == null ? <></> : <IconButton aria-label="delete" onClick={() => {
+  const deleteButton = onDelete == null ? <></> : <IconButton color='inherit' aria-label="delete" edge='end' onClick={() => {
     toggleQuickEdit()
     onDelete()
   }}><DeleteIcon /></IconButton>
@@ -106,11 +107,7 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
   const bottomActions = quickEditEnabled && (
     <CardActions>
       <Box sx={{ ml: 1 }}>
-      { quickEditControls }
-      </Box>
-      <Box style={{marginLeft: 'auto'}}>
-        {/* <Button onClick={toggleQuickEdit}>ok</Button> */}
-        {/* {editButton} */}
+        { quickEditControls }
       </Box>
     </CardActions>
   )
@@ -136,7 +133,6 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
         <CardActionArea disabled={false} component="a" onClick={actionFunction}>
           <CardActions disableSpacing sx={{ alignItems: 'flex-start' }}>
             {actionIcon}
-            {/* <Box style={{ visibility: 'hidden' }}>{editButton}</Box> to make sure the traffic light is centered */}
             <Box style={{ marginLeft: 'auto' }}>{lightIcon}</Box>
             <Box style={{ marginLeft: 'auto', visibility: 'hidden' }}>{editButton}</Box> 
           </CardActions>
@@ -155,21 +151,22 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
       >
         <AppBar position='fixed'>
           <Toolbar>
+            <IconButton 
+              size="large" 
+              edge="start" 
+              color='inherit' 
+            >
+              <SettingsIcon />
+            </IconButton>
             <Typography sx={{ flex: 1 }} variant="h6" component="div">
-              Light Settings
+              Traffic Light
             </Typography>
-            <Button autoFocus color="inherit" onClick={handleClose}>
-              ok
-            </Button>
+            <IconButton color='inherit' aria-label="fullscreen" onClick={onFullscreen}><FullscreenIcon /></IconButton>
+            <IconButton color='inherit' aria-label="share" onClick={onShare}><ShareIcon /></IconButton>
+            { deleteButton }
           </Toolbar>
         </AppBar>
         <Toolbar />
-        
-        <CardActions>
-          <IconButton aria-label="fullscreen" onClick={onFullscreen}><FullscreenIcon /></IconButton>
-          <IconButton aria-label="share" onClick={onShare}><ShareIcon /></IconButton>
-          { deleteButton }
-        </CardActions>
 
         <Stack spacing={2} sx={{ p: 3 }}>
           <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={2}>
@@ -199,14 +196,24 @@ export default function LightComponent({ index, currentTimestamp, light, lightCo
                 editable={true}
               />
             </Grid>
-          </Grid>
 
-          <LightSettingsComponent
-            lightConfig={lightConfig}
-            onLightSettingsChange={onLightSettingsChange}
-            setSelectedState={setSelectedState}
-            selectedState={selectedState}
-          />
+            <Grid size={{ xs: 12 }}>
+              <LightSettingsComponent
+                lightConfig={lightConfig}
+                onLightSettingsChange={onLightSettingsChange}
+                setSelectedState={setSelectedState}
+                selectedState={selectedState}
+              />
+            </Grid>
+
+            <Grid size={{xs: 12}}>
+              <Stack direction={'row'} spacing={2} sx={{ mt: 4 }}>
+                <Button variant='outlined' onClick={handleClose} fullWidth>Cancel</Button>
+                <Button variant='contained' onClick={handleClose} fullWidth>Save</Button>
+              </Stack>
+            </Grid>
+
+          </Grid>
         </Stack>
       </Dialog>
     </>
