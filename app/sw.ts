@@ -18,6 +18,7 @@ const PAGES_CACHE_NAME = {
   rscPrefetch: "pages-rsc-prefetch",
   rsc: "pages-rsc",
   html: "pages",
+  plain: "plain",
 } as const
 
 const matchOptions = { ignoreSearch: true, ignoreVary: true }
@@ -258,6 +259,20 @@ const myDefaultCache: RuntimeCaching[] = [
       request.headers.get("Content-Type")?.includes("text/html") && sameOrigin && !pathname.startsWith("/api/"),
     handler: new NetworkFirst({
       cacheName: PAGES_CACHE_NAME.html,
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 32,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+          matchOptions: matchOptions
+        }),
+      ],
+    }),
+  },
+  {
+    matcher: ({ request, url: { pathname }, sameOrigin }) =>
+      request.headers.get("Content-Type")?.includes("text/plain") && sameOrigin && !pathname.startsWith("/api/"),
+    handler: new NetworkFirst({
+      cacheName: PAGES_CACHE_NAME.plain,
       plugins: [
         new ExpirationPlugin({
           maxEntries: 32,
