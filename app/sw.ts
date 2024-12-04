@@ -305,7 +305,7 @@ const serwist = new Serwist({
   precacheOptions: {
     urlManipulation: (manipulation) => {
       const url = manipulation.url
-      if (url.pathname == '/' || url.pathname == 'index.txt') {
+      if (url.pathname == '/') {
         return [url, new URL(url.href.replace(url.search, ''))]  
       }
       return [url]
