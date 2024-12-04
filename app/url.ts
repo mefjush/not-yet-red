@@ -71,7 +71,7 @@ export default function useStateParams<T>(
     const searchParams = useSearchParams()
     const search = new URLSearchParams(searchParams)
   
-    const existingValue = search.get(paramsName)
+    const existingValue = search.get(`utm_${paramsName}`)
 
     const [state, setState] = useState<T>(
       existingValue ? serdeser.deserialize(existingValue) : initialState
@@ -86,7 +86,7 @@ export default function useStateParams<T>(
   
     const onChange = (s: T) => {
       setState(s)
-      search.set(paramsName, serdeser.serialize(s))
+      search.set(`utm_${paramsName}`, serdeser.serialize(s))
       router.push(pathname + "?" + search.toString(), { scroll: false })
     }
   
