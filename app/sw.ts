@@ -20,9 +20,12 @@ const serwist = new Serwist({
   //   // Ignore all URL parameters.
   //   ignoreURLParametersMatching: [/.*/],
   // },
+  precacheOptions: {
+    matchOptions: { ignoreSearch: true }
+  },
   skipWaiting: true,
   clientsClaim: true,
-  // navigationPreload: true,
+  navigationPreload: false,
   runtimeCaching: defaultCache,
   fallbacks: {
     entries: [
