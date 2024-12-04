@@ -2,9 +2,10 @@ import { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
+    id: 'traffic-lights-by-mefju',
     name: 'Traffic Lights',
     short_name: 'Traffic Lights',
-    description: 'A traffic light simulator',
+    description: 'Build your own intersection using smartphones as traffic lights.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

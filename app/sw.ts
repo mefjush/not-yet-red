@@ -22,12 +22,12 @@ const serwist = new Serwist({
   },
   skipWaiting: true,
   clientsClaim: true,
-  navigationPreload: true,
+  // navigationPreload: true,
   runtimeCaching: defaultCache,
   fallbacks: {
     entries: [
       {
-        url: '/', // the page that'll display if user goes offline
+        url: '/offline', // the page that'll display if user goes offline
         matcher({ request }) {
           return request.destination === 'document'
         },
@@ -35,5 +35,11 @@ const serwist = new Serwist({
     ],
   },
 })
+
+// serwist.addToPrecacheList([
+//   { url: "/index.html", revision: null },
+//   { url: "/favicon.ico", revision: null },
+//   { url: "/icon.svg", revision: null },
+// ])
 
 serwist.addEventListeners()

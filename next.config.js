@@ -14,7 +14,7 @@ module.exports = async (phase) => {
 
   if (phase === PHASE_DEVELOPMENT_SERVER || phase === PHASE_PRODUCTION_BUILD) {
     const withSerwist = (await import("@serwist/next")).default({
-      swSrc: "app/app-worker.ts",
+      swSrc: "app/sw.ts",
       swDest: "public/sw.js",
       reloadOnOnline: true,
     })
