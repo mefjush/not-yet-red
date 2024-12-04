@@ -26,7 +26,6 @@ export type BatchMode = 'none' | 'share' | 'fullscreen'
 // Browser back button on expand (share dialog?)
 // Offline usage
 // Wake lock fix
-// More presets (icons in the preset list)
 
 export interface RefObject {
   

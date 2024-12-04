@@ -63,29 +63,6 @@ export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onL
     </Stack>
   )
 
-  // const isImg = lightConfig.preset.symbolId != SymbolId.NONE
-  // const symbol = SYMBOLS[lightConfig.preset.symbolId]
-
-  // const imgScale = 0.7
-  // const iconSize = `${imgScale * segmentSize}${heightUnit}`
-
-  // const segmentStates = segments.map(segment => {
-
-  //   const on = currentPhase.stateAttributes().segments.includes(segment)
-  //   const inverted = symbol.isInverted(segment)
-
-  //   let icon = <> </>
-  //   if (isImg) {
-  //     icon = createElement(symbol.getIcon(segment), { 
-  //       sx: { 
-  //         width: iconSize, 
-  //         height: iconSize, 
-  //         color: inverted ? 'black' : `${segment}.main`, 
-  //         opacity: on ? 1 : 0.1 
-  //       }
-  //     })
-  //   }
-
   const generatePresetMenuItems = () => {
     return Object.values(PRESETS).map(preset => {
       const icon = preset.symbolId != SymbolId.NONE ? SYMBOLS[preset.symbolId].icon : CircleIcon
