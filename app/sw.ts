@@ -16,10 +16,10 @@ declare const self: ServiceWorkerGlobalScope
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
-  precacheOptions: {
-    // Ignore all URL parameters.
-    ignoreURLParametersMatching: [/.*/],
-  },
+  // precacheOptions: {
+  //   // Ignore all URL parameters.
+  //   ignoreURLParametersMatching: [/.*/],
+  // },
   skipWaiting: true,
   clientsClaim: true,
   // navigationPreload: true,
