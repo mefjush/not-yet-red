@@ -183,7 +183,7 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
 
     const selectedLightSettings = lightSettings.filter((ls, index) => shareMode.includes(index))
 
-    const search = `?utm_intersection=${IntersectionSettingsSerDeser.serialize(intersectionSettings)}&utm_lights=${LightSettingsSerDeser.serialize(selectedLightSettings)}`
+    const search = `?intersection=${IntersectionSettingsSerDeser.serialize(intersectionSettings)}&lights=${LightSettingsSerDeser.serialize(selectedLightSettings)}`
 
     const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
     // const baseUrl = "http://192.168.0.106:3000" 
