@@ -23,9 +23,11 @@ import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
 
-// Browser back button on expand (share dialog?)
+// Browser back button on expand (share dialog?) - a simple adding expand=null as a param does not work correctly - it fucks up storing the light config in the url (query params modified from 2 places)
 // Offline usage
 // Wake lock fix
+// fullscreen with muliple ligts - bad scalling
+// conditional right preset 
 
 export interface RefObject {
   
@@ -71,7 +73,6 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
 
   const [selected, _setSelected] = useState<number[]>([])
 
-  // const [expanded, setExpanded] = useStateParams<number | null>(null, "expand", IntSerDeser)
   const [expanded, setExpanded] = useState<number | null>(null)
 
   const [fullscreenMode, setFullscreenMode] = useState<number[]>([])
@@ -97,13 +98,13 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
     },
 
     enterFullscreen() {
-      _setSelected([])
       setFullscreenMode(lightConfigs.length > 1 ? selected : [0])
+      setSelected([])
     },
 
     enterShareDialog() {
-      _setSelected([])
       setShareMode(lightConfigs.length > 1 ? selected : [0])
+      setSelected([])
     }
 
   }));
