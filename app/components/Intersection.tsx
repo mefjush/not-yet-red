@@ -205,7 +205,21 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
       onFullscreen={() => setFullscreenMode([expanded])}
       onShare={() => setShareMode([expanded])}
     />
-  ) 
+  )
+
+  const fullscreenContents = () => {
+    const fullscreenLights = lights.filter((light, index) => fullscreenMode.includes(index))
+
+    const size = fullscreenLights.length < 3 ? '95vh' : `${3 * 70 / fullscreenLights.length}vw`
+
+    return fullscreenLights
+      .map((light, index) => (
+        <Box key={`fullscreen-light-${index}`}>
+          <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} height={size}/>
+        </Box>
+      )
+    )
+  }
 
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
@@ -285,11 +299,7 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
         enabled={fullscreenMode.length > 0}
         onDisabled={() => setFullscreenMode([])}
       >
-        { lights.filter((light, index) => fullscreenMode.includes(index)).map((light, index) =>
-          <Box key={`fullscreen-light-${index}`}>
-            <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} height='95vh'/>
-          </Box>
-        )}
+        {fullscreenContents()}
       </Fullscreen>
 
       <ShareDialog
@@ -300,7 +310,12 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
 
       {expandDialog}
 
-      <Fab color="primary" aria-label="add" onClick={onAdd} style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}>
+      <Fab 
+        color="primary" 
+        aria-label="add" 
+        onClick={onAdd} 
+        style={{ margin: 0, top: 'auto', right: 20, bottom: 20, left: 'auto', position: 'fixed' }}
+      >
         <AddIcon />
       </Fab>
     </Stack>

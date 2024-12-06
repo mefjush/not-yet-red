@@ -56,8 +56,8 @@ export default function Fullscreen({ enabled, children, onDisabled }: { enabled:
 
   return (
     <Box ref={fullscreenRef} className='fullscreen' display={enabled ? 'block' : 'none'}>
-      <Grid container spacing={2} sx={{ p: 1, height: '100vh', width: '100vw' }}>
-        { Children.map(children, (ch) => <Grid display="flex" size='grow' justifyContent="center" alignItems="center">{ch}</Grid> )}
+      <Grid container spacing={2} alignItems="center" sx={{ height: '100vh', width: '100vw' }}>
+        { Children.map(children, (child) => <Grid display="flex" size='grow' justifyContent="center" alignItems="flex-end">{child}</Grid> )}
       </Grid>
     </Box>
   )

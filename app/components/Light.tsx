@@ -81,12 +81,6 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
       >
         <MoreVertIcon />
       </IconButton>
-      {/* <IconButton 
-        style={{ marginLeft: 'auto' }}
-        onClick={onDelete}
-      >
-        <DeleteIcon />
-      </IconButton> */}
       <Menu
         id="basic-menu"
         MenuListProps={{
