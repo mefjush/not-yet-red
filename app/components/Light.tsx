@@ -18,7 +18,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 export default function LightComponent({ currentTimestamp, light, lightConfig, selected, expanded, onLightSettingsChange, onSelectionChange, selectionMode, setExpanded, onDelete, onFullscreen, onShare }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, expanded: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onSelectionChange: (b: boolean) => void, selectionMode: boolean, setExpanded: () => void, onDelete?: () => void, onFullscreen: () => void, onShare: () => void }) {
 
-  const [selectedState, setSelectedState] = useState(State.RED)
+  const [selectedState, setSelectedState] = useState(light.phases[0].state)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const moreMenuOpen = Boolean(anchorEl)
   

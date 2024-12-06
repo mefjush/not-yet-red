@@ -7,6 +7,17 @@ import ManIcon from '@mui/icons-material/Man'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { negativeSafeMod } from "../utils"
+import ForwardIcon from '@mui/icons-material/Forward'
+import { styled } from '@mui/material/styles'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+import UTurnLeftIcon from '@mui/icons-material/UTurnLeft'
+
+const BackwardIcon = styled(ForwardIcon)(({ theme }) => ({
+  transform: 'rotate(180deg)',
+  transition: theme.transitions.create('transform', {
+    duration: 0,
+  })
+}))
 
 const FOUR_STATE = [State.RED, State.RED_YELLOW, State.GREEN, State.YELLOW]
 const THREE_STATE = [State.RED, State.GREEN, State.YELLOW]
@@ -21,7 +32,9 @@ export enum SymbolId {
   NONE = "NONE",
   PEDESTRIAN = "PEDESTRIAN",
   LEFT = "LEFT",
-  RIGHT = "RIGHT"
+  RIGHT = "RIGHT",
+  STRAIGHT = "STRAIGHT",
+  UTURN = "UTURN"
 }
 
 export enum PresetId {
@@ -29,7 +42,10 @@ export enum PresetId {
   THREE_PHASE = "THREE_PHASE",
   PEDESTRIAN = "PEDESTRIAN",
   LEFT = "LEFT",
-  RIGHT = "RIGHT"
+  RIGHT = "RIGHT",
+  CONDITIONAL_RIGHT = "CONDITIONAL_RIGHT",
+  STRAIGHT = "STRAIGHT",
+  UTURN = "UTURN"
 }
 
 export class Symbol {
@@ -91,7 +107,9 @@ export const SYMBOLS = Object.fromEntries([
   new Symbol(SymbolId.NONE, false, BlurOnIcon),
   new Symbol(SymbolId.PEDESTRIAN, false, ManIcon, DirectionsRunIcon),
   new Symbol(SymbolId.LEFT, true, ArrowBackIcon),
-  new Symbol(SymbolId.RIGHT, true, ArrowForwardIcon)
+  new Symbol(SymbolId.RIGHT, true, ArrowForwardIcon),
+  new Symbol(SymbolId.STRAIGHT, true, ArrowUpwardIcon),
+  new Symbol(SymbolId.UTURN, true, UTurnLeftIcon)
 ].map(symbol => [symbol.symbolId, symbol]))
 
 export const PRESETS = Object.fromEntries([
@@ -100,6 +118,9 @@ export const PRESETS = Object.fromEntries([
   new Preset(PresetId.PEDESTRIAN, "Pedestrian", SymbolId.PEDESTRIAN, TWO_COLOR, TWO_STATE),
   new Preset(PresetId.LEFT, "Left", SymbolId.LEFT, THREE_COLOR, FOUR_STATE),
   new Preset(PresetId.RIGHT, "Right", SymbolId.RIGHT, THREE_COLOR, FOUR_STATE),
+  new Preset(PresetId.STRAIGHT, "Straight", SymbolId.STRAIGHT, THREE_COLOR, FOUR_STATE),
+  new Preset(PresetId.UTURN, "U-Turn", SymbolId.UTURN, THREE_COLOR, FOUR_STATE),
+  new Preset(PresetId.CONDITIONAL_RIGHT, "Conditional Right", SymbolId.RIGHT, ['tlGreen'], [State.GREEN, State.NONE]),
 ].map(preset => [preset.presetId, preset]))
 
 export class Phase {

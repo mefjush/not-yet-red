@@ -1,13 +1,11 @@
 import { IconButton, Dialog, Button, AppBar, Toolbar, Typography, Stack, Select, MenuItem, Box } from '@mui/material'
-import { createElement, useRef, useState } from 'react'
+import { createElement, useState } from 'react'
 import Grid from '@mui/material/Grid2'
-import SettingsIcon from '@mui/icons-material/Settings'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import LightSettingsComponent from './LightSettings'
 import Timeline from './Timeline'
 import LightConfig, { LightSettings, PresetId, PRESETS, SymbolId, SYMBOLS } from '../domain/LightConfig'
-import { State } from '../domain/State'
 import LightHead from './LightHead'
 import TrafficLight from '../domain/TrafficLight'
 import TrafficIcon from '@mui/icons-material/Traffic'
@@ -15,12 +13,9 @@ import CircleIcon from '@mui/icons-material/Circle'
 
 export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight }) {
 
-  const [selectedState, setSelectedState] = useState(State.RED)
+  const [selectedState, setSelectedState] = useState(light.phases[0].state)
 
-  const handleClose = (commit: boolean) => {
-    // if (!commit) {
-    //   onLightSettingsChange(lightSettingsSnapshot.current)
-    // }
+  const handleClose = () => {
     onClose()
   }
 
@@ -84,7 +79,7 @@ export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onL
     <Dialog
       fullScreen
       open={open}
-      onClose={() => handleClose(false)}
+      onClose={handleClose}
     >
       <AppBar className="mui-fixed">
         <Toolbar>
@@ -100,15 +95,14 @@ export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onL
             Traffic Light
           </Typography>
 
-          {/* <Button color='inherit' onClick={() => handleClose(false)}>Cancel</Button> */}
-          <Button color='inherit' onClick={() => handleClose(true)} style={{ marginRight: '-15px' }}>Ok</Button>
+          <Button color='inherit' onClick={handleClose} style={{ marginRight: '-15px' }}>Ok</Button>
         </Toolbar>
       </AppBar>
       <Toolbar />
 
       <Stack spacing={2} sx={{ p: 3 }}>
         <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={2}>
-          <Grid size={{xs: 12, md: 4, lg: 3}}>
+          <Grid size={{ xs: 12, md: 4, lg: 3 }}>
             <Typography gutterBottom>
               Preset
             </Typography>
@@ -148,7 +142,6 @@ export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onL
               selectedState={selectedState}
             />
           </Grid>
-
         </Grid>
       </Stack>
     </Dialog>

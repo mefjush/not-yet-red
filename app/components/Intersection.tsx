@@ -26,8 +26,7 @@ export type BatchMode = 'none' | 'share' | 'fullscreen'
 // Browser back button on expand (share dialog?) - a simple adding expand=null as a param does not work correctly - it fucks up storing the light config in the url (query params modified from 2 places)
 // Offline usage
 // Wake lock fix
-// fullscreen with muliple ligts - bad scalling
-// conditional right preset 
+// Fix the slider near-the-edge rendering
 
 export interface RefObject {
   

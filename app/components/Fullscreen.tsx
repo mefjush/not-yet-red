@@ -1,6 +1,6 @@
 "use client"
 
-import { Box } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { Children, ReactElement, useEffect, useRef, useState } from 'react'
 
@@ -56,8 +56,10 @@ export default function Fullscreen({ enabled, children, onDisabled }: { enabled:
 
   return (
     <Box ref={fullscreenRef} className='fullscreen' display={enabled ? 'block' : 'none'}>
-      <Grid container spacing={2} alignItems="center" sx={{ height: '100vh', width: '100vw' }}>
-        { Children.map(children, (child) => <Grid display="flex" size='grow' justifyContent="center" alignItems="flex-end">{child}</Grid> )}
+      <Grid container justifyContent="center" alignItems="center" sx={{ height: '100vh', width: '100vw' }}>
+        <Stack direction='row' alignItems='flex-end' spacing={2}>
+          {children}
+        </Stack>
       </Grid>
     </Box>
   )
