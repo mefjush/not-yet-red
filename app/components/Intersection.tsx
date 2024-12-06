@@ -71,7 +71,8 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
 
   const [selected, _setSelected] = useState<number[]>([])
 
-  const [expanded, setExpanded] = useStateParams<number | null>(null, "expand", IntSerDeser)
+  // const [expanded, setExpanded] = useStateParams<number | null>(null, "expand", IntSerDeser)
+  const [expanded, setExpanded] = useState<number | null>(null)
 
   const [fullscreenMode, setFullscreenMode] = useState<number[]>([])
 

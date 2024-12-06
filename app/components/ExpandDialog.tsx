@@ -16,7 +16,6 @@ import CircleIcon from '@mui/icons-material/Circle'
 export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight }) {
 
   const [selectedState, setSelectedState] = useState(State.RED)
-  const lightSettingsSnapshot = useRef(lightConfig.toLightSettings())
 
   const handleClose = (commit: boolean) => {
     // if (!commit) {
@@ -102,7 +101,7 @@ export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onL
           </Typography>
 
           {/* <Button color='inherit' onClick={() => handleClose(false)}>Cancel</Button> */}
-          <Button color='inherit' onClick={() => handleClose(true)}>Ok</Button>
+          <Button color='inherit' onClick={() => handleClose(true)} style={{ marginRight: '-15px' }}>Ok</Button>
         </Toolbar>
       </AppBar>
       <Toolbar />
