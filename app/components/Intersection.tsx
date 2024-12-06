@@ -192,19 +192,6 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
     return baseUrl + search
   }  
 
-  const expandDialog = expanded && (
-    <LightDetails
-      open={expanded != null}
-      onClose={() => setExpanded(null)}
-      currentTimestamp={currentTimestamp}
-      light={lights[expanded]}
-      lightConfig={lightConfigs[expanded]}
-      onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, expanded)}
-      onFullscreen={() => setFullscreenMode([expanded])}
-      onShare={() => setShareMode([expanded])}
-    />
-  )
-
   const fullscreenContents = () => {
     const fullscreenLights = lights.filter((light, index) => fullscreenMode.includes(index))
 
@@ -304,7 +291,18 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
         onClose={() => setShareMode([])}
       />
 
-      {expandDialog}
+      {expanded != null &&
+        <LightDetails
+          open={expanded != null}
+          onClose={() => setExpanded(null)}
+          currentTimestamp={currentTimestamp}
+          light={lights[expanded]}
+          lightConfig={lightConfigs[expanded]}
+          onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, expanded)}
+          onFullscreen={() => setFullscreenMode([expanded])}
+          onShare={() => setShareMode([expanded])}
+        />
+      }
 
       <Fab 
         color="primary" 
