@@ -7,11 +7,10 @@ import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/LightConfig'
 import Failure from '../domain/Failure'
 import Input from './Input'
-import { Card, CardContent, Collapse, Fab, Stack, Checkbox, IconButton, CardActions, Box, Button, Tabs, Tab, Dialog, Slide, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText, Divider, FormControlLabel, CardHeader, Avatar } from '@mui/material'
+import { Card, CardContent, Collapse, Fab, Stack, Box, Button, Tabs, Tab, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import useStateParams, { LightSettingsSerDeser, IntersectionSettingsSerDeser, IntSerDeser } from '../url'
+import useStateParams, { LightSettingsSerDeser, IntersectionSettingsSerDeser } from '../url'
 import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
-import SettingsIcon from '@mui/icons-material/Settings'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import Fullscreen from './Fullscreen'
 import LightHead from './LightHead'
@@ -20,6 +19,7 @@ import ShareDialog from './ShareDialog'
 import timeSync from '../domain/timeSync'
 import ExpandDialog from './ExpandDialog'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
+import Grid from '@mui/material/Grid2'
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
 
@@ -286,7 +286,7 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
         onDisabled={() => setFullscreenMode([])}
       >
         { lights.filter((light, index) => fullscreenMode.includes(index)).map((light, index) =>
-          <Box key={`fullscreen-light-${index}`} sx={{ mx: 2 }}>
+          <Box key={`fullscreen-light-${index}`}>
             <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} height='95vh'/>
           </Box>
         )}

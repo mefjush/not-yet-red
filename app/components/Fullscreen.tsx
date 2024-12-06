@@ -2,7 +2,7 @@
 
 import { Box } from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import { ReactElement, useEffect, useRef, useState } from 'react'
+import { Children, ReactElement, useEffect, useRef, useState } from 'react'
 
 export default function Fullscreen({ enabled, children, onDisabled }: { enabled: boolean, children: ReactElement | ReactElement[], onDisabled: () => void }) {
 
@@ -56,10 +56,8 @@ export default function Fullscreen({ enabled, children, onDisabled }: { enabled:
 
   return (
     <Box ref={fullscreenRef} className='fullscreen' display={enabled ? 'block' : 'none'}>
-      <Grid container sx={{p: 1}}>
-        <Grid display="flex" size='grow' justifyContent="center" alignItems="center">
-          {children}
-        </Grid>
+      <Grid container spacing={2} sx={{ p: 1, height: '100vh', width: '100vw' }}>
+        { Children.map(children, (ch) => <Grid display="flex" size='grow' justifyContent="center" alignItems="center">{ch}</Grid> )}
       </Grid>
     </Box>
   )
