@@ -66,8 +66,8 @@ export default function useStateParams<T>(
     paramsName: string,
     serdeser: SerDeser<T>
   ): [T, (state: T) => void] {
-    const router = useRouter()
-    const pathname = usePathname()
+    // const router = useRouter()
+    // const pathname = usePathname()
     const searchParams = useSearchParams()
     const search = new URLSearchParams(searchParams)
   
@@ -89,10 +89,10 @@ export default function useStateParams<T>(
       search.set(paramsName, serdeser.serialize(s))
       // router.push(pathname + "?" + search.toString(), { scroll: false })
 
-      if (window.history.pushState) {       
-        const newURL = new URL(window.location.href)    
-        newURL.search = search.toString()
-        window.history.pushState({ path: newURL.href }, '', newURL.href)
+      const newUrl = new URL(window.location.href)    
+      newUrl.search = search.toString()
+      if (window.history && window.history.pushState) {       
+        window.history.pushState({ path: newUrl.href }, '', newUrl.href)
       }
     }
   
