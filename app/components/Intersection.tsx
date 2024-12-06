@@ -209,19 +209,17 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
 
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+      <Typography variant='h6'>Settings</Typography>
       <Card>
-        <CardActions>
-          <Tabs value={selectedTab} aria-label="basic tabs example">
-            <Tab label='Settings' iconPosition='start' disabled={true} {...a11yProps(0)}/>
-            <Tab icon={<GridGoldenratioIcon />} label='Intersection' iconPosition='top' {...a11yProps(1)} />
-            <Tab icon={<AccessTimeIcon />} label='Time' iconPosition='top' {...a11yProps(2)} />
-          </Tabs>
-        </CardActions>
+        <Tabs value={selectedTab} aria-label="basic tabs example">
+          <Tab icon={<GridGoldenratioIcon />} label='Intersection' iconPosition='top' {...a11yProps(0)} />
+          <Tab icon={<AccessTimeIcon />} label='Time' iconPosition='top' {...a11yProps(1)} />
+        </Tabs>
 
-        <CustomTabPanel value={selectedTab} index={1}>
+        <CustomTabPanel value={selectedTab} index={0}>
           <CardContent>
             <Input 
-              label="Cycle length" 
+              label="Cycle length (s)"
               id="cycle-length" 
               min={10}
               max={180}
@@ -229,7 +227,7 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
               onChange={ e => updateIntersectionSettings({ ...intersectionSettings, cycleLength: Number(e.target.value) * 1000 }) } 
             />
             <Input 
-              label="Failure duration" 
+              label="Failure duration (s)"
               id="failure-duration" 
               min={10}
               max={180}
@@ -237,31 +235,33 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
               onChange={ e => updateIntersectionSettings({ ...intersectionSettings, failure: { probability: intersectionSettings.failure.probability, duration: Number(e.target.value) * 1000 } }) } 
             />
             <Input 
-              label="Failure probability" 
+              label="Failure probability (%)"
               id="failure-probability" 
               min={0}
-              max={1}
-              step={0.1}
-              value={intersectionSettings.failure.probability} 
-              onChange={ e => updateIntersectionSettings({ ...intersectionSettings, failure: { duration: intersectionSettings.failure.duration, probability: Number(e.target.value) } }) } 
+              max={100}
+              step={5}
+              value={Math.round(intersectionSettings.failure.probability * 100)} 
+              onChange={ e => updateIntersectionSettings({ ...intersectionSettings, failure: { duration: intersectionSettings.failure.duration, probability: Number(e.target.value) / 100 } }) } 
             />
           </CardContent>
         </CustomTabPanel>
-        <CustomTabPanel value={selectedTab} index={2}>
+        <CustomTabPanel value={selectedTab} index={1}>
           <CardContent>
             <Input 
-              label="Time correction" 
+              label="Time correction (s)" 
               id="time-correction" 
-              min={-1000}
-              max={1000}
-              step={10}
-              value={timeCorrection} 
-              onChange={e => setTimeCorrection(e.target.value)} 
+              min={-2}
+              max={2}
+              step={0.05}
+              value={timeCorrection / 1000} 
+              onChange={e => setTimeCorrection(e.target.value * 1000)} 
             />
             <Button variant='outlined' onClick={initTimeSync}>Sync time</Button>
           </CardContent>
         </CustomTabPanel>
       </Card>
+
+      <Typography variant='h6'>Traffic Lights</Typography>
 
       { lights.map((light, index) =>
         <LightComponent
