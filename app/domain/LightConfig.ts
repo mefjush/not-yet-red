@@ -188,32 +188,32 @@ export default class LightConfig {
   }
 
   rescale(intersectionSettings: IntersectionSettings, lightSettings: LightSettings): LightSettings {
-    let phasesLength = lightSettings.phases.reduce((acc, phase) => acc + phase.duration, 0)
-    let diff = intersectionSettings.cycleLength - phasesLength
+    const phasesLength = lightSettings.phases.reduce((acc, phase) => acc + phase.duration, 0)
+    const diff = intersectionSettings.cycleLength - phasesLength
 
     if (Math.abs(diff) == 0) {
       return lightSettings
     }
 
-    let fixableCount = lightSettings.phases.filter(this.isFixable).length
-    let diffPerPhase = this.roundSeconds(diff / fixableCount)
+    const fixableCount = lightSettings.phases.filter(this.isFixable).length
+    const diffPerPhase = this.roundSeconds(diff / fixableCount)
     let diffRemainder = diff
 
     let fixedPhases = lightSettings.phases.toSorted((a, b) => b.duration - a.duration)
     
-    let fixStrategies = [
+    const fixStrategies = [
       { precondition: this.isFixable, applicableDiff: () => diffPerPhase },
       { precondition: this.isFixable, applicableDiff: () => diffRemainder },
       { precondition: (p: Phase) => true, applicableDiff: () => diffRemainder }
     ]
 
     for (let i = 0; i < fixStrategies.length && Math.abs(diffRemainder) != 0; i++) {
-      let strategy = fixStrategies[i]
+      const strategy = fixStrategies[i]
       fixedPhases = fixedPhases.map((phase) => {
         if (!strategy.precondition(phase)) {
           return phase
         }
-        let applicableDiff = Math.max(strategy.applicableDiff(), -phase.duration)
+        const applicableDiff = Math.max(strategy.applicableDiff(), -phase.duration)
         diffRemainder -= applicableDiff
         return new Phase(phase.state, phase.duration + applicableDiff)
       })
@@ -230,14 +230,14 @@ export default class LightConfig {
         .reduce((acc, phase) => acc + phase.duration, 0)
     }
 
-    let remainingPhases = this.phases.filter(p => p.state != state).toSorted(sortByPriority).reverse()
-    let fixablePhases = remainingPhases.filter(this.isFixable)
-    let unfixablePhases = remainingPhases.filter(p => !this.isFixable(p))
+    const remainingPhases = this.phases.filter(p => p.state != state).toSorted(sortByPriority).reverse()
+    const fixablePhases = remainingPhases.filter(this.isFixable)
+    const unfixablePhases = remainingPhases.filter(p => !this.isFixable(p))
 
-    let oldDuration = this.phases.find(p => p.state == state)?.duration || 0
+    const oldDuration = this.phases.find(p => p.state == state)?.duration || 0
     let diff = oldDuration - newDuration;
 
-    let fixedRemaining = []
+    const fixedRemaining = []
     
     for (let p of fixablePhases) {
       const durationBeforeFix = p.duration

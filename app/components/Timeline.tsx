@@ -16,8 +16,7 @@ export default function Timeline({ currentTimestamp, lightConfig, onLightSetting
   const hasPageBeenRendered = useRef(false)
   const uiOffset = useRef(0)
 
-  const effectiveSelectedState = lightConfig.phases.find(p => p.state == selectedState)?.state
-  const timeRange = effectiveSelectedState ? lightConfig.getTimeRange(effectiveSelectedState) : new TimeRange(0, 0, 0)
+  const timeRange = selectedState ? lightConfig.getTimeRange(selectedState) : new TimeRange(0, 0, 0)
   
   const uiRange = useRef(timeRange)
 
@@ -128,7 +127,7 @@ export default function Timeline({ currentTimestamp, lightConfig, onLightSetting
     />
   )
 
-  const rangeSlider = editable && effectiveSelectedState ? getRangeSlider(effectiveSelectedState) : null
+  const rangeSlider = editable && selectedState ? getRangeSlider(selectedState) : null
 
   return (
     <Box sx={{ my: 2 }}>

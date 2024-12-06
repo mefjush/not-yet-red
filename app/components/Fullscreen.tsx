@@ -2,7 +2,7 @@
 
 import { Box, Stack } from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import { Children, ReactElement, useEffect, useRef, useState } from 'react'
+import { ReactElement, useEffect, useRef, useState } from 'react'
 
 export default function Fullscreen({ enabled, children, onDisabled }: { enabled: boolean, children: ReactElement | ReactElement[], onDisabled: () => void }) {
 

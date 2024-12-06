@@ -1,7 +1,7 @@
 "use client"
 
-import LightConfig, { LightSettings, PresetId, PRESETS } from '../domain/LightConfig'
-import { Typography, Select, MenuItem } from '@mui/material'
+import LightConfig, { LightSettings } from '../domain/LightConfig'
+import { Typography } from '@mui/material'
 import PhaseControls from './PhaseControls'
 import React from 'react'
 import { State } from '../domain/State'

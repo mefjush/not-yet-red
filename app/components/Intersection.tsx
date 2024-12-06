@@ -17,9 +17,8 @@ import LightHead from './LightHead'
 import React from 'react'
 import ShareDialog from './ShareDialog'
 import timeSync from '../domain/timeSync'
-import ExpandDialog from './ExpandDialog'
+import LightDetails from './LightDetails'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
-import Grid from '@mui/material/Grid2'
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
 
@@ -193,8 +192,8 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
     return baseUrl + search
   }  
 
-  const expandDialog = expanded == null ? null : (
-    <ExpandDialog
+  const expandDialog = expanded && (
+    <LightDetails
       open={expanded != null}
       onClose={() => setExpanded(null)}
       currentTimestamp={currentTimestamp}
@@ -211,13 +210,11 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
 
     const size = fullscreenLights.length < 3 ? '95vh' : `${3 * 70 / fullscreenLights.length}vw`
 
-    return fullscreenLights
-      .map((light, index) => (
-        <Box key={`fullscreen-light-${index}`}>
-          <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} height={size}/>
-        </Box>
-      )
-    )
+    return fullscreenLights.map((light, index) => (
+      <Box key={`fullscreen-light-${index}`}>
+        <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} height={size}/>
+      </Box>
+    ))
   }
 
   return (

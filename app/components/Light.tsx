@@ -7,7 +7,6 @@ import { useState } from 'react'
 import PhaseControls from './PhaseControls'
 import LightHead from './LightHead'
 import React from 'react'
-import { State } from '../domain/State'
 import EditIcon from '@mui/icons-material/Edit'
 import Timeline from './Timeline'
 import ShareIcon from '@mui/icons-material/Share'
@@ -22,17 +21,11 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const moreMenuOpen = Boolean(anchorEl)
   
-  const lightHead = <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
+  if (!light.phases.find(p => p.state == selectedState)) {
+    setSelectedState(light.phases[0].state)
+  }
 
-  const quickEditControls = (
-    <PhaseControls
-      lightConfig={lightConfig}
-      onLightSettingsChange={onLightSettingsChange}
-      setSelectedState={setSelectedState}
-      selectedState={selectedState}
-      expanded={expanded}
-    />
-  )
+  const lightHead = <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
 
   const editButton = (
     <IconButton 
@@ -67,7 +60,13 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
   const bottomActions = (
     <CardActions>
       <Box sx={{ ml: 1 }}>
-        {quickEditControls}
+        <PhaseControls
+          lightConfig={lightConfig}
+          onLightSettingsChange={onLightSettingsChange}
+          setSelectedState={setSelectedState}
+          selectedState={selectedState}
+          expanded={expanded}
+        />
       </Box>
 
       <IconButton
