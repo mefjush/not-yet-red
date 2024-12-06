@@ -19,9 +19,9 @@ export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onL
   const lightSettingsSnapshot = useRef(lightConfig.toLightSettings())
 
   const handleClose = (commit: boolean) => {
-    if (!commit) {
-      onLightSettingsChange(lightSettingsSnapshot.current)
-    }
+    // if (!commit) {
+    //   onLightSettingsChange(lightSettingsSnapshot.current)
+    // }
     onClose()
   }
 
@@ -101,8 +101,8 @@ export default function ExpandDialog({ open, onClose, onFullscreen, onShare, onL
             Traffic Light
           </Typography>
 
-          <Button color='inherit' onClick={() => handleClose(false)}>Cancel</Button>
-          <Button color='inherit' onClick={() => handleClose(true)}>Save</Button>
+          {/* <Button color='inherit' onClick={() => handleClose(false)}>Cancel</Button> */}
+          <Button color='inherit' onClick={() => handleClose(true)}>Ok</Button>
         </Toolbar>
       </AppBar>
       <Toolbar />

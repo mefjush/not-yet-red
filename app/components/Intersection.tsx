@@ -96,10 +96,12 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
     },
 
     enterFullscreen() {
+      _setSelected([])
       setFullscreenMode(lightConfigs.length > 1 ? selected : [0])
     },
 
     enterShareDialog() {
+      _setSelected([])
       setShareMode(lightConfigs.length > 1 ? selected : [0])
     }
 
@@ -272,6 +274,8 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
           setExpanded={() => setExpanded(index)}
           expanded={index === expanded}
           onDelete={() => onDelete([index])}
+          onFullscreen={() => setFullscreenMode([index])}
+          onShare={() => setShareMode([index])}
         />
       )}
 
