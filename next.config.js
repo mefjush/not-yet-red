@@ -17,7 +17,7 @@ module.exports = async (phase) => {
       swSrc: "app/sw.ts",
       swDest: "public/sw.js",
       scope: '/',
-      additionalPrecacheEntries: ['/index.txt']
+      additionalPrecacheEntries: ['/', '/index.txt']
     })
     return withSerwist(nextConfig)
   }

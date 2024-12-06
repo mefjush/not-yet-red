@@ -87,7 +87,13 @@ export default function useStateParams<T>(
     const onChange = (s: T) => {
       setState(s)
       search.set(paramsName, serdeser.serialize(s))
-      router.push(pathname + "?" + search.toString(), { scroll: false })
+      // router.push(pathname + "?" + search.toString(), { scroll: false })
+
+      if (window.history.pushState) {       
+        const newURL = new URL(window.location.href)    
+        newURL.search = search.toString()
+        window.history.pushState({ path: newURL.href }, '', newURL.href)
+      }
     }
   
     return [state, onChange]

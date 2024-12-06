@@ -588,6 +588,7 @@ const serwist = new Serwist({
   //   ignoreURLParametersMatching: [/.*/],
   // },
   precacheOptions: {
+    // cleanURLs: true,
     urlManipulation: (manipulation) => {
       const url = manipulation.url
       console.log(`?? ${url}`)
