@@ -1,15 +1,11 @@
 "use client"
 
 import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Checkbox, Button, FormControlLabel, Collapse } from '@mui/material'
-import MenuIcon from '@mui/icons-material/Menu'
-import CloseIcon from '@mui/icons-material/Close'
 import TrafficIcon from '@mui/icons-material/Traffic'
-import CircleIcon from '@mui/icons-material/Circle'
-import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import IntersectionComponent, { BatchMode, RefObject } from './components/Intersection'
-import { createTheme, ThemeProvider, styled, PaletteColorOptions } from '@mui/material/styles'
+import { createTheme, ThemeProvider } from '@mui/material/styles'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 
 import { Suspense, useRef, useState } from 'react'

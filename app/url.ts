@@ -26,18 +26,18 @@ export const IntSerDeser: SerDeser<number|null> = {
 export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
   serialize: (lightSettingsArray: LightSettings[]) => {
     return lightSettingsArray
-      .map(ls => [ls.offset, ls.phases.map(p => stateSerializationLookup[p.state] + p.duration).join("-"), ls.presetId].join('--'))
+      .map(ls => [ls.offset / 1000, ls.phases.map(p => stateSerializationLookup[p.state] + (p.duration / 1000)).join("-"), ls.presetId].join('--'))
       .join("---")
   },
   deserialize: (s: string) => {
     return s.split("---").map(ls => {
       const lsSplit = ls.split("--")
       return {
-        offset: Number.parseInt(lsSplit[0]), 
+        offset: 1000 * Number.parseInt(lsSplit[0]), 
         phases: lsSplit[1].split("-").map(ph => { 
           const phSplit = ph.match(/[a-zA-Z_]+|[0-9]+/g) || []
           const stateName = stateDeserializationLookup[phSplit[0] as string] as keyof typeof State 
-          return new Phase(State[stateName], Number.parseInt(phSplit[1]))
+          return new Phase(State[stateName], 1000 * Number.parseInt(phSplit[1]))
         }),
         presetId: lsSplit[2] as PresetId
       }
@@ -47,14 +47,14 @@ export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
 
 export const IntersectionSettingsSerDeser: SerDeser<IntersectionSettings> = {
   serialize: (intersectionSettings: IntersectionSettings) => {
-    return [intersectionSettings.cycleLength, intersectionSettings.failure.duration, intersectionSettings.failure.probability].join('-')
+    return [intersectionSettings.cycleLength / 1000, intersectionSettings.failure.duration / 1000, intersectionSettings.failure.probability].join('-')
   },
   deserialize: (s: string) => {
     const split = s.split("-")
     return {
-      cycleLength: Number.parseInt(split[0]),
+      cycleLength: 1000 * Number.parseInt(split[0]),
       failure: {
-        duration: Number.parseInt(split[1]),
+        duration: 1000 * Number.parseInt(split[1]),
         probability: Number.parseFloat(split[2])
       }
     }
