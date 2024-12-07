@@ -17,12 +17,12 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 export default function LightComponent({ currentTimestamp, light, lightConfig, selected, expanded, onLightSettingsChange, onSelectionChange, selectionMode, setExpanded, onDelete, onFullscreen, onShare }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, selected: boolean, expanded: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, onSelectionChange: (b: boolean) => void, selectionMode: boolean, setExpanded: () => void, onDelete?: () => void, onFullscreen: () => void, onShare: () => void }) {
 
-  const [selectedState, setSelectedState] = useState(light.phases[0].state)
+  const [selectedState, setSelectedState] = useState(lightConfig.phases[0].state)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const moreMenuOpen = Boolean(anchorEl)
   
-  if (!light.phases.find(p => p.state == selectedState)) {
-    setSelectedState(light.phases[0].state)
+  if (!lightConfig.phases.find(p => p.state == selectedState)) {
+    setSelectedState(lightConfig.phases[0].state)
   }
 
   const lightHead = <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />

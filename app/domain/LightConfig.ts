@@ -282,6 +282,10 @@ export default class LightConfig {
     const finalOffset = adjustToRangeStart ? newTimeRange.start - phaseStart : newTimeRange.end - (phaseStart + withNewDuration.phases[selectedPhaseIndex].duration)
     return { ...withNewDuration, offset: negativeSafeMod(finalOffset, this.cycleLength()) }
   }
+
+  includesState(state: State): boolean {
+    return !this.phases.find(p => p.state == state)
+  }
 }
 
 export const DEFAULT_LIGHT_SETTINGS: LightSettings = {

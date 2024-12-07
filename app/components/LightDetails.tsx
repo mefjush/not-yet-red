@@ -13,7 +13,7 @@ import CircleIcon from '@mui/icons-material/Circle'
 
 export default function LightDetails({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight }) {
 
-  const [selectedState, setSelectedState] = useState(light.phases[0].state)
+  const [selectedState, setSelectedState] = useState(lightConfig.phases[0].state)
 
   const handleClose = () => {
     onClose()
