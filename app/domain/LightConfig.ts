@@ -284,7 +284,7 @@ export default class LightConfig {
   }
 
   includesState(state: State): boolean {
-    return !this.phases.find(p => p.state == state)
+    return this.phases.map(p => p.state).includes(state)
   }
 }
 

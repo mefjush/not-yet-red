@@ -21,7 +21,7 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, s
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const moreMenuOpen = Boolean(anchorEl)
   
-  if (!lightConfig.phases.find(p => p.state == selectedState)) {
+  if (!lightConfig.includesState(selectedState)) {
     setSelectedState(lightConfig.phases[0].state)
   }
 
