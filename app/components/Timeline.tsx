@@ -16,11 +16,14 @@ export default function Timeline({ currentTimestamp, lightConfig, onLightSetting
   const hasPageBeenRendered = useRef(false)
   const uiOffset = useRef(0)
 
+  const cycleLength = lightConfig.cycleLength()
+
+  const toUiFirendlyTimeRange = (timeRange: TimeRange): TimeRange => new TimeRange(timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end, cycleLength)
+
   const timeRange = selectedState ? lightConfig.getTimeRange(selectedState) : new TimeRange(0, 0, 0)
   
-  const uiRange = useRef(timeRange)
+  const uiRange = useRef(toUiFirendlyTimeRange(timeRange))
 
-  const cycleLength = lightConfig.cycleLength()
   const markPosition = currentTimestamp % cycleLength
 
   const needsTransition = hasPageBeenRendered && (transitionStartTime == markPosition)
@@ -42,7 +45,7 @@ export default function Timeline({ currentTimestamp, lightConfig, onLightSetting
   const timeRangeChanged = !(timeRange.start == modCycle(uiRange.current.start) && timeRange.end == modCycle(uiRange.current.end))
 
   if (timeRangeChanged) {
-    uiRange.current = new TimeRange(timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end, cycleLength)
+    uiRange.current = toUiFirendlyTimeRange(timeRange)
   }
 
   const offsetSliderValue: number = modCycle(timeRange.start + timeRange.duration() / 2)

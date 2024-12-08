@@ -1,5 +1,5 @@
 import { IconButton, Dialog, Button, AppBar, Toolbar, Typography, Stack, Select, MenuItem, Box } from '@mui/material'
-import { createElement, useState } from 'react'
+import { createElement } from 'react'
 import Grid from '@mui/material/Grid2'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
@@ -10,21 +10,14 @@ import LightHead from './LightHead'
 import TrafficLight from '../domain/TrafficLight'
 import TrafficIcon from '@mui/icons-material/Traffic'
 import CircleIcon from '@mui/icons-material/Circle'
+import LightModel from '../domain/LightModel'
 
-export default function LightDetails({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight }) {
+export default function LightDetails({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light, lightModel }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight, lightModel: LightModel }) {
 
-  const [selectedState, setSelectedState] = useState(lightConfig.phases[0].state)
+  const selectedState = lightModel.getSelectedState()
 
   const handleClose = () => {
     onClose()
-  }
-
-  const changePreset = (presetId: PresetId) => {
-    const supportedStates = PRESETS[presetId].states
-    if (!supportedStates.includes(selectedState)) {
-      setSelectedState(supportedStates[0])
-    }
-    onLightSettingsChange(lightConfig.withPreset(presetId))
   }
 
   const lightHead = (
@@ -110,7 +103,7 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
               fullWidth 
               size='small' 
               value={lightConfig.preset.presetId} 
-              onChange={event => changePreset(event.target.value as PresetId)}
+              onChange={event => lightModel.changePreset(event.target.value as PresetId)}
             >
               { generatePresetMenuItems() }
             </Select>
@@ -138,7 +131,7 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
             <LightSettingsComponent
               lightConfig={lightConfig}
               onLightSettingsChange={onLightSettingsChange}
-              setSelectedState={setSelectedState}
+              setSelectedState={(state) => lightModel.setSelectedState(state)}
               selectedState={selectedState}
             />
           </Grid>
