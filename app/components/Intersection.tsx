@@ -27,7 +27,6 @@ export type BatchMode = 'none' | 'share' | 'fullscreen'
 // Browser back button on expand (share dialog?) - a simple adding expand=null as a param does not work correctly - it fucks up storing the light config in the url (query params modified from 2 places)
 // Offline usage
 // Wake lock fix
-// Fix the slider near-the-edge rendering
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -201,8 +200,26 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
     ))
   }
 
+  const intersectionLights = lights.map((light, index) =>
+    <LightComponent
+      key={index}
+      currentTimestamp={currentTimestamp}
+      light={light}
+      lightConfig={lightConfigs[index]}
+      onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
+      selectionMode={selectionMode}
+      setExpanded={() => setExpanded(index)}
+      expanded={index === expanded}
+      onDelete={() => onDelete([index])}
+      onFullscreen={() => _setFullscreen(index)}
+      onShare={() => _setShare(index)}
+      lightModel={lightModels[index]}
+    />
+  )
+
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+   
       <Typography variant='h6'>Settings</Typography>
       <Card>
         <Tabs value={selectedTab} aria-label="basic tabs example">
@@ -256,23 +273,7 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
       </Card>
 
       <Typography variant='h6'>Traffic Lights</Typography>
-
-      { lights.map((light, index) =>
-        <LightComponent
-          key={index}
-          currentTimestamp={currentTimestamp}
-          light={light}
-          lightConfig={lightConfigs[index]}
-          onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
-          selectionMode={selectionMode}
-          setExpanded={() => setExpanded(index)}
-          expanded={index === expanded}
-          onDelete={() => onDelete([index])}
-          onFullscreen={() => _setFullscreen(index)}
-          onShare={() => _setShare(index)}
-          lightModel={lightModels[index]}
-        />
-      )}
+      { expanded == null && intersectionLights}
 
       <Fullscreen
         enabled={uiMode == 'fullscreen'}
