@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, forwardRef, useImperativeHandle, Ref } from 'react'
+import { useState, useEffect } from 'react'
 import LightComponent from './Light'
 import Clock from '../domain/Clock'
 import TrafficLight from '../domain/TrafficLight'
@@ -28,17 +28,7 @@ export type BatchMode = 'none' | 'share' | 'fullscreen'
 // Offline usage
 // Wake lock fix
 // Fix the slider near-the-edge rendering
-// Use one state selection (on both pages)
-
-export interface RefObject {
-  
-  handleSelectAll(value: boolean): void
-
-  enterFullscreen(): void
-
-  enterShareDialog(): void
-
-}
+// 3-dot menu does not close on delete (on any non-last element)
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -64,7 +54,7 @@ function CustomTabPanel(props: TabPanelProps) {
   )
 }
 
-export default forwardRef(function IntersectionComponent({ selectionMode, onSelectionChanged }: { selectionMode: boolean, onSelectionChanged: (total: number, selected: number) => void }, ref: Ref<RefObject>) {
+export default function IntersectionComponent({ selectionMode, allSelected, onSelectionChanged, uiMode, setUiMode }: { selectionMode: boolean, allSelected: boolean | undefined, onSelectionChanged: (total: number, selected: number) => void, uiMode: BatchMode, setUiMode: (uiMode: BatchMode) => void }) {
 
   const [intersectionSettings, setIntersectionSettings] = useStateParams(DEFAULT_INTERSECTION_SETTINGS, "intersection", IntersectionSettingsSerDeser)
 
@@ -73,10 +63,6 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
   const [expanded, setExpanded] = useState<number | null>(null)
-
-  const [fullscreenMode, setFullscreenMode] = useState<number[]>([])
-
-  const [shareMode, setShareMode] = useState<number[]>([])
 
   const [lightSettings, setLightSettings] = useStateParams([DEFAULT_LIGHT_SETTINGS], "lights", LightSettingsSerDeser)
 
@@ -90,38 +76,40 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
 
   const lightConfigs = lightSettings.map(lightSetting => new LightConfig(intersectionSettings, lightSetting))
 
+  const updateLightSettings = (settings: LightSettings, index: number) => {
+    const copy = [...lightSettings]
+    copy.splice(index, 1, settings)
+    setLightSettings(copy)
+    setCurrentTimestamp(clock.now())
+  }
+
+  const updateLightUiState = (lightUiState: LightUiState, index: number) => {
+    setLightUiStates((prev) => {
+      const copy = [...prev]
+      copy.splice(index, 1, lightUiState)
+      return copy
+    })
+  }
+
   const lightModels = lightConfigs.map((lightConfig, idx) => 
     new LightModel(
       lightConfig, 
       lightUiStates[idx], 
       (ls: LightSettings) => updateLightSettings(ls, idx), 
-      (lightUiState: LightUiState) => updateLightUiState(lightUiState, idx)
+      (lightUiState: LightUiState) => updateLightUiState(lightUiState, idx),
+      (selected: Boolean) => onSelectionChanged(lightModels.length, lightModels.filter(lm => lm.isSelected()).length + (selected ? 1 : -1))
     )
   )
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
 
+  if (allSelected) {
+    lightModels.forEach(lm => lm.setSelected(true))  
+  } else if (allSelected === false) {
+    lightModels.forEach(lm => lm.setSelected(false))
+  }
+
   const selected = lightModels.map((model, idx) => model.isSelected() ? idx : -1).filter(x => x >= 0)
-
-  useImperativeHandle(ref, () => ({
-
-    handleSelectAll(value: boolean) {
-      onAllSelectionChanged(value)
-    },
-
-    enterFullscreen() {
-      setFullscreenMode(lightConfigs.length > 1 ? selected : [0])
-      // setSelected([])
-      onAllSelectionChanged(false)
-    },
-
-    enterShareDialog() {
-      setShareMode(lightConfigs.length > 1 ? selected : [0])
-      // setSelected([])
-      onAllSelectionChanged(false)
-    }
-
-  }))
 
   const wrapListener = {
     nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / intersectionSettings.cycleLength) + 1) * intersectionSettings.cycleLength
@@ -140,6 +128,21 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
   }
 
   const clock = new Clock(timeCorrection)
+
+  const _setUiMode = (idx: number | null, uiMode: BatchMode) => {
+    if (idx != null) {
+      lightModels[idx].setSelected(true)
+    }
+    setUiMode(idx != null ? uiMode : 'none')
+  }
+
+  const _setFullscreen = (idx: number | null) => {
+    _setUiMode(idx, 'fullscreen')
+  }
+
+  const _setShare = (idx: number | null) => {
+    _setUiMode(idx, 'share')
+  }
 
   const initTimeSync = () => timeSync()
     .then(correction => setTimeCorrection(correction))
@@ -160,60 +163,35 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
     }
   })
 
-  const updateLightSettings = (settings: LightSettings, index: number) => {
-    const copy = [...lightSettings]
-    copy.splice(index, 1, settings)
-    setLightSettings(copy)
-    setCurrentTimestamp(clock.now())
-  }
-
-  const updateLightUiState = (lightUiState: LightUiState, index: number) => {
-    setLightUiStates((prev) => {
-      const copy = [...prev]
-      copy.splice(index, 1, lightUiState)
-      return copy
-    })
-  }
-
   const updateIntersectionSettings = (intersectionSettings: IntersectionSettings) => {
     setIntersectionSettings(intersectionSettings)
     setCurrentTimestamp(clock.now())
   }
 
   const onAdd = () => {
-    const updatedLightSettings = [...lightSettings, DEFAULT_LIGHT_SETTINGS]
-    setLightSettings(updatedLightSettings)
-    onSelectionChanged(updatedLightSettings.length, selected.length)
-    setExpanded(updatedLightSettings.length - 1)
+    setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
+    setLightUiStates([...lightUiStates, new LightUiState(false, DEFAULT_LIGHT_SETTINGS.phases[0].state)])
+    setExpanded(lightSettings.length)
   }
 
   const onDelete = (indicesToDelete: number[]) => {
-    onAllSelectionChanged(false)
-    const updatedLightSettings = [...lightSettings].filter((ls, i) => !indicesToDelete.includes(i))
-    setLightSettings(updatedLightSettings)
-    onSelectionChanged(updatedLightSettings.length, 0)
-  }
-
-  const onAllSelectionChanged = (b: boolean) => {
-    lightModels.forEach(model => model.setSelected(b))
+    setLightSettings([...lightSettings].filter((ls, i) => !indicesToDelete.includes(i)))
+    setLightUiStates([...lightUiStates].filter((ui, i) => !indicesToDelete.includes(i)))
   }
 
   const getShareUrl = () => {
-    if (shareMode.length == 0) {
-      return ""
-    } 
-
-    const selectedLightSettings = lightSettings.filter((ls, index) => shareMode.includes(index))
+    
+    const selectedLightSettings = lightSettings.filter((ls, index) => selected.includes(index))
 
     const search = `?intersection=${IntersectionSettingsSerDeser.serialize(intersectionSettings)}&lights=${LightSettingsSerDeser.serialize(selectedLightSettings)}`
 
     const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
-    // const baseUrl = "http://192.168.0.106:3000" 
+
     return baseUrl + search
   }  
 
   const fullscreenContents = () => {
-    const fullscreenLights = lights.filter((light, index) => fullscreenMode.includes(index))
+    const fullscreenLights = lights.filter((light, index) => selected.includes(index))
 
     const size = fullscreenLights.length < 3 ? '95vh' : `${3 * 70 / fullscreenLights.length}vw`
 
@@ -291,23 +269,23 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
           setExpanded={() => setExpanded(index)}
           expanded={index === expanded}
           onDelete={() => onDelete([index])}
-          onFullscreen={() => setFullscreenMode([index])}
-          onShare={() => setShareMode([index])}
+          onFullscreen={() => _setFullscreen(index)}
+          onShare={() => _setShare(index)}
           lightModel={lightModels[index]}
         />
       )}
 
       <Fullscreen
-        enabled={fullscreenMode.length > 0}
-        onDisabled={() => setFullscreenMode([])}
+        enabled={uiMode == 'fullscreen'}
+        onDisabled={() => _setFullscreen(null)}
       >
         {fullscreenContents()}
       </Fullscreen>
 
       <ShareDialog
         url={getShareUrl()}
-        open={shareMode.length > 0}
-        onClose={() => setShareMode([])}
+        open={uiMode == 'share'}
+        onClose={() => _setShare(null)}
       />
 
       {expanded != null &&
@@ -319,8 +297,8 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
           light={lights[expanded]}
           lightConfig={lightConfigs[expanded]}
           onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, expanded)}
-          onFullscreen={() => setFullscreenMode([expanded])}
-          onShare={() => setShareMode([expanded])}
+          onFullscreen={() => _setFullscreen(expanded)}
+          onShare={() => _setShare(expanded)}
         />
       }
 
@@ -334,4 +312,4 @@ export default forwardRef(function IntersectionComponent({ selectionMode, onSele
       </Fab>
     </Stack>
   )
-})
+}

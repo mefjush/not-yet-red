@@ -4,7 +4,7 @@ import { State } from "./State"
 
 export default class LightModel {
 
-  constructor(private lightConfig: LightConfig, private lightUiState: LightUiState, private updateLightSettings: (ls: LightSettings) => void, private updateLightUiState: (l: LightUiState) => void) {
+  constructor(private lightConfig: LightConfig, private lightUiState: LightUiState, private updateLightSettings: (ls: LightSettings) => void, private updateLightUiState: (l: LightUiState) => void, private updateSelection: (b: boolean) => void) {
   }
 
   getSelectedState(): State {
@@ -20,7 +20,10 @@ export default class LightModel {
   }
 
   setSelected(value: boolean) {
-    this.updateLightUiState(this.lightUiState.withSelected(value))
+    if (value != this.isSelected()) {
+      this.updateLightUiState(this.lightUiState.withSelected(value))
+      this.updateSelection(value)
+    }
   }
 
   changePreset(presetId: PresetId) {

@@ -8,7 +8,7 @@ import IntersectionComponent, { BatchMode, RefObject } from './components/Inters
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 
-import { Suspense, useRef, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { orange, green, yellow, red, grey } from '@mui/material/colors'
 
 //https://mui.com/material-ui/customization/palette/
@@ -83,23 +83,21 @@ const theme = createTheme({
 
 function Content() {
 
-  const [totalCount, setTotalCount] = useState(0)
-  const [selectedCount, setSelectedCount] = useState(0)
+  const [totalCount, setTotalCount] = useState(1)
 
   const [selectionMode, setSelectionMode] = useState(false)
+  const [allSelected, setAllSelected] = useState<boolean | undefined>(false)
   const [uiMode, setUiMode] = useState<BatchMode>('none')
   
-  const childRef = useRef<RefObject>(null)
-
   const checkbox = (
     <Checkbox 
       edge="start"
       size='medium'
-      checked={totalCount == selectedCount} 
-      indeterminate={selectedCount != totalCount && selectedCount > 0} 
+      checked={allSelected == true}
+      indeterminate={allSelected == undefined} 
       aria-label='select all'
       onChange={e => {
-        childRef?.current?.handleSelectAll(e.target.checked)
+        setAllSelected(e.target.checked)
       }}
       color='default'
       sx={{
@@ -110,18 +108,15 @@ function Content() {
 
   const buttonAction = (uiMode: BatchMode) => {
     return () => {
-      const refObj = childRef?.current
-      const enter = (uiMode == 'fullscreen' ? refObj?.enterFullscreen : refObj?.enterShareDialog) || (() => {})
-
       if (selectionMode) {
         setSelectionMode(false)
-        enter()
       } else {
         if (totalCount > 1) {
           setSelectionMode(true)
           setUiMode(uiMode)
         } else {
-          enter()
+          setAllSelected(true)
+          setUiMode(uiMode)
         }
       }
     }
@@ -188,6 +183,7 @@ function Content() {
             onClick={e => {
               setUiMode('none')
               setSelectionMode(false)
+              setAllSelected(false)
             }}
           >
             cancel
@@ -212,11 +208,24 @@ function Content() {
       </AppBar>
       <Toolbar />
       <IntersectionComponent 
-        ref={childRef}
         selectionMode={selectionMode}
+        allSelected={allSelected}
         onSelectionChanged={(updatedTotalCount, updatedSelectedCount) => {
-          setSelectedCount(updatedSelectedCount)
           setTotalCount(updatedTotalCount)
+          if (updatedSelectedCount == 0) {
+            setAllSelected(false)
+          } else if (updatedTotalCount == updatedSelectedCount) {
+            setAllSelected(true)
+          } else {
+            setAllSelected(undefined)
+          }
+        }}
+        uiMode={selectionMode ? 'none' : uiMode}
+        setUiMode={(uiMode) => {
+          if (uiMode == 'none') {
+            setAllSelected(false)
+          }
+          setUiMode(uiMode)
         }}
       />
       <Stack spacing={2} sx={{ p: 1, m: 1 }}>
