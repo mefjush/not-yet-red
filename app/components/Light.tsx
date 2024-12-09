@@ -16,7 +16,7 @@ import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import LightModel from '../domain/LightModel'
 
-export default function LightComponent({ currentTimestamp, light, lightConfig, expanded, onLightSettingsChange, selectionMode, setExpanded, onDelete, onFullscreen, onShare, lightModel }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, expanded: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, selectionMode: boolean, setExpanded: () => void, onDelete?: () => void, onFullscreen: () => void, onShare: () => void, lightModel: LightModel }) {
+export default function LightComponent({ currentTimestamp, light, lightConfig, expanded, onLightSettingsChange, selectionMode, setExpanded, onDelete, onFullscreen, onShare, lightModel }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, expanded: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, selectionMode: boolean, setExpanded: () => void, onDelete: () => void, onFullscreen: () => void, onShare: () => void, lightModel: LightModel }) {
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const moreMenuOpen = Boolean(anchorEl)
@@ -25,6 +25,8 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
   const selected = lightModel.isSelected()
 
   const lightHead = <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
+
+  const onMenuClose = () => setAnchorEl(null)
 
   const editButton = (
     <IconButton 
@@ -84,21 +86,36 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
         }}
         anchorEl={anchorEl}
         open={moreMenuOpen}
-        onClose={() => setAnchorEl(null)}
+        onClose={onMenuClose}
       >
-        <MenuItem onClick={onShare}>
+        <MenuItem 
+          onClick={() => {
+            onMenuClose()
+            onShare()
+          }}
+        >
           <ListItemIcon>
             <ShareIcon />
           </ListItemIcon>
           <ListItemText>Share</ListItemText>
         </MenuItem>
-        <MenuItem onClick={onFullscreen}>
+        <MenuItem 
+          onClick={() => {
+            onMenuClose()
+            onFullscreen()
+          }}
+        >
           <ListItemIcon>
             <FullscreenIcon />
           </ListItemIcon>
           <ListItemText>Fullscreen</ListItemText>
         </MenuItem>
-        <MenuItem onClick={onDelete}>
+        <MenuItem 
+          onClick={() => {
+            onMenuClose()
+            onDelete()
+          }}
+        >
           <ListItemIcon>
             <DeleteIcon />
           </ListItemIcon>

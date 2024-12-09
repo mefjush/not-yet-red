@@ -28,7 +28,6 @@ export type BatchMode = 'none' | 'share' | 'fullscreen'
 // Offline usage
 // Wake lock fix
 // Fix the slider near-the-edge rendering
-// 3-dot menu does not close on delete (on any non-last element)
 
 interface TabPanelProps {
   children?: React.ReactNode
