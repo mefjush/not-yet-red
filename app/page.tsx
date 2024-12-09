@@ -130,7 +130,6 @@ function Content() {
             size="large" 
             edge="start" 
             color='inherit' 
-            href="/"
           >
             <GridGoldenratioIcon />
           </IconButton>

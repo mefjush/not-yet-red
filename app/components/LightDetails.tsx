@@ -1,4 +1,4 @@
-import { IconButton, Dialog, Button, AppBar, Toolbar, Typography, Stack, Select, MenuItem, Box } from '@mui/material'
+import { IconButton, Dialog, Button, AppBar, Toolbar, Typography, Stack, Select, MenuItem, Box, Breadcrumbs, Link } from '@mui/material'
 import { createElement } from 'react'
 import Grid from '@mui/material/Grid2'
 import ShareIcon from '@mui/icons-material/Share'
@@ -11,6 +11,8 @@ import TrafficLight from '../domain/TrafficLight'
 import TrafficIcon from '@mui/icons-material/Traffic'
 import CircleIcon from '@mui/icons-material/Circle'
 import LightModel from '../domain/LightModel'
+import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
+import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 
 export default function LightDetails({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light, lightModel }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight, lightModel: LightModel }) {
 
@@ -76,17 +78,28 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
     >
       <AppBar className="mui-fixed">
         <Toolbar>
-          <IconButton 
-            size="large" 
-            edge="start" 
-            color='inherit' 
-          >
-            <TrafficIcon />
-          </IconButton>
+          <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" sx={{ mx: -1 }} />} style={{ color: 'white', fontSize: '1.25rem' }} sx={{ flex: 1 }}>
+            <IconButton 
+              size="large" 
+              edge="start" 
+              onClick={handleClose}
+              color='inherit'
+            >
+              <GridGoldenratioIcon />
+            </IconButton>
 
-          <Typography sx={{ flex: 1 }} variant="h6" component="div">
-            Traffic Light
-          </Typography>
+            <Stack direction='row'>
+              <IconButton 
+                size="large" 
+                sx={{ color: 'white' }} 
+              >
+                <TrafficIcon />
+              </IconButton>
+              <Typography sx={{ display: 'flex', alignItems: 'center' }} variant="h6" color='inherit'>
+                Traffic Light
+              </Typography>
+            </Stack>
+          </Breadcrumbs>
 
           <Button color='inherit' onClick={handleClose} style={{ marginRight: '-15px' }}>Ok</Button>
         </Toolbar>
