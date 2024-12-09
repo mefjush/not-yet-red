@@ -4,7 +4,7 @@ import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Checkbox, Button, 
 import TrafficIcon from '@mui/icons-material/Traffic'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import IntersectionComponent, { BatchMode, RefObject } from './components/Intersection'
+import IntersectionComponent, { BatchMode } from './components/Intersection'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 
