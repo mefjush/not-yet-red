@@ -59,12 +59,12 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
 
   const [intersectionSettings, setIntersectionSettings] = useQueryState(
     "intersection", 
-    IntersectionSettingsParser.withOptions(historyPush).withDefault(DEFAULT_INTERSECTION_SETTINGS)
+    IntersectionSettingsParser.withDefault(DEFAULT_INTERSECTION_SETTINGS)
   )
 
   const [lightSettings, setLightSettings] = useQueryState(
     "lights", 
-    LightSettingsParser.withOptions(historyPush).withDefault([DEFAULT_LIGHT_SETTINGS])
+    LightSettingsParser.withDefault([DEFAULT_LIGHT_SETTINGS])
   )
 
   const [expanded, setExpanded] = useQueryState("e", parseAsInteger.withOptions(historyPush))
