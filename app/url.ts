@@ -1,35 +1,19 @@
-import { useEffect, useState } from "react"
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { LightSettings, Phase, PresetId } from "./domain/LightConfig"
 import { State } from "./domain/State"
 import IntersectionSettings from "./domain/IntersectionSettings"
+import { createParser } from "nuqs"
 
 const stateLookup = Object.values(State).map(state => [state, state.split('_').map(x => x.charAt(0)).join('')])
 const stateSerializationLookup = Object.fromEntries(stateLookup)
 const stateDeserializationLookup = Object.fromEntries(stateLookup.map(([k, v]) => [v, k]))
 
-interface SerDeser<T> {
-  serialize: (state: T) => string
-  deserialize: (state: string) => T
-}
-
-export const BooleanSerDeser: SerDeser<boolean> = {
-  serialize: (s: Boolean) => (s ? 'true' : 'false'),
-  deserialize: (s: string) => s === 'true'
-}
-
-export const IntSerDeser: SerDeser<number|null> = {
-  serialize: (s: number|null) => `${s}`,
-  deserialize: (s: string) => s == 'null' ? null : Number.parseInt(s)
-}
-
-export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
+export const LightSettingsSerDeser = createParser({
   serialize: (lightSettingsArray: LightSettings[]) => {
     return lightSettingsArray
       .map(ls => [ls.offset / 1000, ls.phases.map(p => stateSerializationLookup[p.state] + (p.duration / 1000)).join("-"), ls.presetId].join('--'))
       .join("---")
   },
-  deserialize: (s: string) => {
+  parse: (s: string) => {
     return s.split("---").map(ls => {
       const lsSplit = ls.split("--")
       return {
@@ -43,13 +27,13 @@ export const LightSettingsSerDeser: SerDeser<LightSettings[]> = {
       }
     })
   }
-}
+})
 
-export const IntersectionSettingsSerDeser: SerDeser<IntersectionSettings> = {
+export const IntersectionSettingsSerDeser = createParser({
   serialize: (intersectionSettings: IntersectionSettings) => {
     return [intersectionSettings.cycleLength / 1000, intersectionSettings.failure.duration / 1000, intersectionSettings.failure.probability].join('-')
   },
-  deserialize: (s: string) => {
+  parse: (s: string) => {
     const split = s.split("-")
     return {
       cycleLength: 1000 * Number.parseInt(split[0]),
@@ -59,42 +43,4 @@ export const IntersectionSettingsSerDeser: SerDeser<IntersectionSettings> = {
       }
     }
   }
-}
-
-export default function useStateParams<T>(
-    initialState: T,
-    paramsName: string,
-    serdeser: SerDeser<T>
-  ): [T, (state: T) => void] {
-    // const router = useRouter()
-    // const pathname = usePathname()
-    const searchParams = useSearchParams()
-    const search = new URLSearchParams(searchParams)
-  
-    const existingValue = search.get(paramsName)
-
-    const [state, setState] = useState<T>(
-      existingValue ? serdeser.deserialize(existingValue) : initialState
-    )
-  
-    useEffect(() => {
-      // Updates state when user navigates backwards or forwards in browser history
-      if (existingValue && serdeser.deserialize(existingValue) !== state) {
-        setState(serdeser.deserialize(existingValue))
-      }
-    }, [existingValue])
-  
-    const onChange = (s: T) => {
-      setState(s)
-      search.set(paramsName, serdeser.serialize(s))
-      // router.push(pathname + "?" + search.toString(), { scroll: false })
-
-      const newUrl = new URL(window.location.href)    
-      newUrl.search = search.toString()
-      if (window.history && window.history.pushState) {       
-        window.history.pushState({ path: newUrl.href }, '', newUrl.href)
-      }
-    }
-  
-    return [state, onChange]
-  }
+})

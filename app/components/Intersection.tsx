@@ -9,7 +9,7 @@ import Failure from '../domain/Failure'
 import Input from './Input'
 import { Card, CardContent, Collapse, Fab, Stack, Box, Button, Tabs, Tab, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import useStateParams, { LightSettingsSerDeser, IntersectionSettingsSerDeser } from '../url'
+import { LightSettingsSerDeser, IntersectionSettingsSerDeser } from '../url'
 import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import Fullscreen from './Fullscreen'
@@ -21,10 +21,11 @@ import LightDetails from './LightDetails'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 import LightUiState from '../domain/LightUiState'
 import LightModel from '../domain/LightModel'
+import { parseAsInteger, useQueryState } from 'nuqs'
+
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
 
-// Browser back button on expand (share dialog?) - a simple adding expand=null as a param does not work correctly - it fucks up storing the light config in the url (query params modified from 2 places)
 // Offline usage
 // Wake lock fix
 
@@ -54,15 +55,15 @@ function CustomTabPanel(props: TabPanelProps) {
 
 export default function IntersectionComponent({ selectionMode, allSelected, onSelectionChanged, uiMode, setUiMode }: { selectionMode: boolean, allSelected: boolean | undefined, onSelectionChanged: (total: number, selected: number) => void, uiMode: BatchMode, setUiMode: (uiMode: BatchMode) => void }) {
 
-  const [intersectionSettings, setIntersectionSettings] = useStateParams(DEFAULT_INTERSECTION_SETTINGS, "intersection", IntersectionSettingsSerDeser)
+  const [intersectionSettings, setIntersectionSettings] = useQueryState("intersection", IntersectionSettingsSerDeser.withDefault(DEFAULT_INTERSECTION_SETTINGS))
 
   const [timeCorrection, setTimeCorrection] = useState(0)
 
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
-  const [expanded, setExpanded] = useState<number | null>(null)
+  const [expanded, setExpanded] = useQueryState("e", parseAsInteger)
 
-  const [lightSettings, setLightSettings] = useStateParams([DEFAULT_LIGHT_SETTINGS], "lights", LightSettingsSerDeser)
+  const [lightSettings, setLightSettings] = useQueryState("lights", LightSettingsSerDeser.withDefault([DEFAULT_LIGHT_SETTINGS]))
 
   const [lightUiStates, setLightUiStates] = useState(lightSettings.map(ls => new LightUiState(false, ls.phases[0].state)))
 
@@ -208,7 +209,10 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
       lightConfig={lightConfigs[index]}
       onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
       selectionMode={selectionMode}
-      setExpanded={() => setExpanded(index)}
+      setExpanded={() => {
+        setExpanded(index)
+        window.history.pushState({ dialogOpen: true }, '')
+      }}
       expanded={index === expanded}
       onDelete={() => onDelete([index])}
       onFullscreen={() => _setFullscreen(index)}
