@@ -7,7 +7,7 @@ const stateLookup = Object.values(State).map(state => [state, state.split('_').m
 const stateSerializationLookup = Object.fromEntries(stateLookup)
 const stateDeserializationLookup = Object.fromEntries(stateLookup.map(([k, v]) => [v, k]))
 
-export const LightSettingsSerDeser = createParser({
+export const LightSettingsParser = createParser({
   serialize: (lightSettingsArray: LightSettings[]) => {
     return lightSettingsArray
       .map(ls => [ls.offset / 1000, ls.phases.map(p => stateSerializationLookup[p.state] + (p.duration / 1000)).join("-"), ls.presetId].join('--'))
@@ -29,7 +29,7 @@ export const LightSettingsSerDeser = createParser({
   }
 })
 
-export const IntersectionSettingsSerDeser = createParser({
+export const IntersectionSettingsParser = createParser({
   serialize: (intersectionSettings: IntersectionSettings) => {
     return [intersectionSettings.cycleLength / 1000, intersectionSettings.failure.duration / 1000, intersectionSettings.failure.probability].join('-')
   },

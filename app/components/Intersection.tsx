@@ -9,7 +9,7 @@ import Failure from '../domain/Failure'
 import Input from './Input'
 import { Card, CardContent, Collapse, Fab, Stack, Box, Button, Tabs, Tab, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import { LightSettingsSerDeser, IntersectionSettingsSerDeser } from '../url'
+import { LightSettingsParser, IntersectionSettingsParser } from '../url'
 import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import Fullscreen from './Fullscreen'
@@ -21,10 +21,12 @@ import LightDetails from './LightDetails'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 import LightUiState from '../domain/LightUiState'
 import LightModel from '../domain/LightModel'
-import { parseAsInteger, useQueryState } from 'nuqs'
+import { Options, parseAsInteger, useQueryState } from 'nuqs'
 
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
+
+const historyPush: Options = { history: 'push' }
 
 // Offline usage
 // Wake lock fix
@@ -55,15 +57,21 @@ function CustomTabPanel(props: TabPanelProps) {
 
 export default function IntersectionComponent({ selectionMode, allSelected, onSelectionChanged, uiMode, setUiMode }: { selectionMode: boolean, allSelected: boolean | undefined, onSelectionChanged: (total: number, selected: number) => void, uiMode: BatchMode, setUiMode: (uiMode: BatchMode) => void }) {
 
-  const [intersectionSettings, setIntersectionSettings] = useQueryState("intersection", IntersectionSettingsSerDeser.withDefault(DEFAULT_INTERSECTION_SETTINGS))
+  const [intersectionSettings, setIntersectionSettings] = useQueryState(
+    "intersection", 
+    IntersectionSettingsParser.withOptions(historyPush).withDefault(DEFAULT_INTERSECTION_SETTINGS)
+  )
+
+  const [lightSettings, setLightSettings] = useQueryState(
+    "lights", 
+    LightSettingsParser.withOptions(historyPush).withDefault([DEFAULT_LIGHT_SETTINGS])
+  )
+
+  const [expanded, setExpanded] = useQueryState("e", parseAsInteger.withOptions(historyPush))
 
   const [timeCorrection, setTimeCorrection] = useState(0)
 
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
-
-  const [expanded, setExpanded] = useQueryState("e", parseAsInteger)
-
-  const [lightSettings, setLightSettings] = useQueryState("lights", LightSettingsSerDeser.withDefault([DEFAULT_LIGHT_SETTINGS]))
 
   const [lightUiStates, setLightUiStates] = useState(lightSettings.map(ls => new LightUiState(false, ls.phases[0].state)))
 
@@ -182,7 +190,7 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
     
     const selectedLightSettings = lightSettings.filter((ls, index) => selected.includes(index))
 
-    const search = `?intersection=${IntersectionSettingsSerDeser.serialize(intersectionSettings)}&lights=${LightSettingsSerDeser.serialize(selectedLightSettings)}`
+    const search = `?intersection=${IntersectionSettingsParser.serialize(intersectionSettings)}&lights=${LightSettingsParser.serialize(selectedLightSettings)}`
 
     const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
 
