@@ -1,5 +1,5 @@
 import { State } from '../../app/domain/State'
-import LightConfig, { MAXED_OUT_TEST_LIGHT_SETTINGS, TEST_LIGHT_SETTINGS, TimeRange } from '../../app/domain/LightConfig'
+import LightConfig, { CONDITIONAL_RIGHT_TEST_LIGHT_SETTINGS, MAXED_OUT_TEST_LIGHT_SETTINGS, TEST_LIGHT_SETTINGS, TimeRange } from '../../app/domain/LightConfig'
 
 const intersectionSettings = {
   cycleLength: 60_000,
@@ -136,5 +136,12 @@ describe('LightConfig', () => {
 
     expect(modified.offset).toBe(11_000)
     expect(modified.phases).toContainEqual({ state: State.RED, duration: 56_000 })
+  })
+
+  it('conditional right phases can be altered', () => {
+    const lightConfig = new LightConfig(intersectionSettings, CONDITIONAL_RIGHT_TEST_LIGHT_SETTINGS)
+    const modified = lightConfig.withStateTimeRange(State.GREEN, new TimeRange(0, 15_000, lightConfig.cycleLength()))
+
+    expect(modified.phases).toContainEqual({ state: State.GREEN, duration: 15_000 })
   })
 })

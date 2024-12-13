@@ -21,7 +21,7 @@ import LightDetails from './LightDetails'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 import LightUiState from '../domain/LightUiState'
 import LightModel from '../domain/LightModel'
-import { Options, parseAsInteger, useQueryState } from 'nuqs'
+import { createParser, Options, parseAsInteger, useQueryState } from 'nuqs'
 
 
 export type BatchMode = 'none' | 'share' | 'fullscreen'
@@ -58,12 +58,12 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
 
   const [intersectionSettings, setIntersectionSettings] = useQueryState(
     "intersection", 
-    IntersectionSettingsParser.withDefault(DEFAULT_INTERSECTION_SETTINGS)
+    createParser(IntersectionSettingsParser).withDefault(DEFAULT_INTERSECTION_SETTINGS)
   )
 
   const [lightSettings, setLightSettings] = useQueryState(
     "lights", 
-    LightSettingsParser.withDefault([DEFAULT_LIGHT_SETTINGS])
+    createParser(LightSettingsParser).withDefault([DEFAULT_LIGHT_SETTINGS])
   )
 
   const [expanded, setExpanded] = useQueryState("e", parseAsInteger.withOptions(historyPush))

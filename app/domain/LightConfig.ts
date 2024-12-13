@@ -319,3 +319,12 @@ export const MAXED_OUT_TEST_LIGHT_SETTINGS: LightSettings = {
     new Phase(State.YELLOW, 2_000)
   ],
 }
+
+export const CONDITIONAL_RIGHT_TEST_LIGHT_SETTINGS: LightSettings = {
+  offset: 0,
+  phases: [
+    new Phase(State.GREEN, 10_000),
+    new Phase(State.NONE, 50_000)
+  ],
+  presetId: PresetId.CONDITIONAL_RIGHT
+}

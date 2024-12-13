@@ -1,13 +1,12 @@
 import { LightSettings, Phase, PresetId } from "./domain/LightConfig"
 import { State } from "./domain/State"
 import IntersectionSettings from "./domain/IntersectionSettings"
-import { createParser } from "nuqs"
 
 const stateLookup = Object.values(State).map(state => [state, state.split('_').map(x => x.charAt(0)).join('')])
 const stateSerializationLookup = Object.fromEntries(stateLookup)
 const stateDeserializationLookup = Object.fromEntries(stateLookup.map(([k, v]) => [v, k]))
 
-export const LightSettingsParser = createParser({
+export const LightSettingsParser = {
   serialize: (lightSettingsArray: LightSettings[]) => {
     return lightSettingsArray
       .map(ls => [ls.offset / 1000, ls.phases.map(p => stateSerializationLookup[p.state] + (p.duration / 1000)).join("-"), ls.presetId].join('--'))
@@ -27,9 +26,9 @@ export const LightSettingsParser = createParser({
       }
     })
   }
-})
+}
 
-export const IntersectionSettingsParser = createParser({
+export const IntersectionSettingsParser = {
   serialize: (intersectionSettings: IntersectionSettings) => {
     return [intersectionSettings.cycleLength / 1000, intersectionSettings.failure.duration / 1000, intersectionSettings.failure.probability].join('-')
   },
@@ -43,4 +42,4 @@ export const IntersectionSettingsParser = createParser({
       }
     }
   }
-})
+}
