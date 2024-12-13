@@ -1,6 +1,5 @@
 import { IconButton, Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, InputAdornment, Snackbar } from '@mui/material'
-import { useEffect, useState } from 'react'
-// import { useHistory } from 'react-router-dom'
+import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 
@@ -12,22 +11,6 @@ export default function ShareDialog({ url, open, onClose }: { url: string, open:
     setSnackOpen(true)
     navigator.clipboard.writeText(url)
   }
-
-
-  // const history = useHistory()
-  
-  // useEffect(() => {
-  //     const unblock = history.block((location, action) => {
-  //         if (open) {
-  //             onClose()
-  //             return false // Prevent navigation
-  //         }
-  //     })
-
-  //     return () => {
-  //         unblock()
-  //     }
-  // }, [open, onClose, history])
 
   return (
     <Dialog
