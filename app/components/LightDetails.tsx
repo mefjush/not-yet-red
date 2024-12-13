@@ -70,6 +70,14 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
     })
   }
 
+  const changePreset = (presetId: PresetId) => {
+    const supportedStates = PRESETS[presetId].states
+    if (!supportedStates.includes(selectedState)) {
+      lightModel.setSelectedState(supportedStates[0])
+    }
+    onLightSettingsChange(lightConfig.withPreset(presetId))
+  }
+
   return (
     <Dialog
       fullScreen
@@ -116,7 +124,7 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
               fullWidth 
               size='small' 
               value={lightConfig.preset.presetId} 
-              onChange={event => lightModel.changePreset(event.target.value as PresetId)}
+              onChange={event => changePreset(event.target.value as PresetId)}
             >
               { generatePresetMenuItems() }
             </Select>

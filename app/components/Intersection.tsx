@@ -29,7 +29,6 @@ export type BatchMode = 'none' | 'share' | 'fullscreen'
 const historyPush: Options = { history: 'push' }
 
 // Offline usage
-// Wake lock fix
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -98,11 +97,9 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
     })
   }
 
-  const lightModels = lightConfigs.map((lightConfig, idx) => 
+  const lightModels = lightUiStates.map((lightUiState, idx) => 
     new LightModel(
-      lightConfig, 
-      lightUiStates[idx], 
-      (ls: LightSettings) => updateLightSettings(ls, idx), 
+      lightUiState,
       (lightUiState: LightUiState) => updateLightUiState(lightUiState, idx),
       (selected: Boolean) => onSelectionChanged(lightModels.length, lightModels.filter(lm => lm.isSelected()).length + (selected ? 1 : -1))
     )
