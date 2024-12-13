@@ -1,6 +1,7 @@
-import { LightSettings, Phase, PresetId } from "./domain/LightConfig"
+import { LightSettings, Phase } from "./domain/LightConfig"
 import { State } from "./domain/State"
 import IntersectionSettings from "./domain/IntersectionSettings"
+import { PresetId } from "./domain/Preset"
 
 const stateLookup = Object.values(State).map(state => [state, state.split('_').map(x => x.charAt(0)).join('')])
 const stateSerializationLookup = Object.fromEntries(stateLookup)

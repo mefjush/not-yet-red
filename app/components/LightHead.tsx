@@ -4,8 +4,9 @@ import TrafficLight from '../domain/TrafficLight'
 import { Stack, Avatar, AvatarProps, Box } from '@mui/material'
 import { styled, alpha, Palette, PaletteColor } from "@mui/material/styles"
 import { SegmentColor } from '../domain/State'
-import LightConfig, { SymbolId, SYMBOLS } from '../domain/LightConfig'
+import LightConfig from '../domain/LightConfig'
 import { createElement } from 'react'
+import { SymbolId, SYMBOLS } from '../domain/Preset'
 
 const TRANSITION_DURATION = '300ms'
 

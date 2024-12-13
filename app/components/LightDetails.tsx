@@ -5,7 +5,7 @@ import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import LightSettingsComponent from './LightSettings'
 import Timeline from './Timeline'
-import LightConfig, { LightSettings, PresetId, PRESETS, SymbolId, SYMBOLS } from '../domain/LightConfig'
+import LightConfig, { LightSettings } from '../domain/LightConfig'
 import LightHead from './LightHead'
 import TrafficLight from '../domain/TrafficLight'
 import TrafficIcon from '@mui/icons-material/Traffic'
@@ -13,6 +13,7 @@ import CircleIcon from '@mui/icons-material/Circle'
 import LightModel from '../domain/LightModel'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
+import { PresetId, PRESETS, SYMBOLS, SymbolId } from '../domain/Preset'
 
 export default function LightDetails({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light, lightModel }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight, lightModel: LightModel }) {
 
