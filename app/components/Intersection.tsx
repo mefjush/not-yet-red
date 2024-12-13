@@ -23,7 +23,6 @@ import LightUiState from '../domain/LightUiState'
 import LightModel from '../domain/LightModel'
 import { createParser, Options, parseAsInteger, useQueryState } from 'nuqs'
 
-
 export type BatchMode = 'none' | 'share' | 'fullscreen'
 
 const historyPush: Options = { history: 'push' }
@@ -33,6 +32,7 @@ const historyPush: Options = { history: 'push' }
 // Light model cleanup
 // Description / about page
 // Manual time correction in cookie / local storage
+// blink & beep
 
 interface TabPanelProps {
   children?: React.ReactNode
