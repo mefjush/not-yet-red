@@ -28,7 +28,11 @@ export type BatchMode = 'none' | 'share' | 'fullscreen'
 
 const historyPush: Options = { history: 'push' }
 
+// TODOs
 // Offline usage
+// Light model cleanup
+// Description / about page
+// Manual time correction in cookie / local storage
 
 interface TabPanelProps {
   children?: React.ReactNode
