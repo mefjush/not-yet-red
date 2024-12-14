@@ -127,6 +127,10 @@ export default function IntersectionComponent({ selectionMode, onSelectionChange
   const clock = new Clock(timeCorrection)
 
   const _setUiMode = (idx: number | null, uiMode: UiMode) => {
+    if (uiMode != 'none') {
+      setLightUiStates(lightUiStates.map((ui, index) => index == idx ? ui.withSelected(true) : ui))
+      onSelectionChanged(lightConfigs.length, 1)
+    }
     setUiMode(idx != null ? uiMode : 'none')
   }
 
