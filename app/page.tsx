@@ -4,7 +4,7 @@ import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Checkbox, Button, 
 import TrafficIcon from '@mui/icons-material/Traffic'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import IntersectionComponent, { BatchMode } from './components/Intersection'
+import IntersectionComponent, { UiMode, SelectionMode } from './components/Intersection'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 
@@ -69,7 +69,7 @@ declare module "@mui/material/Radio" {
   }
 }
 
-const { palette } = createTheme();
+const { palette } = createTheme()
 
 const theme = createTheme({
   palette: {
@@ -85,19 +85,19 @@ function Content() {
 
   const [totalCount, setTotalCount] = useState(1)
 
-  const [selectionMode, setSelectionMode] = useState(false)
-  const [allSelected, setAllSelected] = useState<boolean | undefined>(false)
-  const [uiMode, setUiMode] = useState<BatchMode>('none')
-  
+  const [selectionMode, setSelectionMode] = useState<SelectionMode>('none')
+  const [uiMode, setUiMode] = useState<UiMode>('none')
+  const [checkboxMode, setCheckboxMode] = useState<UiMode>('none')
+
   const checkbox = (
     <Checkbox 
       edge="start"
       size='medium'
-      checked={allSelected == true}
-      indeterminate={allSelected == undefined} 
+      checked={selectionMode.includes('all')}
+      indeterminate={selectionMode == 'some'} 
       aria-label='select all'
       onChange={e => {
-        setAllSelected(e.target.checked)
+        setSelectionMode(e.target.checked ? 'set-all' : 'set-none')
       }}
       color='default'
       sx={{
@@ -106,25 +106,26 @@ function Content() {
     />
   )
 
-  const buttonAction = (uiMode: BatchMode) => {
+  const buttonAction = (uiMode: UiMode) => {
     return () => {
-      if (selectionMode) {
-        setSelectionMode(false)
-      } else {
-        if (totalCount > 1) {
-          setSelectionMode(true)
-          setUiMode(uiMode)
+      if (totalCount > 1) {
+        if (checkboxMode == 'none') {
+          setCheckboxMode(uiMode)
+          setSelectionMode('set-none')
         } else {
-          setAllSelected(true)
+          setCheckboxMode('none')
           setUiMode(uiMode)
         }
+      } else {
+        setUiMode(uiMode)
+        setSelectionMode('set-all')
       }
     }
   }
 
   const toolbarElements = (
     <>
-      <Collapse orientation='horizontal' in={!selectionMode}>
+      <Collapse orientation='horizontal' in={checkboxMode == 'none'}>
         <Stack direction='row' display={'flex'} sx={{ alignItems: "center" }}>
           <IconButton 
             size="large" 
@@ -139,35 +140,35 @@ function Content() {
         </Stack>
       </Collapse>
       
-      { selectionMode || <Box sx={{ flexGrow: 1 }}></Box> }
+      { checkboxMode != 'none' || <Box sx={{ flexGrow: 1 }}></Box> }
 
-      { (!selectionMode || uiMode == 'share') && 
+      { (checkboxMode == 'none' || checkboxMode == 'share') && 
         <IconButton
           size="large"
           color="inherit"
           aria-label="share"
-          edge={selectionMode && 'start'}
+          edge={(checkboxMode != 'none') && 'start'}
           onClick={buttonAction('share')}
         >
           <ShareIcon />
         </IconButton>
       }
 
-      { (!selectionMode || uiMode == 'fullscreen') && 
+      { (checkboxMode == 'none' || checkboxMode == 'fullscreen') && 
         <IconButton
           size="large"
           color="inherit"
           aria-label="fullscreen"
-          edge={selectionMode ? 'start' : 'end'}
+          edge={(checkboxMode != 'none') ? 'start' : 'end'}
           onClick={buttonAction('fullscreen')}
         >
           <FullscreenIcon />
         </IconButton>
       }
 
-      { selectionMode && <Box sx={{ flexGrow: 1 }}></Box> }
+      { checkboxMode != 'none' && <Box sx={{ flexGrow: 1 }}></Box> }
 
-      <Collapse in={selectionMode} orientation='horizontal' unmountOnExit>
+      <Collapse in={checkboxMode != 'none'} orientation='horizontal' unmountOnExit>
         <Stack direction={'row'}>
           <FormControlLabel
             control={checkbox}
@@ -181,15 +182,15 @@ function Content() {
             color='inherit' 
             onClick={e => {
               setUiMode('none')
-              setSelectionMode(false)
-              setAllSelected(false)
+              setSelectionMode('none')
+              setCheckboxMode('none')
             }}
           >
             cancel
           </Button>
           <Button 
             color='inherit' 
-            onClick={buttonAction(uiMode)}
+            onClick={buttonAction(checkboxMode)}
           >
             ok
           </Button>
@@ -208,21 +209,22 @@ function Content() {
       <Toolbar />
       <IntersectionComponent 
         selectionMode={selectionMode}
-        allSelected={allSelected}
         onSelectionChanged={(updatedTotalCount, updatedSelectedCount) => {
           setTotalCount(updatedTotalCount)
           if (updatedSelectedCount == 0) {
-            setAllSelected(false)
+            setSelectionMode('none')
           } else if (updatedTotalCount == updatedSelectedCount) {
-            setAllSelected(true)
+            setSelectionMode('all')
           } else {
-            setAllSelected(undefined)
+            setSelectionMode('some')
           }
         }}
-        uiMode={selectionMode ? 'none' : uiMode}
+        checkboxMode={checkboxMode}
+        uiMode={uiMode}
         setUiMode={(uiMode) => {
           if (uiMode == 'none') {
-            setAllSelected(false)
+            setSelectionMode('set-none')
+            setCheckboxMode('none')
           }
           setUiMode(uiMode)
         }}

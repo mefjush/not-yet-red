@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import LightComponent from './Light'
 import Clock from '../domain/Clock'
 import TrafficLight from '../domain/TrafficLight'
@@ -20,16 +20,15 @@ import timeSync from '../domain/timeSync'
 import LightDetails from './LightDetails'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 import LightUiState from '../domain/LightUiState'
-import LightModel from '../domain/LightModel'
 import { createParser, Options, parseAsInteger, useQueryState } from 'nuqs'
 
-export type BatchMode = 'none' | 'share' | 'fullscreen'
+export type UiMode = 'none' | 'share' | 'fullscreen'
+export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 
 const historyPush: Options = { history: 'push' }
 
 // TODOs
 // Offline usage
-// Light model cleanup
 // Description / about page
 // Manual time correction in cookie / local storage
 // blink & beep
@@ -58,7 +57,7 @@ function CustomTabPanel(props: TabPanelProps) {
   )
 }
 
-export default function IntersectionComponent({ selectionMode, allSelected, onSelectionChanged, uiMode, setUiMode }: { selectionMode: boolean, allSelected: boolean | undefined, onSelectionChanged: (total: number, selected: number) => void, uiMode: BatchMode, setUiMode: (uiMode: BatchMode) => void }) {
+export default function IntersectionComponent({ selectionMode, onSelectionChanged, uiMode, setUiMode, checkboxMode }: { selectionMode: SelectionMode, onSelectionChanged: (total: number, selected: number) => void, uiMode: UiMode, setUiMode: (uiMode: UiMode) => void, checkboxMode: UiMode }) {
 
   const [intersectionSettings, setIntersectionSettings] = useQueryState(
     "intersection", 
@@ -94,30 +93,20 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
   }
 
   const updateLightUiState = (lightUiState: LightUiState, index: number) => {
-    setLightUiStates((prev) => {
-      const copy = [...prev]
-      copy.splice(index, 1, lightUiState)
-      return copy
-    })
+    const copy = [...lightUiStates]
+    copy.splice(index, 1, lightUiState)
+    setLightUiStates(copy)
+    onSelectionChanged(lightConfigs.length, copy.filter(ui => ui.isSelected).length)
   }
-
-  const lightModels = lightUiStates.map((lightUiState, idx) => 
-    new LightModel(
-      lightUiState,
-      (lightUiState: LightUiState) => updateLightUiState(lightUiState, idx),
-      (selected: Boolean) => onSelectionChanged(lightModels.length, lightModels.filter(lm => lm.isSelected()).length + (selected ? 1 : -1))
-    )
-  )
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
 
-  if (allSelected) {
-    lightModels.forEach(lm => lm.setSelected(true))  
-  } else if (allSelected === false) {
-    lightModels.forEach(lm => lm.setSelected(false))
+  if (selectionMode.includes('set')) {
+    const selected = selectionMode == 'set-all'
+    if (lightUiStates.find(ui => ui.isSelected != selected)) {
+      setLightUiStates(lightUiStates.map(ui => ui.withSelected(selected)))
+    }
   }
-
-  const selected = lightModels.map((model, idx) => model.isSelected() ? idx : -1).filter(x => x >= 0)
 
   const wrapListener = {
     nextStateTimestamp: (timestamp: number) => (Math.floor(timestamp / intersectionSettings.cycleLength) + 1) * intersectionSettings.cycleLength
@@ -137,10 +126,7 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
 
   const clock = new Clock(timeCorrection)
 
-  const _setUiMode = (idx: number | null, uiMode: BatchMode) => {
-    if (idx != null) {
-      lightModels[idx].setSelected(true)
-    }
+  const _setUiMode = (idx: number | null, uiMode: UiMode) => {
     setUiMode(idx != null ? uiMode : 'none')
   }
 
@@ -158,13 +144,12 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
 
   // once
   useEffect(() => {
-    onSelectionChanged(lightConfigs.length, selected.length) // to render the toolbar
+    onSelectionChanged(lightConfigs.length, lightUiStates.filter(ui => ui.isSelected).length) // to render the toolbar
     initTimeSync()
   }, [])
 
   // after each render
   useEffect(() => {
-    onSelectionChanged(lightConfigs.length, lightModels.filter(m => m.isSelected()).length) // not so ideal
     clock.register([...lights, failure, wrapListener]).then(setCurrentTimestamp)
     return () => {
       clock.unregister()
@@ -179,17 +164,21 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
   const onAdd = () => {
     setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
     setLightUiStates([...lightUiStates, new LightUiState(false, DEFAULT_LIGHT_SETTINGS.phases[0].state)])
+    onSelectionChanged(lightSettings.length + 1, 0)
+    setUiMode('none')
     setExpanded(lightSettings.length)
   }
 
   const onDelete = (indicesToDelete: number[]) => {
     setLightSettings([...lightSettings].filter((ls, i) => !indicesToDelete.includes(i)))
     setLightUiStates([...lightUiStates].filter((ui, i) => !indicesToDelete.includes(i)))
+    onSelectionChanged(lightSettings.length - 1, 0)
+    setUiMode('none')
   }
 
   const getShareUrl = () => {
     
-    const selectedLightSettings = lightSettings.filter((ls, index) => selected.includes(index))
+    const selectedLightSettings = lightSettings.filter((ls, index) => lightUiStates[index].isSelected)
 
     const search = `?intersection=${IntersectionSettingsParser.serialize(intersectionSettings)}&lights=${LightSettingsParser.serialize(selectedLightSettings)}`
 
@@ -199,7 +188,7 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
   }  
 
   const fullscreenContents = () => {
-    const fullscreenLights = lights.filter((light, index) => selected.includes(index))
+    const fullscreenLights = lights.filter((light, index) => lightUiStates[index].isSelected)
 
     const size = fullscreenLights.length < 3 ? '95vh' : `${3 * 70 / fullscreenLights.length}vw`
 
@@ -217,16 +206,14 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
       light={light}
       lightConfig={lightConfigs[index]}
       onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
-      selectionMode={selectionMode}
-      setExpanded={() => {
-        setExpanded(index)
-        window.history.pushState({ dialogOpen: true }, '')
-      }}
+      checkboxMode={checkboxMode}
+      setExpanded={() => setExpanded(index)}
       expanded={index === expanded}
       onDelete={() => onDelete([index])}
       onFullscreen={() => _setFullscreen(index)}
       onShare={() => _setShare(index)}
-      lightModel={lightModels[index]}
+      lightUiState={lightUiStates[index]}
+      setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, index)}
     />
   )
 
@@ -306,12 +293,13 @@ export default function IntersectionComponent({ selectionMode, allSelected, onSe
           open={expanded != null}
           onClose={() => setExpanded(null)}
           currentTimestamp={currentTimestamp}
-          lightModel={lightModels[expanded]}
           light={lights[expanded]}
           lightConfig={lightConfigs[expanded]}
           onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, expanded)}
           onFullscreen={() => _setFullscreen(expanded)}
           onShare={() => _setShare(expanded)}
+          lightUiState={lightUiStates[expanded]}
+          setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, expanded)}
         />
       }
 

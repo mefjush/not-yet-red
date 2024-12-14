@@ -12,15 +12,16 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import LightModel from '../domain/LightModel'
+import LightUiState from '../domain/LightUiState'
+import { UiMode } from './Intersection'
 
-export default function LightComponent({ currentTimestamp, light, lightConfig, expanded, onLightSettingsChange, selectionMode, setExpanded, onDelete, onFullscreen, onShare, lightModel }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, expanded: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, selectionMode: boolean, setExpanded: () => void, onDelete: () => void, onFullscreen: () => void, onShare: () => void, lightModel: LightModel }) {
+export default function LightComponent({ currentTimestamp, light, lightConfig, expanded, onLightSettingsChange, checkboxMode, setExpanded, onDelete, onFullscreen, onShare, lightUiState, setLightUiState }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, expanded: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, checkboxMode: UiMode, setExpanded: () => void, onDelete: () => void, onFullscreen: () => void, onShare: () => void, lightUiState: LightUiState, setLightUiState: (lightUiState: LightUiState) => void }) {
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const moreMenuOpen = Boolean(anchorEl)
   
-  const selectedState = lightModel.getSelectedState()
-  const selected = lightModel.isSelected()
+  const selectedState = lightUiState.selectedState
+  const selected = lightUiState.isSelected
 
   const lightHead = <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
 
@@ -48,7 +49,7 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
       value={selected} 
       checked={selected}
       onClick={e => e.stopPropagation()}
-      onChange={e => lightModel.setSelected(e.target.checked)}
+      onChange={e => setLightUiState(lightUiState.withSelected(e.target.checked))}
       onTouchStart={(event) => event.stopPropagation()}
       onMouseDown={(event) => event.stopPropagation()}
     />
@@ -60,7 +61,7 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
         <PhaseControls
           lightConfig={lightConfig}
           onLightSettingsChange={onLightSettingsChange}
-          setSelectedState={(state) => lightModel.setSelectedState(state)}
+          setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
           selectedState={selectedState}
           expanded={expanded}
         />
@@ -135,8 +136,8 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
     </CardContent>
   ) 
 
-  const actionIcon = !selectionMode ? editButton : checkbox
-  const actionFunction = !selectionMode ? setExpanded : (() => lightModel.setSelected(!selected))
+  const actionIcon = checkboxMode == 'none' ? editButton : checkbox
+  const actionFunction = checkboxMode == 'none' ? setExpanded : (() => setLightUiState(lightUiState.withSelected(!selected)))
 
   return (
     <>

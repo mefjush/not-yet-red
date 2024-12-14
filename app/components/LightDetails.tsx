@@ -10,14 +10,14 @@ import LightHead from './LightHead'
 import TrafficLight from '../domain/TrafficLight'
 import TrafficIcon from '@mui/icons-material/Traffic'
 import CircleIcon from '@mui/icons-material/Circle'
-import LightModel from '../domain/LightModel'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import { PresetId, PRESETS, SYMBOLS, SymbolId } from '../domain/Preset'
+import LightUiState from '../domain/LightUiState'
 
-export default function LightDetails({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light, lightModel }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight, lightModel: LightModel }) {
+export default function LightDetails({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light, lightUiState, setLightUiState }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight, lightUiState: LightUiState, setLightUiState: (lightUiState: LightUiState) => void }) {
 
-  const selectedState = lightModel.getSelectedState()
+  const selectedState = lightUiState.selectedState
 
   const handleClose = () => {
     onClose()
@@ -74,7 +74,7 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
   const changePreset = (presetId: PresetId) => {
     const supportedStates = PRESETS[presetId].states
     if (!supportedStates.includes(selectedState)) {
-      lightModel.setSelectedState(supportedStates[0])
+      setLightUiState(lightUiState.withSelectedState(supportedStates[0]))
     }
     onLightSettingsChange(lightConfig.withPreset(presetId))
   }
@@ -153,7 +153,7 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
             <LightSettingsComponent
               lightConfig={lightConfig}
               onLightSettingsChange={onLightSettingsChange}
-              setSelectedState={(state) => lightModel.setSelectedState(state)}
+              setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
               selectedState={selectedState}
             />
           </Grid>
