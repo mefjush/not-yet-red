@@ -194,7 +194,6 @@ export default function IntersectionComponent({ selectionMode, onSelectionChange
   }  
 
   const fullscreenContents = () => {
-    console.log(lights.length + ' -- ' + lightUiStates.length)
     const fullscreenLights = lights.filter((light, index) => lightUiStates[index].isSelected)
 
     const size = fullscreenLights.length < 3 ? '95vh' : `${3 * 70 / fullscreenLights.length}vw`
