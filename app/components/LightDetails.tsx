@@ -28,7 +28,8 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
       currentTimestamp={currentTimestamp} 
       light={light} 
       lightConfig={lightConfig}
-      height={ open ? '150px' : '60px' } 
+      maxHeight={ open ? 200 : 100 } 
+      maxWidth={ 1000 } 
     />
   )
 

@@ -29,21 +29,20 @@ const StyledImgAvatar = styled(Avatar)<AvatarProps>(
   }
 )
 
-export default function LightHead({ currentTimestamp, light, lightConfig, height }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, height: string }) {
+export default function LightHead({ currentTimestamp, light, lightConfig, maxHeight, maxWidth }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, maxHeight: number, maxWidth: number }) {
 
   const segments: SegmentColor[] = lightConfig.preset.colors
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const heightValue = Number.parseInt(height.substring(0, height.length - 2))
-  const heightUnit = height.substring(height.length - 2, height.length)
-  const segmentSize = 0.8 * heightValue / 3
+  const segmentSize = 0.6 * Math.round(Math.min(maxHeight / 2.5, maxWidth))
+  const unit = 'px'
 
   const isImg = lightConfig.preset.symbolId != SymbolId.NONE
   const symbol = SYMBOLS[lightConfig.preset.symbolId]
 
   const imgScale = 0.7
-  const iconSize = `${imgScale * segmentSize}${heightUnit}`
+  const iconSize = `${imgScale * segmentSize}${unit}`
 
   const segmentStates = segments.map(segment => {
 
@@ -69,9 +68,9 @@ export default function LightHead({ currentTimestamp, light, lightConfig, height
         key={segment}
         itemType={ isImg && !inverted ? 'black-background' : 'color-background' }
         sx={{
-          width: `${segmentSize}${heightUnit}`, 
-          height: `${segmentSize}${heightUnit}`,
-          border: `${0.015 * segmentSize}${heightUnit} solid black`
+          width: `${segmentSize}${unit}`, 
+          height: `${segmentSize}${unit}`,
+          border: `${0.015 * segmentSize}${unit} solid black`
         }}
       >
         {icon}
@@ -80,14 +79,14 @@ export default function LightHead({ currentTimestamp, light, lightConfig, height
   })
 
   return (
-    <Box sx={{ py: 2 }}>
+    <Box sx={{ py: `${segmentSize * 0.05}${unit}`, m: `${segmentSize * 0.05}${unit}` }}>
       <Stack 
         direction='column' 
-        spacing={`${Math.round(heightValue * 0.01)}${heightUnit}`} 
+        spacing={`${Math.round(segmentSize * 0.03)}${unit}`} 
         sx={{ 
-          padding: `${Math.round(heightValue * 0.06)}${heightUnit}`, 
-          borderRadius: `${Math.round(heightValue * 0.1)}${heightUnit}`, 
-          border: `${0.015 * segmentSize}${heightUnit} solid black`,
+          padding: `${Math.round(segmentSize * 0.2)}${unit}`, 
+          borderRadius: `${Math.round(segmentSize * 0.3)}${unit}`, 
+          border: `${0.04 * segmentSize}${unit} solid black`,
           transitionDuration: TRANSITION_DURATION,
           backgroundColor: '#131313',
           boxShadow: 3

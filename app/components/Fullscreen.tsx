@@ -51,8 +51,8 @@ export default function Fullscreen({ enabled, children, onDisabled }: { enabled:
 
   return (
     <Box ref={fullscreenRef} className='fullscreen' display={enabled ? 'block' : 'none'}>
-      <Grid container justifyContent="center" alignItems="center" sx={{ height: '100vh', width: '100vw' }}>
-        <Stack direction='row' alignItems='flex-end' spacing={2}>
+      <Grid container justifyContent="center" alignItems="center" sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, height: '100%', width: '100%' }}>
+        <Stack direction='row' alignItems='flex-end' spacing={0}>
           {children}
         </Stack>
       </Grid>

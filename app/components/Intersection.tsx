@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import LightComponent from './Light'
 import Clock from '../domain/Clock'
 import TrafficLight from '../domain/TrafficLight'
@@ -57,6 +57,20 @@ function CustomTabPanel(props: TabPanelProps) {
   )
 }
 
+function useWindowSize() {
+  const [size, setSize] = useState([0, 0])
+  useLayoutEffect(() => {
+    function updateSize() {
+      setSize([window.innerWidth, window.innerHeight]);
+    }
+    window.addEventListener('resize', updateSize)
+    updateSize()
+    return () => window.removeEventListener('resize', updateSize)
+  }, [])
+  return size
+}
+
+
 export default function IntersectionComponent({ selectionMode, onSelectionChanged, uiMode, setUiMode, checkboxMode }: { selectionMode: SelectionMode, onSelectionChanged: (total: number, selected: number) => void, uiMode: UiMode, setUiMode: (uiMode: UiMode) => void, checkboxMode: UiMode }) {
 
   const [intersectionSettings, setIntersectionSettings] = useQueryState(
@@ -88,6 +102,8 @@ export default function IntersectionComponent({ selectionMode, onSelectionChange
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
 
   const clock = new Clock(timeCorrection)
+
+  const [windowWidth, windowHeight] = useWindowSize()
 
   if (selectionMode.includes('set')) {
     const selected = selectionMode == 'set-all'
@@ -196,11 +212,12 @@ export default function IntersectionComponent({ selectionMode, onSelectionChange
   const fullscreenContents = () => {
     const fullscreenLights = lights.filter((light, index) => lightUiStates[index].isSelected)
 
-    const size = fullscreenLights.length < 3 ? '95vh' : `${3 * 70 / fullscreenLights.length}vw`
+    const heightConstrainedSize = windowHeight
+    const widthConstrainedSize = windowWidth / fullscreenLights.length
 
     return fullscreenLights.map((light, index) => (
       <Box key={`fullscreen-light-${index}`}>
-        <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} height={size}/>
+        <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} maxHeight={heightConstrainedSize} maxWidth={widthConstrainedSize}/>
       </Box>
     ))
   }
@@ -279,7 +296,7 @@ export default function IntersectionComponent({ selectionMode, onSelectionChange
       </Card>
 
       <Typography variant='h6'>Traffic Lights</Typography>
-      { expanded == null && intersectionLights}
+      { intersectionLights}
 
       <Fullscreen
         enabled={uiMode == 'fullscreen'}

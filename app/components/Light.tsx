@@ -23,7 +23,7 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
   const selectedState = lightUiState.selectedState
   const selected = lightUiState.isSelected
 
-  const lightHead = <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} height={ expanded ? '150px' : '60px' } />
+  const lightHead = <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} maxHeight={ expanded ? 200 : 100 } maxWidth={ 1000 } />
 
   const onMenuClose = () => setAnchorEl(null)
 
