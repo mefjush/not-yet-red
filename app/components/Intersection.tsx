@@ -32,6 +32,8 @@ const historyPush: Options = { history: 'push' }
 // Description / about page
 // Manual time correction in cookie / local storage
 // blink & beep
+// better sharing (share all? swipe on fullscreen?)
+// fix the timeline range slider on edge (when expanding)
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -60,16 +62,13 @@ function CustomTabPanel(props: TabPanelProps) {
 function useWindowSize() {
   const [size, setSize] = useState([0, 0])
   useLayoutEffect(() => {
-    function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
-    }
+    const updateSize = () => setSize([window.innerWidth, window.innerHeight])
     window.addEventListener('resize', updateSize)
     updateSize()
     return () => window.removeEventListener('resize', updateSize)
   }, [])
   return size
 }
-
 
 export default function IntersectionComponent({ selectionMode, onSelectionChanged, uiMode, setUiMode, checkboxMode }: { selectionMode: SelectionMode, onSelectionChanged: (total: number, selected: number) => void, uiMode: UiMode, setUiMode: (uiMode: UiMode) => void, checkboxMode: UiMode }) {
 
