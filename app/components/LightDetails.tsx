@@ -3,7 +3,6 @@ import { createElement } from 'react'
 import Grid from '@mui/material/Grid2'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import LightSettingsComponent from './LightSettings'
 import Timeline from './Timeline'
 import LightConfig, { LightSettings } from '../domain/LightConfig'
 import LightHead from './LightHead'
@@ -14,6 +13,7 @@ import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import { PresetId, PRESETS, SYMBOLS, SymbolId } from '../domain/Preset'
 import LightUiState from '../domain/LightUiState'
+import PhaseControls from './PhaseControls'
 
 export default function LightDetails({ 
   open, 
@@ -173,12 +173,16 @@ export default function LightDetails({
             />
           </Grid>
 
-          <Grid size={{ xs: 12 }}>
-            <LightSettingsComponent
+          <Grid size={{ xs: 12, md: 4, lg: 3 }}>
+            <Typography gutterBottom>
+              Phases
+            </Typography>
+            <PhaseControls
               lightConfig={lightConfig}
               onLightSettingsChange={onLightSettingsChange}
               setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
               selectedState={selectedState}
+              expanded={true}
             />
           </Grid>
         </Grid>

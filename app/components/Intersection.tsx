@@ -46,16 +46,16 @@ function useWindowSize() {
 
 export default function IntersectionComponent({ 
   selectionMode, 
-  onSelectionChanged, 
+  checkboxMode, 
   uiMode, 
   setUiMode, 
-  checkboxMode 
+  onSelectionChanged   
 }: { 
   selectionMode: SelectionMode, 
-  onSelectionChanged: (total: number, selected: number) => void, 
+  checkboxMode: UiMode,
   uiMode: UiMode,
   setUiMode: (uiMode: UiMode) => void, 
-  checkboxMode: UiMode 
+  onSelectionChanged: (total: number, selected: number) => void
 }) {
 
   const [intersectionSettings, setIntersectionSettings] = useQueryState(

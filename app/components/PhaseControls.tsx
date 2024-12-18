@@ -71,7 +71,7 @@ function DelayedTextField({value, onChange}: {value: number, onChange: ((v: numb
   )
 }
 
-export function PhaseControl({
+function PhaseControl({
   min, 
   max, 
   step, 
@@ -123,7 +123,6 @@ export function PhaseControl({
     </>
   )
 }
-
 
 export default function PhaseControls({ 
   lightConfig,
