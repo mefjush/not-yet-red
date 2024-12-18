@@ -15,7 +15,29 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import { PresetId, PRESETS, SYMBOLS, SymbolId } from '../domain/Preset'
 import LightUiState from '../domain/LightUiState'
 
-export default function LightDetails({ open, onClose, onFullscreen, onShare, onLightSettingsChange, lightConfig, currentTimestamp, light, lightUiState, setLightUiState }: { open: boolean, onClose: () => void, onFullscreen: () => void, onShare: () => void, onLightSettingsChange: (lightSettings: LightSettings) => void, lightConfig: LightConfig, currentTimestamp: number, light: TrafficLight, lightUiState: LightUiState, setLightUiState: (lightUiState: LightUiState) => void }) {
+export default function LightDetails({ 
+  open, 
+  lightConfig, 
+  currentTimestamp, 
+  light, 
+  lightUiState, 
+  onClose, 
+  onFullscreen, 
+  onShare, 
+  onLightSettingsChange, 
+  setLightUiState 
+}: { 
+  open: boolean, 
+  lightConfig: LightConfig, 
+  currentTimestamp: number, 
+  light: TrafficLight, 
+  lightUiState: LightUiState, 
+  onClose: () => void, 
+  onFullscreen: () => void, 
+  onShare: () => void, 
+  onLightSettingsChange: (lightSettings: LightSettings) => void, 
+  setLightUiState: (lightUiState: LightUiState) => void 
+}) {
 
   const selectedState = lightUiState.selectedState
 
@@ -114,6 +136,7 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
           <Button color='inherit' onClick={handleClose} style={{ marginRight: '-15px' }}>Ok</Button>
         </Toolbar>
       </AppBar>
+
       <Toolbar />
 
       <Stack spacing={2} sx={{ p: 3 }}>
@@ -139,7 +162,7 @@ export default function LightDetails({ open, onClose, onFullscreen, onShare, onL
             <Box sx={{ flex: 1 }}></Box>
             {buttons}
           </Grid>
-          
+
           <Grid size={{ xs: 12 }}>
             <Timeline 
               currentTimestamp={currentTimestamp} 

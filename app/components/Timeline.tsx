@@ -9,7 +9,19 @@ import React from 'react'
 import { State, STATE_ATTRIBUTES } from '../domain/State'
 import { negativeSafeMod } from '../utils'
 
-export default function Timeline({ currentTimestamp, lightConfig, onLightSettingsChange, selectedState, editable }: { currentTimestamp: number, lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, selectedState?: State, editable: boolean }) {
+export default function Timeline({ 
+  currentTimestamp, 
+  lightConfig, 
+  selectedState, 
+  editable,
+  onLightSettingsChange
+}: { 
+  currentTimestamp: number, 
+  lightConfig: LightConfig, 
+  selectedState?: State, 
+  editable: boolean,
+  onLightSettingsChange: (lightSettings: LightSettings) => void, 
+ }) {
 
   const [transitionStartTime, setTransitionStartTime] = useState(-1)
   
@@ -18,10 +30,10 @@ export default function Timeline({ currentTimestamp, lightConfig, onLightSetting
 
   const cycleLength = lightConfig.cycleLength()
 
+  const timeRange = selectedState ? lightConfig.getTimeRange(selectedState) : new TimeRange(0, 0, 0)  
+
   const toUiFirendlyTimeRange = (timeRange: TimeRange): TimeRange => new TimeRange(timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end, cycleLength)
 
-  const timeRange = selectedState ? lightConfig.getTimeRange(selectedState) : new TimeRange(0, 0, 0)
-  
   const uiRange = useRef(toUiFirendlyTimeRange(timeRange))
 
   const markPosition = currentTimestamp % cycleLength

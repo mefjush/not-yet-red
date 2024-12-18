@@ -29,7 +29,19 @@ const StyledImgAvatar = styled(Avatar)<AvatarProps>(
   }
 )
 
-export default function LightHead({ currentTimestamp, light, lightConfig, maxHeight, maxWidth }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, maxHeight: number, maxWidth: number }) {
+export default function LightHead({ 
+  currentTimestamp, 
+  light, 
+  lightConfig, 
+  maxHeight, 
+  maxWidth 
+}: { 
+  currentTimestamp: number, 
+  light: TrafficLight, 
+  lightConfig: LightConfig, 
+  maxHeight: number, 
+  maxWidth: number 
+}) {
 
   const segments: SegmentColor[] = lightConfig.preset.colors
 

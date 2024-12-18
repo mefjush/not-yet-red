@@ -15,17 +15,43 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import LightUiState from '../domain/LightUiState'
 import { UiMode } from './Intersection'
 
-export default function LightComponent({ currentTimestamp, light, lightConfig, expanded, onLightSettingsChange, checkboxMode, setExpanded, onDelete, onFullscreen, onShare, lightUiState, setLightUiState }: { currentTimestamp: number, light: TrafficLight, lightConfig: LightConfig, expanded: boolean, onLightSettingsChange: (lightSettings: LightSettings) => void, checkboxMode: UiMode, setExpanded: () => void, onDelete: () => void, onFullscreen: () => void, onShare: () => void, lightUiState: LightUiState, setLightUiState: (lightUiState: LightUiState) => void }) {
+export default function LightComponent({ 
+  currentTimestamp, 
+  light, 
+  lightConfig, 
+  expanded, 
+  checkboxMode, 
+  lightUiState, 
+  onLightSettingsChange, 
+  setExpanded, 
+  onDelete, 
+  onFullscreen, 
+  onShare, 
+  setLightUiState 
+}: { 
+  currentTimestamp: number, 
+  light: TrafficLight, 
+  lightConfig: LightConfig, 
+  expanded: boolean, 
+  checkboxMode: UiMode, 
+  lightUiState: LightUiState, 
+  onLightSettingsChange: (lightSettings: LightSettings) => void, 
+  setExpanded: () => void, 
+  onDelete: () => void, 
+  onFullscreen: () => void, 
+  onShare: () => void, 
+  setLightUiState: (lightUiState: LightUiState) => void 
+}) {
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const moreMenuOpen = Boolean(anchorEl)
-  
+  const [moreMenuAnchor, setMoreMenuAnchor] = React.useState<null | HTMLElement>(null)
+
+  const moreMenuOpen = Boolean(moreMenuAnchor)
   const selectedState = lightUiState.selectedState
   const selected = lightUiState.isSelected
 
   const lightHead = <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} maxHeight={ expanded ? 200 : 100 } maxWidth={ 1000 } />
 
-  const onMenuClose = () => setAnchorEl(null)
+  const onMenuClose = () => setMoreMenuAnchor(null)
 
   const editButton = (
     <IconButton 
@@ -74,7 +100,7 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
         aria-controls={moreMenuOpen ? 'basic-menu' : undefined}
         aria-expanded={moreMenuOpen ? 'true' : undefined}
         aria-haspopup="true"
-        onClick={(event) => setAnchorEl(event.currentTarget)}
+        onClick={(event) => setMoreMenuAnchor(event.currentTarget)}
       >
         <MoreVertIcon />
       </IconButton>
@@ -83,7 +109,7 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
-        anchorEl={anchorEl}
+        anchorEl={moreMenuAnchor}
         open={moreMenuOpen}
         onClose={onMenuClose}
       >
@@ -124,18 +150,6 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
     </CardActions>
   )
 
-  const theContent = (
-    <CardContent>
-      <Timeline 
-        currentTimestamp={currentTimestamp} 
-        lightConfig={lightConfig} 
-        onLightSettingsChange={onLightSettingsChange} 
-        selectedState={selectedState}
-        editable={true}
-      />
-    </CardContent>
-  ) 
-
   const actionIcon = checkboxMode == 'none' ? editButton : checkbox
   const actionFunction = checkboxMode == 'none' ? setExpanded : (() => setLightUiState(lightUiState.withSelected(!selected)))
 
@@ -150,7 +164,16 @@ export default function LightComponent({ currentTimestamp, light, lightConfig, e
           </CardActions>
         </CardActionArea> 
 
-        {theContent}
+        <CardContent>
+          <Timeline 
+            currentTimestamp={currentTimestamp} 
+            lightConfig={lightConfig} 
+            onLightSettingsChange={onLightSettingsChange} 
+            selectedState={selectedState}
+            editable={true}
+          />
+        </CardContent>
+
         {bottomActions}
 
       </Card>

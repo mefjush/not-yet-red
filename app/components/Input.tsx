@@ -1,7 +1,6 @@
 "use client"
 
-import { OverridableStringUnion } from '@mui/types'
-import { Box, Slider, Typography, Input as MuiInput, Stack, ButtonPropsColorOverrides } from '@mui/material'
+import { Box, Slider, Typography, Input as MuiInput, Stack } from '@mui/material'
 import { styled } from '@mui/material/styles'
 
 const MInput = styled(MuiInput)({
@@ -14,7 +13,23 @@ interface ChangeEvent {
   }
 }
 
-export default function Input({id, label, min, max, step, value, onChange, color}: {id: string, label: string, min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color?: OverridableStringUnion<'inherit', ButtonPropsColorOverrides>}) {
+export default function Input({
+  id, 
+  label, 
+  min, 
+  max, 
+  step, 
+  value, 
+  onChange
+}: {
+  id: string, 
+  label: string, 
+  min?: number, 
+  max?: number, 
+  step?: number, 
+  value: number, 
+  onChange: ((e: ChangeEvent) => void)
+}) {
 
   const toEvent = (val: any) => ({ target: { value: Number(val) }})
 

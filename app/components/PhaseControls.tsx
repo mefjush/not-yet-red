@@ -71,7 +71,23 @@ function DelayedTextField({value, onChange}: {value: number, onChange: ((v: numb
   )
 }
 
-export function PhaseControl({min, max, step, value, onChange, color, style}: {min?: number, max?: number, step?: number, value: number, onChange: ((e: ChangeEvent) => void), color: TrafficLightColors, style?: React.CSSProperties}) {
+export function PhaseControl({
+  min, 
+  max, 
+  step, 
+  value, 
+  color, 
+  style,
+  onChange 
+}: {
+  min?: number, 
+  max?: number, 
+  step?: number, 
+  value: number, 
+  color: TrafficLightColors, 
+  style?: React.CSSProperties,
+  onChange: ((e: ChangeEvent) => void)
+}) {
   
   const [longPressInterval, setLongPressInterval] = useState<NodeJS.Timeout|null>(null)
   
@@ -109,9 +125,54 @@ export function PhaseControl({min, max, step, value, onChange, color, style}: {m
 }
 
 
-export default function PhaseControls({ lightConfig, onLightSettingsChange, setSelectedState, selectedState, expanded }: { lightConfig: LightConfig, onLightSettingsChange: (lightSettings: LightSettings) => void, setSelectedState: (state: State) => void, selectedState?: State, expanded: boolean }) {
+export default function PhaseControls({ 
+  lightConfig,
+  selectedState,
+  expanded,
+  onLightSettingsChange, 
+  setSelectedState
+}: { 
+  lightConfig: LightConfig,
+  selectedState?: State, 
+  expanded: boolean,
+  onLightSettingsChange: (lightSettings: LightSettings) => void, 
+  setSelectedState: (state: State) => void, 
+}) {
   
-  const cycleLength = lightConfig.cycleLength()
+  const phaseControls = lightConfig.phases.map(phase => {
+
+    const phaseControl = (
+      <PhaseControl
+        min={0} 
+        max={lightConfig.cycleLength() / 1000} 
+        value={phase.duration / 1000} 
+        onChange={e => {
+          setSelectedState(phase.state)
+          onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))
+        }} 
+        color={phase.stateAttributes().color}
+      />
+    )
+
+    const radio = (
+      <Radio 
+        size='small' 
+        color={`${phase.stateAttributes().color}`} 
+        sx={{ color: `${phase.stateAttributes().color}.main` }}
+      />
+    )
+
+    return (
+      <Stack direction='row' key={phase.state}>
+        <FormControlLabel 
+          value={phase.state} 
+          control={radio} 
+          label=''
+        />
+        { expanded ? phaseControl : null }
+      </Stack>
+    )
+  })
 
   return (
     <FormControl fullWidth>
@@ -123,30 +184,7 @@ export default function PhaseControls({ lightConfig, onLightSettingsChange, setS
         onChange={event => setSelectedState(State[((event.target as HTMLInputElement).value) as keyof typeof State])}
       >
         <Stack direction={ expanded ? 'column' : 'row' } spacing={ expanded ? 1 : 0 }>
-        { lightConfig.phases.map(phase => {
-          const phaseControl = (
-            <PhaseControl
-              min={0} 
-              max={cycleLength / 1000} 
-              value={phase.duration / 1000} 
-              onChange={e => {
-                setSelectedState(phase.state)
-                onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))
-              }} 
-              color={phase.stateAttributes().color}
-            />
-          )
-          return (
-            <Stack direction='row' key={phase.state}>
-              <FormControlLabel 
-                value={phase.state} 
-                control={<Radio size='small' color={`${phase.stateAttributes().color}`} sx={{ color: `${phase.stateAttributes().color}.main` }}/>} 
-                label=''
-              />
-              { expanded ? phaseControl : null }
-            </Stack>
-          )
-        })}
+          {phaseControls}
         </Stack>
       </RadioGroup>
     </FormControl>
