@@ -1,8 +1,9 @@
 "use client"
 
-import { Box, Stack } from '@mui/material'
+import { Box, Button, Snackbar, Stack } from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import { ReactElement, useEffect, useRef } from 'react'
+import React, { ReactElement, useEffect, useRef, useState } from 'react'
+import useWindowSize from '../hooks/useWindowSize'
 
 export default function Fullscreen({ 
   enabled, 
@@ -10,12 +11,15 @@ export default function Fullscreen({
   onDisabled 
 }: { 
   enabled: boolean, 
-  children: ReactElement | ReactElement[], 
+  children: ReactElement[], 
   onDisabled: () => void 
 }) {
 
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
+  const [invisibleChildren, setInvisibleChildren] = useState<number[]>([])
+  const [snackbarUndo, setSnackbarUndo] = useState<number|null>(null)
+  const [windowWidth, windowHeight] = useWindowSize()
 
   // once
   useEffect(() => {
@@ -30,6 +34,8 @@ export default function Fullscreen({
   }, [])
 
   useEffect(() => {
+    setInvisibleChildren([])
+    setSnackbarUndo(null)
     if (enabled) {
       fullscreenRef.current?.requestFullscreen({ navigationUI: 'hide' })
     }
@@ -57,13 +63,44 @@ export default function Fullscreen({
     }
   }
 
+  const action = (
+    <>
+      <Button color="secondary" size="small" onClick={() => {
+        setInvisibleChildren(invisibleChildren.filter(i => i != snackbarUndo))
+        setSnackbarUndo(null)
+      }}>
+        UNDO
+      </Button>
+    </>
+  )
+
+  const heightConstrainedSize = windowHeight
+  const widthConstrainedSize = windowWidth / (children.length - invisibleChildren.length)
+
+  const onClick = (index: number) => {
+    if (invisibleChildren.length < children.length - 1) {
+      setInvisibleChildren([...invisibleChildren, index])
+      setSnackbarUndo(index)
+    }
+  }
+
+  const childrenToRender = children
+      .map((ch, index) => React.cloneElement(ch, { maxWidth: widthConstrainedSize, maxHeight: heightConstrainedSize, onClick: () => onClick(index) }))
+      .filter((ch, index) => !invisibleChildren.includes(index))
+
   return (
     <Box ref={fullscreenRef} className='fullscreen' display={enabled ? 'block' : 'none'}>
-      <Grid container justifyContent="center" alignItems="center" sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, height: '100%', width: '100%' }}>
+      <Grid container justifyContent="center" alignItems="center" sx={{ height: '100%', width: '100%' }}>
         <Stack direction='row' alignItems='flex-end' spacing={0}>
-          {children}
+          {childrenToRender}
         </Stack>
       </Grid>
+      <Snackbar
+        open={snackbarUndo != null}
+        autoHideDuration={6000}
+        message="Traffic light hidden"
+        action={action}
+      />
     </Box>
   )
 }

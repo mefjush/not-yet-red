@@ -34,13 +34,15 @@ export default function LightHead({
   light, 
   lightConfig, 
   maxHeight, 
-  maxWidth 
+  maxWidth,
+  onClick
 }: { 
   currentTimestamp: number, 
   light: TrafficLight, 
   lightConfig: LightConfig, 
   maxHeight: number, 
-  maxWidth: number 
+  maxWidth: number, 
+  onClick?: () => void
 }) {
 
   const segments: SegmentColor[] = lightConfig.preset.colors
@@ -91,7 +93,7 @@ export default function LightHead({
   })
 
   return (
-    <Box sx={{ py: `${segmentSize * 0.05}${unit}`, m: `${segmentSize * 0.05}${unit}` }}>
+    <Box sx={{ py: `${segmentSize * 0.05}${unit}`, m: `${segmentSize * 0.05}${unit}` }} onClick={onClick}>
       <Stack 
         direction='column' 
         spacing={`${Math.round(segmentSize * 0.03)}${unit}`} 

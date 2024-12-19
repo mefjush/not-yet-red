@@ -13,14 +13,12 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import LightUiState from '../domain/LightUiState'
-import { UiMode } from './Intersection'
 
 export default function LightComponent({ 
   currentTimestamp, 
   light, 
   lightConfig, 
   expanded, 
-  checkboxMode, 
   lightUiState, 
   onLightSettingsChange, 
   setExpanded, 
@@ -33,7 +31,6 @@ export default function LightComponent({
   light: TrafficLight, 
   lightConfig: LightConfig, 
   expanded: boolean, 
-  checkboxMode: UiMode, 
   lightUiState: LightUiState, 
   onLightSettingsChange: (lightSettings: LightSettings) => void, 
   setExpanded: () => void, 
@@ -47,7 +44,6 @@ export default function LightComponent({
 
   const moreMenuOpen = Boolean(moreMenuAnchor)
   const selectedState = lightUiState.selectedState
-  const selected = lightUiState.isSelected
 
   const lightHead = <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={lightConfig} maxHeight={ expanded ? 200 : 100 } maxWidth={ 1000 } />
 
@@ -68,17 +64,6 @@ export default function LightComponent({
     >
       <ZoomInIcon />
     </IconButton>
-  )
-
-  const checkbox = (
-    <Checkbox 
-      value={selected} 
-      checked={selected}
-      onClick={e => e.stopPropagation()}
-      onChange={e => setLightUiState(lightUiState.withSelected(e.target.checked))}
-      onTouchStart={(event) => event.stopPropagation()}
-      onMouseDown={(event) => event.stopPropagation()}
-    />
   )
 
   const bottomActions = (
@@ -150,8 +135,8 @@ export default function LightComponent({
     </CardActions>
   )
 
-  const actionIcon = checkboxMode == 'none' ? editButton : checkbox
-  const actionFunction = checkboxMode == 'none' ? setExpanded : (() => setLightUiState(lightUiState.withSelected(!selected)))
+  const actionIcon = editButton
+  const actionFunction = setExpanded
 
   return (
     <>

@@ -83,119 +83,49 @@ const theme = createTheme({
 
 function Content() {
 
-  const [totalCount, setTotalCount] = useState(1)
-
-  const [selectionMode, setSelectionMode] = useState<SelectionMode>('none')
   const [uiMode, setUiMode] = useState<UiMode>('none')
-  const [checkboxMode, setCheckboxMode] = useState<UiMode>('none')
-
-  const checkbox = (
-    <Checkbox 
-      edge="start"
-      size='medium'
-      checked={selectionMode.includes('all')}
-      indeterminate={selectionMode == 'some'} 
-      aria-label='select all'
-      onChange={e => {
-        setSelectionMode(e.target.checked ? 'set-all' : 'set-none')
-      }}
-      color='default'
-      sx={{
-        color: 'white'
-      }}
-    />
-  )
 
   const buttonAction = (uiMode: UiMode) => {
     return () => {
-      if (totalCount > 1) {
-        if (checkboxMode == 'none') {
-          setCheckboxMode(uiMode)
-          setSelectionMode('set-none')
-        } else {
-          setCheckboxMode('none')
-          setUiMode(uiMode)
-        }
-      } else {
-        setUiMode(uiMode)
-        setSelectionMode('set-all')
-      }
+      setUiMode(uiMode)
     }
   }
 
   const toolbarElements = (
     <>
-      <Collapse orientation='horizontal' in={checkboxMode == 'none'}>
-        <Stack direction='row' display={'flex'} sx={{ alignItems: "center" }}>
-          <IconButton 
-            size="large" 
-            edge="start" 
-            color='inherit' 
-          >
-            <GridGoldenratioIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" noWrap>
-            Intersection
-          </Typography>
-        </Stack>
-      </Collapse>
+      <Stack direction='row' display={'flex'} sx={{ alignItems: "center" }}>
+        <IconButton 
+          size="large" 
+          edge="start" 
+          color='inherit' 
+        >
+          <GridGoldenratioIcon />
+        </IconButton>
+        <Typography variant="h6" component="div" noWrap>
+          Intersection
+        </Typography>
+      </Stack>
       
-      { checkboxMode != 'none' || <Box sx={{ flexGrow: 1 }}></Box> }
+      <Box sx={{ flexGrow: 1 }}></Box>
 
-      { (checkboxMode == 'none' || checkboxMode == 'share') && 
-        <IconButton
-          size="large"
-          color="inherit"
-          aria-label="share"
-          edge={(checkboxMode != 'none') && 'start'}
-          onClick={buttonAction('share')}
-        >
-          <ShareIcon />
-        </IconButton>
-      }
+      <IconButton
+        size="large"
+        color="inherit"
+        aria-label="share"
+        onClick={buttonAction('share')}
+      >
+        <ShareIcon />
+      </IconButton>
 
-      { (checkboxMode == 'none' || checkboxMode == 'fullscreen') && 
-        <IconButton
-          size="large"
-          color="inherit"
-          aria-label="fullscreen"
-          edge={(checkboxMode != 'none') ? 'start' : 'end'}
-          onClick={buttonAction('fullscreen')}
-        >
-          <FullscreenIcon />
-        </IconButton>
-      }
-
-      { checkboxMode != 'none' && <Box sx={{ flexGrow: 1 }}></Box> }
-
-      <Collapse in={checkboxMode != 'none'} orientation='horizontal' unmountOnExit>
-        <Stack direction={'row'}>
-          <FormControlLabel
-            control={checkbox}
-            label="Select all"
-            labelPlacement='end'
-            style={{ whiteSpace: 'nowrap' }}
-            sx={{ marginLeft: 1 }}
-          />
-
-          <Button 
-            color='inherit' 
-            onClick={e => {
-              setUiMode('none')
-              setSelectionMode('none')
-              setCheckboxMode('none')
-            }}
-          >
-            cancel
-          </Button>
-          <Button 
-            color='inherit' 
-            onClick={buttonAction(checkboxMode)}
-          >
-            ok
-          </Button>
-        </Stack>
-      </Collapse>
+      <IconButton
+        size="large"
+        color="inherit"
+        aria-label="fullscreen"
+        edge="end"
+        onClick={buttonAction('fullscreen')}
+      >
+        <FullscreenIcon />
+      </IconButton>
     </>
   )
 
@@ -208,26 +138,8 @@ function Content() {
       </AppBar>
       <Toolbar />
       <IntersectionComponent 
-        selectionMode={selectionMode}
-        onSelectionChanged={(updatedTotalCount, updatedSelectedCount) => {
-          setTotalCount(updatedTotalCount)
-          if (updatedSelectedCount == 0) {
-            setSelectionMode('none')
-          } else if (updatedTotalCount == updatedSelectedCount) {
-            setSelectionMode('all')
-          } else {
-            setSelectionMode('some')
-          }
-        }}
-        checkboxMode={checkboxMode}
         uiMode={uiMode}
-        setUiMode={(uiMode) => {
-          if (uiMode == 'none') {
-            setSelectionMode('set-none')
-            setCheckboxMode('none')
-          }
-          setUiMode(uiMode)
-        }}
+        setUiMode={setUiMode}
       />
       <Stack spacing={2} sx={{ p: 1, m: 1 }}>
         <Box

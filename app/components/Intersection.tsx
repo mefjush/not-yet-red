@@ -33,29 +33,12 @@ const historyPush: Options = { history: 'push' }
 // better sharing (share all? swipe on fullscreen?)
 // fix the timeline range slider on edge (when expanding)
 
-function useWindowSize() {
-  const [size, setSize] = useState([0, 0])
-  useLayoutEffect(() => {
-    const updateSize = () => setSize([window.innerWidth, window.innerHeight])
-    window.addEventListener('resize', updateSize)
-    updateSize()
-    return () => window.removeEventListener('resize', updateSize)
-  }, [])
-  return size
-}
-
 export default function IntersectionComponent({ 
-  selectionMode, 
-  checkboxMode, 
   uiMode, 
   setUiMode, 
-  onSelectionChanged   
 }: { 
-  selectionMode: SelectionMode, 
-  checkboxMode: UiMode,
   uiMode: UiMode,
   setUiMode: (uiMode: UiMode) => void, 
-  onSelectionChanged: (total: number, selected: number) => void
 }) {
 
   const [intersectionSettings, setIntersectionSettings] = useQueryState(
@@ -74,7 +57,11 @@ export default function IntersectionComponent({
 
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
-  const [lightUiStates, setLightUiStates] = useState(lightSettings.map(ls => new LightUiState(false, ls.phases[0].state)))
+  const [selected, setSelected] = useState<number[]>([])
+
+  const effectivelySelected = selected.length == 0 ? lightSettings.map((ls, index) => index) : selected
+
+  const [lightUiStates, setLightUiStates] = useState(lightSettings.map(ls => new LightUiState(ls.phases[0].state)))
 
   const failure = new Failure(intersectionSettings.failure.duration, intersectionSettings.failure.probability)
 
@@ -86,8 +73,7 @@ export default function IntersectionComponent({
 
   const clock = new Clock(timeCorrection)
 
-  const [windowWidth, windowHeight] = useWindowSize()
-
+  
   const updateLightSettings = (settings: LightSettings, index: number) => {
     const copy = [...lightSettings]
     copy.splice(index, 1, settings)
@@ -99,7 +85,6 @@ export default function IntersectionComponent({
     const copy = [...lightUiStates]
     copy.splice(index, 1, lightUiState)
     setLightUiStates(copy)
-    onSelectionChanged(lightConfigs.length, copy.filter(ui => ui.isSelected).length)
   }
 
   const wrapListener = {
@@ -107,13 +92,13 @@ export default function IntersectionComponent({
   }
 
   const enterUiMode = (idx: number, uiMode: UiMode) => {
-    setLightUiStates(lightUiStates.map((ui, index) => index == idx ? ui.withSelected(true) : ui))
-    onSelectionChanged(lightConfigs.length, 1)
+    setSelected([idx])
     setUiMode(uiMode)
   }
 
   const exitUiMode = () => {
     setUiMode('none')
+    setSelected([])
   }
 
   const enterFullscreenMode = (idx: number) => {
@@ -135,8 +120,7 @@ export default function IntersectionComponent({
 
   const onAdd = () => {
     setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
-    setLightUiStates([...lightUiStates, new LightUiState(false, DEFAULT_LIGHT_SETTINGS.phases[0].state)])
-    onSelectionChanged(lightSettings.length + 1, 0)
+    setLightUiStates([...lightUiStates, new LightUiState(DEFAULT_LIGHT_SETTINGS.phases[0].state)])
     setUiMode('none')
     setExpanded(lightSettings.length)
   }
@@ -144,13 +128,12 @@ export default function IntersectionComponent({
   const onDelete = (indicesToDelete: number[]) => {
     setLightSettings([...lightSettings].filter((ls, i) => !indicesToDelete.includes(i)))
     setLightUiStates([...lightUiStates].filter((ui, i) => !indicesToDelete.includes(i)))
-    onSelectionChanged(lightSettings.length - 1, 0)
     setUiMode('none')
   }
 
   const getShareUrl = () => {
     
-    const selectedLightSettings = lightSettings.filter((ls, index) => lightUiStates[index].isSelected)
+    const selectedLightSettings = lightSettings.filter((ls, index) => effectivelySelected.includes(index))
 
     const search = `?intersection=${IntersectionSettingsParser.serialize(intersectionSettings)}&lights=${LightSettingsParser.serialize(selectedLightSettings)}`
 
@@ -160,28 +143,15 @@ export default function IntersectionComponent({
   }  
 
   const fullscreenContents = () => {
-    const fullscreenLights = lights.filter((light, index) => lightUiStates[index].isSelected)
-
-    const heightConstrainedSize = windowHeight
-    const widthConstrainedSize = windowWidth / fullscreenLights.length
+    const fullscreenLights = lights.filter((light, index) => effectivelySelected.includes(index))
 
     return fullscreenLights.map((light, index) => (
-      <Box key={`fullscreen-light-${index}`}>
-        <LightHead currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} maxHeight={heightConstrainedSize} maxWidth={widthConstrainedSize}/>
-      </Box>
+      <LightHead key={`fullscreen-light-${index}`} currentTimestamp={currentTimestamp} light={light} lightConfig={light.lightConfig} maxHeight={100} maxWidth={100}/>
     ))
-  }
-
-  if (selectionMode.includes('set')) {
-    const selected = selectionMode == 'set-all'
-    if (lightUiStates.find(ui => ui.isSelected != selected)) {
-      setLightUiStates(lightUiStates.map(ui => ui.withSelected(selected)))
-    }
   }
 
   // once
   useEffect(() => {
-    onSelectionChanged(lightConfigs.length, lightUiStates.filter(ui => ui.isSelected).length) // to render the toolbar
     initTimeSync()
   }, [])
 
@@ -199,7 +169,6 @@ export default function IntersectionComponent({
       currentTimestamp={currentTimestamp}
       light={light}
       lightConfig={lightConfigs[index]}
-      checkboxMode={checkboxMode}
       expanded={index === expanded}
       lightUiState={lightUiStates[index]}
       onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, index)}
@@ -226,7 +195,7 @@ export default function IntersectionComponent({
 
       <Typography variant='h6'>Traffic Lights</Typography>
   
-      { intersectionLights}
+      {intersectionLights}
 
       <Fullscreen
         enabled={uiMode == 'fullscreen'}
