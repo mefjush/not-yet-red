@@ -17,9 +17,13 @@ export default function Fullscreen({
 
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
-  const [invisibleChildren, setInvisibleChildren] = useState<number[]>([])
+  
+  const [hiddenChildren, setHiddenChildren] = useState<number[]>([])
   const [showSnackbar, setShowSnackbar] = useState<boolean>(false)
   const [windowWidth, windowHeight] = useWindowSize()
+
+  const heightConstrainedSize = windowHeight
+  const widthConstrainedSize = windowWidth / (children.length - hiddenChildren.length)
 
   // once
   useEffect(() => {
@@ -34,7 +38,7 @@ export default function Fullscreen({
   }, [])
 
   useEffect(() => {
-    setInvisibleChildren([])
+    setHiddenChildren([])
     if (enabled) {
       fullscreenRef.current?.requestFullscreen({ navigationUI: 'hide' })
     }
@@ -62,20 +66,6 @@ export default function Fullscreen({
     }
   }
 
-  const action = (
-    <>
-      <Button color="secondary" size="small" onClick={() => {
-        setInvisibleChildren(invisibleChildren.filter((x, index) => index != invisibleChildren.length - 1))
-        setShowSnackbar(invisibleChildren.length > 1)
-      }}>
-        UNDO
-      </Button>
-    </>
-  )
-
-  const heightConstrainedSize = windowHeight
-  const widthConstrainedSize = windowWidth / (children.length - invisibleChildren.length)
-
   const handleClose = (
     event: React.SyntheticEvent | Event,
     reason?: SnackbarCloseReason,
@@ -85,9 +75,9 @@ export default function Fullscreen({
     } 
   }
 
-  const onHideTrafficLight = (index: number) => {
-    if (invisibleChildren.length < children.length - 1) {
-      setInvisibleChildren([...invisibleChildren, index])
+  const onHideChild = (index: number) => {
+    if (hiddenChildren.length < children.length - 1) {
+      setHiddenChildren([...hiddenChildren, index])
       setShowSnackbar(true)
     }
   }
@@ -96,9 +86,18 @@ export default function Fullscreen({
       .map((ch, index) => React.cloneElement(ch, { 
         maxWidth: widthConstrainedSize, 
         maxHeight: heightConstrainedSize, 
-        onClick: () => onHideTrafficLight(index) 
+        onClick: () => onHideChild(index) 
       }))
-      .filter((ch, index) => !invisibleChildren.includes(index))
+      .filter((ch, index) => !hiddenChildren.includes(index))
+
+  const snackbarAction = (
+    <Button color="secondary" size="small" onClick={() => {
+      setHiddenChildren(hiddenChildren.filter((x, index) => index != hiddenChildren.length - 1))
+      setShowSnackbar(hiddenChildren.length > 1)
+    }}>
+      UNDO
+    </Button>
+  )
 
   return (
     <Box ref={fullscreenRef} className='fullscreen' display={enabled ? 'block' : 'none'}>
@@ -112,7 +111,7 @@ export default function Fullscreen({
         onClose={handleClose}
         autoHideDuration={6000}
         message="Traffic light hidden"
-        action={action}
+        action={snackbarAction}
       />
     </Box>
   )
