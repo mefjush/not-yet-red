@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Button, Snackbar, Stack } from '@mui/material'
+import { Box, Button, Snackbar, SnackbarCloseReason, Stack } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import React, { ReactElement, useEffect, useRef, useState } from 'react'
 import useWindowSize from '../hooks/useWindowSize'
@@ -18,7 +18,7 @@ export default function Fullscreen({
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
   const [invisibleChildren, setInvisibleChildren] = useState<number[]>([])
-  const [snackbarUndo, setSnackbarUndo] = useState<number|null>(null)
+  const [showSnackbar, setShowSnackbar] = useState<boolean>(false)
   const [windowWidth, windowHeight] = useWindowSize()
 
   // once
@@ -35,7 +35,6 @@ export default function Fullscreen({
 
   useEffect(() => {
     setInvisibleChildren([])
-    setSnackbarUndo(null)
     if (enabled) {
       fullscreenRef.current?.requestFullscreen({ navigationUI: 'hide' })
     }
@@ -66,8 +65,8 @@ export default function Fullscreen({
   const action = (
     <>
       <Button color="secondary" size="small" onClick={() => {
-        setInvisibleChildren(invisibleChildren.filter(i => i != snackbarUndo))
-        setSnackbarUndo(null)
+        setInvisibleChildren(invisibleChildren.filter((x, index) => index != invisibleChildren.length - 1))
+        setShowSnackbar(invisibleChildren.length > 1)
       }}>
         UNDO
       </Button>
@@ -77,15 +76,28 @@ export default function Fullscreen({
   const heightConstrainedSize = windowHeight
   const widthConstrainedSize = windowWidth / (children.length - invisibleChildren.length)
 
-  const onClick = (index: number) => {
+  const handleClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason,
+  ) => {
+    if (reason != 'clickaway') {
+      setShowSnackbar(false)
+    } 
+  }
+
+  const onHideTrafficLight = (index: number) => {
     if (invisibleChildren.length < children.length - 1) {
       setInvisibleChildren([...invisibleChildren, index])
-      setSnackbarUndo(index)
+      setShowSnackbar(true)
     }
   }
 
   const childrenToRender = children
-      .map((ch, index) => React.cloneElement(ch, { maxWidth: widthConstrainedSize, maxHeight: heightConstrainedSize, onClick: () => onClick(index) }))
+      .map((ch, index) => React.cloneElement(ch, { 
+        maxWidth: widthConstrainedSize, 
+        maxHeight: heightConstrainedSize, 
+        onClick: () => onHideTrafficLight(index) 
+      }))
       .filter((ch, index) => !invisibleChildren.includes(index))
 
   return (
@@ -96,7 +108,8 @@ export default function Fullscreen({
         </Stack>
       </Grid>
       <Snackbar
-        open={snackbarUndo != null}
+        open={showSnackbar}
+        onClose={handleClose}
         autoHideDuration={6000}
         message="Traffic light hidden"
         action={action}
