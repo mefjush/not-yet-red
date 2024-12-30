@@ -11,6 +11,7 @@ import TrafficIcon from '@mui/icons-material/Traffic'
 import CircleIcon from '@mui/icons-material/Circle'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
+import HomeIcon from '@mui/icons-material/Home'
 import { PresetId, PRESETS, SYMBOLS, SymbolId } from '../domain/Preset'
 import LightUiState from '../domain/LightUiState'
 import PhaseControls from './PhaseControls'
@@ -110,28 +111,37 @@ export default function LightDetails({
     >
       <AppBar className="mui-fixed">
         <Toolbar>
-          <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" sx={{ mx: -1 }} />} style={{ color: 'white', fontSize: '1.25rem' }} sx={{ flex: 1 }}>
+          {/* <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" sx={{ mx: -1 }} />} style={{ color: 'white', fontSize: '1.25rem' }} sx={{ flex: 1 }}>
             <IconButton 
               size="large" 
               edge="start" 
+              color='inherit'
+              href='/'
+            >
+              <HomeIcon />
+            </IconButton>
+            
+            <IconButton 
+              size="large" 
               onClick={handleClose}
               color='inherit'
             >
               <GridGoldenratioIcon />
-            </IconButton>
+            </IconButton> */}
 
-            <Stack direction='row'>
-              <IconButton 
-                size="large" 
-                sx={{ color: 'white' }} 
-              >
-                <TrafficIcon />
-              </IconButton>
-              <Typography sx={{ display: 'flex', alignItems: 'center' }} variant="h6" color='inherit'>
-                Traffic Light
-              </Typography>
-            </Stack>
-          </Breadcrumbs>
+          <Stack direction='row' sx={{ flex: 1 }}>
+            <IconButton
+              edge="start"
+              size="large" 
+              sx={{ color: 'white' }} 
+            >
+              <TrafficIcon />
+            </IconButton>
+            <Typography sx={{ display: 'flex', alignItems: 'center' }} variant="h6" color='inherit'>
+              Traffic Light
+            </Typography>
+          </Stack>
+          {/* </Breadcrumbs> */}
 
           <Button color='inherit' onClick={handleClose} style={{ marginRight: '-15px' }}>Ok</Button>
         </Toolbar>

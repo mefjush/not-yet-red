@@ -32,6 +32,7 @@ const historyPush: Options = { history: 'push' }
 // blink & beep
 // better sharing (share all? swipe on fullscreen?)
 // fix the timeline range slider on edge (when expanding)
+// breadcrumbs
 
 export default function IntersectionComponent({ 
   uiMode, 
@@ -139,7 +140,7 @@ export default function IntersectionComponent({
 
     const baseUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
 
-    return baseUrl + search
+    return baseUrl + '/intersection' + search
   }  
 
   const fullscreenContents = () => {

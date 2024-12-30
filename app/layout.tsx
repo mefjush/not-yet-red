@@ -3,8 +3,10 @@ import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
+import { Box, IconButton, Stack } from '@mui/material'
 import type { Metadata, Viewport } from 'next'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import TrafficIcon from '@mui/icons-material/Traffic'
 
 export const metadata: Metadata = {
   title: 'Traffic Lights',
@@ -25,7 +27,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body><NuqsAdapter>{children}</NuqsAdapter></body>
+      <body>
+        <NuqsAdapter>
+          {children}
+          <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <IconButton size="large" edge="start" href="/">
+                <TrafficIcon />
+              </IconButton> 
+              <p>2024 <strong>Traffic Lights</strong> by mefju</p>
+            </Box>
+          </Stack>
+        </NuqsAdapter>
+      </body>
     </html>
   )
 }
