@@ -71,7 +71,7 @@ function Content() {
           <li><strong>Interactive Traffic Signals:</strong> Control traffic flow by changing the color of traffic lights, simulating real-world traffic scenarios.</li>
           <li><strong>Educational Gameplay:</strong> Perfect for young learners, the app turns every street corner into an opportunity for exploring the world of traffic safety and urban planning.</li>
         </ul>
-        <p>Whether you're building roads for your toy cars, helping kids understand traffic rules, or simply having fun with a digital model of your own intersection, <strong>Traffic Lights</strong> makes it all possible.</p>
+        <p>Whether you&apos;re building roads for your toy cars, helping kids understand traffic rules, or simply having fun with a digital model of your own intersection, <strong>Traffic Lights</strong> makes it all possible.</p>
         
         <Button sx={{ my: 2 }} href='/intersection' variant="contained" endIcon={<PlayArrowIcon />}>Build your own intersection</Button>
 
