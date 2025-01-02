@@ -58,8 +58,7 @@ export default function LightGroup({
     const sx = {
       borderRadius: 0,
       '.MuiTouchRipple-ripple .MuiTouchRipple-child': {
-        borderRadius: 0,
-        backgroundColor: 'red',
+        borderRadius: 0
       },
     }
 
