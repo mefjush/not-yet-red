@@ -44,7 +44,7 @@ export default function LightGroup({
 
   const moreMenuOpen = Boolean(moreMenuAnchor)
 
-  const lightHeads = lightRecords.map(({ light, lightConfig, onLightSettingsChange, setExpanded }) => {
+  const lightHeads = lightRecords.map(({ light, lightConfig, onLightSettingsChange, setExpanded }, idx) => {
     const head = (
       <LightHead 
         currentTimestamp={currentTimestamp} 
@@ -63,15 +63,16 @@ export default function LightGroup({
     }
 
     return (
-      <IconButton onClick={setExpanded} sx={sx}>
+      <IconButton key={idx} onClick={setExpanded} sx={sx}>
         {head}
       </IconButton>
     )
   })
   
-  const timelines = lightRecords.map(({ light, lightConfig, onLightSettingsChange, setExpanded }) => {
+  const timelines = lightRecords.map(({ light, lightConfig, onLightSettingsChange, setExpanded }, idx) => {
     return (
-      <Timeline 
+      <Timeline
+        key={idx}
         currentTimestamp={currentTimestamp} 
         lightConfig={lightConfig} 
         onLightSettingsChange={onLightSettingsChange} 

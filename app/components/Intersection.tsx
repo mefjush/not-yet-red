@@ -191,7 +191,8 @@ export default function IntersectionComponent({
   )
 
   const intersectionGroups = groups.map((group, index) => (
-    <LightGroup 
+    <LightGroup
+      key={index}
       currentTimestamp={currentTimestamp}
       lightUiState={lightUiStates[index]}
       setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, index)}
