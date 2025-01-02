@@ -19,6 +19,8 @@ import LightDetails from './LightDetails'
 import LightUiState from '../domain/LightUiState'
 import { createParser, Options, parseAsInteger, useQueryState } from 'nuqs'
 import IntersectionSettingsPanel from './IntersectionSettingsPanel'
+import LightGroup from './LightGroup'
+import { light } from '@mui/material/styles/createPalette'
 
 export type UiMode = 'none' | 'share' | 'fullscreen'
 export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
@@ -72,8 +74,15 @@ export default function IntersectionComponent({
 
   const lights = lightConfigs.map(lightConfig => new TrafficLight(lightConfig, hasFailed))
 
-  const clock = new Clock(timeCorrection)
+  const groups = lightConfigs.map((lightConfig, index) => ([{ 
+    light: lights[index],
+    lightConfig: lightConfigs[index],
+    expanded: index === expanded,
+    onLightSettingsChange: (settings: LightSettings) => updateLightSettings(settings, index),
+    setExpanded: () => setExpanded(index)
+  }]))
 
+  const clock = new Clock(timeCorrection)
   
   const updateLightSettings = (settings: LightSettings, index: number) => {
     const copy = [...lightSettings]
@@ -181,6 +190,18 @@ export default function IntersectionComponent({
     />
   )
 
+  const intersectionGroups = groups.map((group, index) => (
+    <LightGroup 
+      currentTimestamp={currentTimestamp}
+      lightUiState={lightUiStates[index]}
+      setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, index)}
+      onDelete={() => onDelete([index])}
+      onFullscreen={() => enterFullscreenMode(index)}
+      onShare={() => enterShareMode(index)}
+      lightRecords={group}
+    />
+  ))
+
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
    
@@ -196,7 +217,8 @@ export default function IntersectionComponent({
 
       <Typography variant='h6'>Traffic Lights</Typography>
   
-      {intersectionLights}
+      {/* {intersectionLights} */}
+      {intersectionGroups}
 
       <Fullscreen
         enabled={uiMode == 'fullscreen'}
