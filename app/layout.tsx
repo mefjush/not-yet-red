@@ -7,6 +7,7 @@ import { Box, IconButton, Stack } from '@mui/material'
 import type { Metadata, Viewport } from 'next'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import TrafficIcon from '@mui/icons-material/Traffic'
+import GitHubIcon from '@mui/icons-material/GitHub'
 
 export const metadata: Metadata = {
   title: 'Traffic Lights',
@@ -39,7 +40,10 @@ export default function RootLayout({
               <IconButton size="large" edge="start" href="/">
                 <TrafficIcon />
               </IconButton> 
-              <p>2024 <strong>Traffic Lights</strong> by mefju</p>
+              <p>2025 <strong>Traffic Lights</strong> by mefju</p>
+              <IconButton size="large" edge="end" href="https://github.com/mefjush/mefjush.github.io">
+                <GitHubIcon />
+              </IconButton>
             </Box>
           </Stack>
         </NuqsAdapter>

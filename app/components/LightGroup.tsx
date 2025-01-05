@@ -2,7 +2,7 @@
 
 import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings } from '../domain/LightConfig'
-import { Card, CardActions, CardContent, Checkbox, Box, CardActionArea, Menu, MenuItem, ListItemIcon, ListItemText, Stack, Button, IconButton } from '@mui/material'
+import { Card, CardActions, CardContent, Box, Menu, MenuItem, ListItemIcon, ListItemText, Stack, IconButton } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import PhaseControls from './PhaseControls'
 import LightHead from './LightHead'
@@ -11,11 +11,11 @@ import Timeline from './Timeline'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import DeleteIcon from '@mui/icons-material/Delete'
-import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import AddIcon from '@mui/icons-material/Add'
 import LightUiState from '../domain/LightUiState'
 
-type LightRecord = {
+export type LightRecord = {
   light: TrafficLight
   lightConfig: LightConfig
   onLightSettingsChange: (lightSettings: LightSettings) => void, 
@@ -29,6 +29,7 @@ export default function LightGroup({
   onDelete,
   onFullscreen, 
   onShare,
+  onAdd,
   lightRecords
 }: { 
   currentTimestamp: number,
@@ -37,6 +38,7 @@ export default function LightGroup({
   onDelete: () => void, 
   onFullscreen: () => void, 
   onShare: () => void, 
+  onAdd: () => void,
   lightRecords: LightRecord[]
 }) {
 
@@ -149,6 +151,17 @@ export default function LightGroup({
             <DeleteIcon />
           </ListItemIcon>
           <ListItemText>Delete</ListItemText>
+        </MenuItem>
+        <MenuItem 
+          onClick={() => {
+            onMenuClose()
+            onAdd()
+          }}
+        >
+          <ListItemIcon>
+            <AddIcon />
+          </ListItemIcon>
+          <ListItemText>Add</ListItemText>
         </MenuItem>
       </Menu>
     </CardActions>
