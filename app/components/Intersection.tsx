@@ -28,6 +28,7 @@ const historyPush: Options = { history: 'push' }
 // TODOs
 // group should contain the union of colors - crashes!
 // ungroup button
+// fullscreen - swipe groups
 // Offline usage
 // Description / about page
 // Manual time correction in cookie / local storage
