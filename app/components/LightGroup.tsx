@@ -4,7 +4,7 @@ import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings } from '../domain/LightConfig'
 import { Card, CardActions, CardContent, Box, Menu, MenuItem, ListItemIcon, ListItemText, Stack, IconButton } from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import PhaseControls from './PhaseControls'
+import { StatePicker } from './PhaseControls'
 import LightHead from './LightHead'
 import React from 'react'
 import Timeline from './Timeline'
@@ -83,19 +83,16 @@ export default function LightGroup({
       />
     )
   })
-  
 
   const onMenuClose = () => setMoreMenuAnchor(null)
 
   const bottomActions = (
     <CardActions>
       <Box sx={{ ml: 1 }}>
-        <PhaseControls
-          lightConfig={lightRecords[0].lightConfig}
-          onLightSettingsChange={(foo) => {}}
+        <StatePicker
+          states={[...new Set(lightRecords.flatMap(lr => lr.lightConfig.phases).map(phase => phase.state))]}
           setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
           selectedState={lightUiState.selectedState}
-          expanded={false}
         />
       </Box>
 

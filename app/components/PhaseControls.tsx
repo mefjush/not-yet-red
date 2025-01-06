@@ -1,8 +1,8 @@
 "use client"
 
 import { ButtonGroup, Button, TextField, FormControl, RadioGroup, Stack, FormControlLabel, Radio } from '@mui/material'
-import { useState, useRef } from 'react'
-import { State, TrafficLightColors } from '../domain/State'
+import { useState, useRef, ReactNode } from 'react'
+import { State, STATE_ATTRIBUTES, TrafficLightColors } from '../domain/State'
 import { useLongPress } from 'use-long-press'
 import LightConfig, { LightSettings } from '../domain/LightConfig'
 
@@ -124,51 +124,42 @@ function PhaseControl({
   )
 }
 
-export default function PhaseControls({ 
-  lightConfig,
-  selectedState,
-  expanded,
-  onLightSettingsChange, 
+export function StatePicker({
+  states, 
+  selectedState, 
+  children,
   setSelectedState
-}: { 
-  lightConfig: LightConfig,
+}: {
+  states: State[], 
   selectedState?: State, 
-  expanded: boolean,
-  onLightSettingsChange: (lightSettings: LightSettings) => void, 
+  children?: ReactNode[],
   setSelectedState: (state: State) => void, 
 }) {
-  
-  const phaseControls = lightConfig.phases.map(phase => {
 
-    const phaseControl = (
-      <PhaseControl
-        min={0} 
-        max={lightConfig.cycleLength() / 1000} 
-        value={phase.duration / 1000} 
-        onChange={e => {
-          setSelectedState(phase.state)
-          onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))
-        }} 
-        color={phase.stateAttributes().color}
-      />
-    )
+  const theChildren = children || []
+
+  const expanded = theChildren.length != 0
+
+  const entries = states.map((state, idx) => {
+
+    const color = STATE_ATTRIBUTES[state].color
 
     const radio = (
       <Radio 
         size='small' 
-        color={`${phase.stateAttributes().color}`} 
-        sx={{ color: `${phase.stateAttributes().color}.main` }}
+        color={`${color}`} 
+        sx={{ color: `${color}.main` }}
       />
     )
 
     return (
-      <Stack direction='row' key={phase.state}>
+      <Stack direction='row' key={state}>
         <FormControlLabel 
-          value={phase.state} 
+          value={state} 
           control={radio} 
           label=''
         />
-        { expanded ? phaseControl : null }
+        { theChildren[idx] }
       </Stack>
     )
   })
@@ -183,9 +174,47 @@ export default function PhaseControls({
         onChange={event => setSelectedState(State[((event.target as HTMLInputElement).value) as keyof typeof State])}
       >
         <Stack direction={ expanded ? 'column' : 'row' } spacing={ expanded ? 1 : 0 }>
-          {phaseControls}
+          {entries}
         </Stack>
       </RadioGroup>
     </FormControl>
+  )
+}
+
+export default function PhaseControls({ 
+  lightConfig,
+  selectedState,
+  onLightSettingsChange, 
+  setSelectedState
+}: { 
+  lightConfig: LightConfig,
+  selectedState?: State, 
+  onLightSettingsChange: (lightSettings: LightSettings) => void, 
+  setSelectedState: (state: State) => void, 
+}) {
+  
+  const phaseControls = lightConfig.phases.map(phase => {
+    return (
+      <PhaseControl
+        min={0} 
+        max={lightConfig.cycleLength() / 1000} 
+        value={phase.duration / 1000} 
+        onChange={e => {
+          setSelectedState(phase.state)
+          onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))
+        }} 
+        color={phase.stateAttributes().color}
+      />
+    )
+  })
+
+  return (
+    <StatePicker
+      states={lightConfig.phases.map(p => p.state)} 
+      selectedState={selectedState}
+      setSelectedState={setSelectedState}
+    >
+      {phaseControls}
+    </StatePicker>
   )
 }

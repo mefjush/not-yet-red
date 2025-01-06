@@ -30,7 +30,9 @@ export default function Timeline({
 
   const cycleLength = lightConfig.cycleLength()
 
-  const timeRange = selectedState ? lightConfig.getTimeRange(selectedState) : new TimeRange(0, 0, 0)  
+  const theSelectedState = lightConfig.phases.map(phase => phase.state).find(state => state == selectedState)
+
+  const timeRange = theSelectedState ? lightConfig.getTimeRange(theSelectedState) : new TimeRange(0, 0, 0)  
 
   const toUiFirendlyTimeRange = (timeRange: TimeRange): TimeRange => new TimeRange(timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end, cycleLength)
 
@@ -142,7 +144,7 @@ export default function Timeline({
     />
   )
 
-  const rangeSlider = editable && selectedState ? getRangeSlider(selectedState) : null
+  const rangeSlider = editable && theSelectedState ? getRangeSlider(theSelectedState) : null
 
   return (
     <Box sx={{ my: 2 }}>

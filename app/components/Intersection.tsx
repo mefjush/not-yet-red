@@ -26,7 +26,6 @@ export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 const historyPush: Options = { history: 'push' }
 
 // TODOs
-// group should contain the union of colors - crashes!
 // ungroup button
 // fullscreen - swipe groups
 // Offline usage
@@ -222,7 +221,6 @@ export default function IntersectionComponent({
 
       <Typography variant='h6'>Traffic Lights</Typography>
   
-      {/* {intersectionLights} */}
       {intersectionGroups}
 
       <Fullscreen
