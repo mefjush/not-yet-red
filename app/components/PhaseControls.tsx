@@ -196,6 +196,7 @@ export default function PhaseControls({
   const phaseControls = lightConfig.phases.map(phase => {
     return (
       <PhaseControl
+        key={phase.state}
         min={0} 
         max={lightConfig.cycleLength() / 1000} 
         value={phase.duration / 1000} 
