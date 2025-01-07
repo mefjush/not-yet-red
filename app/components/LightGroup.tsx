@@ -116,7 +116,7 @@ export default function LightGroup({
         open={moreMenuOpen}
         onClose={onMenuClose}
       >
-        <MenuItem 
+        {/* <MenuItem 
           onClick={() => {
             onMenuClose()
             onShare()
@@ -126,8 +126,8 @@ export default function LightGroup({
             <ShareIcon />
           </ListItemIcon>
           <ListItemText>Share</ListItemText>
-        </MenuItem>
-        <MenuItem 
+        </MenuItem> */}
+        {/* <MenuItem 
           onClick={() => {
             onMenuClose()
             onFullscreen()
@@ -137,7 +137,7 @@ export default function LightGroup({
             <FullscreenIcon />
           </ListItemIcon>
           <ListItemText>Fullscreen</ListItemText>
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem 
           onClick={() => {
             onMenuClose()

@@ -1,29 +1,31 @@
 "use client"
 
-import { Box, Button, Snackbar, SnackbarCloseReason, Stack } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import React, { ReactElement, useEffect, useRef, useState } from 'react'
 import useWindowSize from '../hooks/useWindowSize'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Pagination } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/pagination'
 
 export default function Fullscreen({ 
   enabled, 
-  children, 
-  onDisabled 
+  children,
+  onDisabled,
+  grouping 
 }: { 
   enabled: boolean, 
   children: ReactElement[], 
   onDisabled: () => void 
+  grouping: number[][]
 }) {
 
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
   
   const [hiddenChildren, setHiddenChildren] = useState<number[]>([])
-  const [showSnackbar, setShowSnackbar] = useState<boolean>(false)
   const [windowWidth, windowHeight] = useWindowSize()
-
-  const heightConstrainedSize = windowHeight
-  const widthConstrainedSize = windowWidth / (children.length - hiddenChildren.length)
 
   // once
   useEffect(() => {
@@ -66,53 +68,40 @@ export default function Fullscreen({
     }
   }
 
-  const handleClose = (
-    event: React.SyntheticEvent | Event,
-    reason?: SnackbarCloseReason,
-  ) => {
-    if (reason != 'clickaway') {
-      setShowSnackbar(false)
-    } 
+  const groupToRender = (children: ReactElement[]) => {
+    const heightConstrainedSize = windowHeight
+    const widthConstrainedSize = windowWidth / (children.length - hiddenChildren.length)
+
+    return children.map((child) => React.cloneElement(child, { 
+      maxWidth: widthConstrainedSize, 
+      maxHeight: heightConstrainedSize
+    }))
   }
 
-  const onHideChild = (index: number) => {
-    if (hiddenChildren.length < children.length - 1) {
-      setHiddenChildren([...hiddenChildren, index])
-      setShowSnackbar(true)
-    }
-  }
-
-  const childrenToRender = children
-      .map((ch, index) => React.cloneElement(ch, { 
-        maxWidth: widthConstrainedSize, 
-        maxHeight: heightConstrainedSize, 
-        onClick: () => onHideChild(index) 
-      }))
-      .filter((ch, index) => !hiddenChildren.includes(index))
-
-  const snackbarAction = (
-    <Button color="secondary" size="small" onClick={() => {
-      setHiddenChildren(hiddenChildren.filter((x, index) => index != hiddenChildren.length - 1))
-      setShowSnackbar(hiddenChildren.length > 1)
-    }}>
-      UNDO
-    </Button>
-  )
+  const slides = grouping.map((group, idx) => {
+    const groupChildren = groupToRender(group.map(lightIdx => children[lightIdx]))
+    return (
+      <SwiperSlide key={idx}>
+        <Grid container justifyContent="center" alignItems="center" sx={{ height: '100%', width: '100%' }}>
+          <Stack direction='row' alignItems='flex-end' spacing={0}>
+            {groupChildren}
+          </Stack>
+        </Grid>
+      </SwiperSlide>
+    )
+  })
 
   return (
     <Box ref={fullscreenRef} className='fullscreen' display={enabled ? 'block' : 'none'}>
-      <Grid container justifyContent="center" alignItems="center" sx={{ height: '100%', width: '100%' }}>
-        <Stack direction='row' alignItems='flex-end' spacing={0}>
-          {childrenToRender}
-        </Stack>
-      </Grid>
-      <Snackbar
-        open={showSnackbar}
-        onClose={handleClose}
-        autoHideDuration={6000}
-        message="Traffic light hidden"
-        action={snackbarAction}
-      />
+      <Swiper
+        style={{ height: '100%', width: '100%' }}
+        modules={[Pagination]}
+        pagination={{ clickable: true }}
+        onSlideChange={() => console.log('slide change')}
+        onSwiper={(swiper) => console.log(swiper)}
+      >
+        {slides}
+      </Swiper>
     </Box>
   )
 }

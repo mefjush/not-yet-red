@@ -118,6 +118,7 @@ export default function Timeline({
 
   const getRangeSlider = (selectedState: State) => (
     <Slider
+      key='visible-range-slider'
       disableSwap
       value={[uiRange.current.start, uiRange.current.end]}
       step={1000}
@@ -144,7 +145,11 @@ export default function Timeline({
     />
   )
 
-  const rangeSlider = editable && theSelectedState ? getRangeSlider(theSelectedState) : null
+  const invisibleSlider = (
+    <Slider key='hidden-range-slider' style={{ visibility: 'hidden' }}/>
+  )
+
+  const rangeSlider = editable && theSelectedState ? getRangeSlider(theSelectedState) : invisibleSlider
 
   return (
     <Box sx={{ my: 2 }}>

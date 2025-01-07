@@ -5,7 +5,7 @@ import Clock from '../domain/Clock'
 import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/LightConfig'
 import Failure from '../domain/Failure'
-import { Fab, Stack, Box, Typography } from '@mui/material'
+import { Fab, Stack, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { LightSettingsParser, IntersectionSettingsParser } from '../url'
 import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
@@ -26,13 +26,11 @@ export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 const historyPush: Options = { history: 'push' }
 
 // TODOs
-// ungroup button
-// fullscreen - swipe groups
+// timelines - always the same height
+// group / ungroup button
 // Offline usage
-// Description / about page
 // Manual time correction in cookie / local storage
 // blink & beep
-// better sharing (share all? swipe on fullscreen?)
 // fix the timeline range slider on edge (when expanding)
 // breadcrumbs
 
@@ -69,9 +67,9 @@ export default function IntersectionComponent({
 
   const effectivelySelected = selected.length == 0 ? lightSettings.map((ls, index) => index) : selected
 
-  const grouping = Object.values(Object.groupBy(groups.map((_, idx) => idx), (groupIdx, lightIdx) => groups[lightIdx])) as number[][]
+  const grouping = Object.values(Object.groupBy(groups.map((_, idx) => idx), (_, lightIdx) => groups[lightIdx])) as number[][]
 
-  const [groupUiStates, setGroupUiStates] = useState(grouping.map((lightIndices, groupIdx) => new LightUiState(lightSettings[lightIndices[0]].phases[0].state)))
+  const [groupUiStates, setGroupUiStates] = useState(grouping.map((lightIndices) => new LightUiState(lightSettings[lightIndices[0]].phases[0].state)))
 
   const failure = new Failure(intersectionSettings.failure.duration, intersectionSettings.failure.probability)
 
@@ -194,20 +192,16 @@ export default function IntersectionComponent({
     )
   })
 
-  const fullscreenContents = () => {
-    const fullscreenLights = lights.filter((light, index) => effectivelySelected.includes(index))
-
-    return fullscreenLights.map((light, index) => (
-      <LightHead 
-        key={`fullscreen-light-${index}`} 
-        currentTimestamp={currentTimestamp} 
-        light={light} 
-        lightConfig={light.lightConfig} 
-        maxHeight={100} 
-        maxWidth={100}
-      />
-    ))
-  }
+  const fullscreenContents = lights.map((light, index) => (
+    <LightHead 
+      key={`fullscreen-light-${index}`} 
+      currentTimestamp={currentTimestamp} 
+      light={light} 
+      lightConfig={light.lightConfig} 
+      maxHeight={100} 
+      maxWidth={100}
+    />
+  ))
 
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
@@ -229,8 +223,9 @@ export default function IntersectionComponent({
       <Fullscreen
         enabled={uiMode == 'fullscreen'}
         onDisabled={exitUiMode}
+        grouping={grouping}
       >
-        {fullscreenContents()}
+        {fullscreenContents}
       </Fullscreen>
 
       <ShareDialog

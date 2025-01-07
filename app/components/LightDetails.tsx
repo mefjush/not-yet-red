@@ -166,11 +166,11 @@ export default function LightDetails({
           </Grid>
 
           <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems='flex-start'>
-            <Box sx={{ visibility: 'hidden' }}>{buttons}</Box>
+            {/* <Box sx={{ visibility: 'hidden' }}>{buttons}</Box> */}
             <Box sx={{ flex: 1 }}></Box>
             {lightHead}
             <Box sx={{ flex: 1 }}></Box>
-            {buttons}
+            {/* {buttons} */}
           </Grid>
 
           <Grid size={{ xs: 12 }}>
