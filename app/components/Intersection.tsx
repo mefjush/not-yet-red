@@ -26,8 +26,6 @@ export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 const historyPush: Options = { history: 'push' }
 
 // TODOs
-// timelines - always the same height
-// group / ungroup button
 // Offline usage
 // Manual time correction in cookie / local storage
 // blink & beep
@@ -140,6 +138,29 @@ export default function IntersectionComponent({
     setGroups([...groups, groupIdx])
   }
 
+  const groupingToGroups = (grouping: number[][]) => {
+    const newGroups = []
+    for (let groupIdx = 0; groupIdx < grouping.length; groupIdx++) {
+      const group = grouping[groupIdx]
+      for (let lightIdx of group) {
+        newGroups[lightIdx] = groupIdx
+      }
+    }
+    return newGroups
+  }
+
+  const onUngroup = (groupIdx: number) => {
+    const removedGroup = grouping[groupIdx]
+    const newGrouping = grouping.flatMap((group, idx) => idx == groupIdx ? removedGroup.map(x => [x]) : [group])
+    setGroups(groupingToGroups(newGrouping))
+  }
+
+  const onGroupUp = (groupIdx: number) => {
+    const initAcc: number[][] = []
+    const newGrouping = grouping.reduce((acc, group, idx) => idx != groupIdx ? [...acc, group] : [...acc.slice(0, -1), [...acc[acc.length - 1], ...group]], initAcc)
+    setGroups(groupingToGroups(newGrouping))
+  }
+
   const onAdd = () => {
     onAddToGroup(groups.length == 0 ? 0 : Math.max.apply(null, groups) + 1)
   }
@@ -187,6 +208,8 @@ export default function IntersectionComponent({
         onFullscreen={() => enterFullscreenMode(lightIndices)}
         onShare={() => enterShareMode(lightIndices)}
         onAdd={() => onAddToGroup(groupIdx)}
+        onGroup={() => onGroupUp(groupIdx)}
+        onUngroup={() => onUngroup(groupIdx)}
         lightRecords={lightIndices.map(lightIdx => lightRecords[lightIdx])}
       />
     )

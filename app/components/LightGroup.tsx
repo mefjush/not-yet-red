@@ -14,6 +14,9 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import AddIcon from '@mui/icons-material/Add'
 import LightUiState from '../domain/LightUiState'
+import MergeIcon from '@mui/icons-material/Merge'
+import CallSplitIcon from '@mui/icons-material/CallSplit'
+import ExpandIcon from '@mui/icons-material/Expand'
 
 export type LightRecord = {
   light: TrafficLight
@@ -29,6 +32,8 @@ export default function LightGroup({
   onDelete,
   onFullscreen, 
   onShare,
+  onGroup,
+  onUngroup,
   onAdd,
   lightRecords
 }: { 
@@ -37,7 +42,9 @@ export default function LightGroup({
   setLightUiState: (lightUiState: LightUiState) => void,
   onDelete: () => void, 
   onFullscreen: () => void, 
-  onShare: () => void, 
+  onShare: () => void,
+  onGroup: () => void,
+  onUngroup: () => void,
   onAdd: () => void,
   lightRecords: LightRecord[]
 }) {
@@ -116,28 +123,30 @@ export default function LightGroup({
         open={moreMenuOpen}
         onClose={onMenuClose}
       >
-        {/* <MenuItem 
+        <MenuItem 
           onClick={() => {
             onMenuClose()
-            onShare()
+            onGroup()
           }}
         >
           <ListItemIcon>
-            <ShareIcon />
+            <MergeIcon />
           </ListItemIcon>
-          <ListItemText>Share</ListItemText>
-        </MenuItem> */}
-        {/* <MenuItem 
+          <ListItemText>Group up</ListItemText>
+        </MenuItem>
+
+        <MenuItem 
           onClick={() => {
             onMenuClose()
-            onFullscreen()
+            onUngroup()
           }}
         >
           <ListItemIcon>
-            <FullscreenIcon />
+            <CallSplitIcon />
           </ListItemIcon>
-          <ListItemText>Fullscreen</ListItemText>
-        </MenuItem> */}
+          <ListItemText>Ungroup</ListItemText>
+        </MenuItem>
+
         <MenuItem 
           onClick={() => {
             onMenuClose()
@@ -149,17 +158,6 @@ export default function LightGroup({
           </ListItemIcon>
           <ListItemText>Delete</ListItemText>
         </MenuItem>
-        <MenuItem 
-          onClick={() => {
-            onMenuClose()
-            onAdd()
-          }}
-        >
-          <ListItemIcon>
-            <AddIcon />
-          </ListItemIcon>
-          <ListItemText>Add</ListItemText>
-        </MenuItem>
       </Menu>
     </CardActions>
   )
@@ -167,6 +165,12 @@ export default function LightGroup({
   return (
     <>
       <Card>
+        <CardActions>
+          <IconButton style={{ marginLeft: 'auto' }} onClick={onAdd}>
+            <AddIcon/>
+          </IconButton>
+        </CardActions>
+
         <Grid container justifyContent="center" alignItems="center">
           <Stack direction='row' alignItems='flex-end'>
             {lightHeads}
