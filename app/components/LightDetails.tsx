@@ -1,4 +1,5 @@
 import { IconButton, Dialog, Button, AppBar, Toolbar, Typography, Stack, Select, MenuItem, Box, Breadcrumbs, Link } from '@mui/material'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { createElement } from 'react'
 import Grid from '@mui/material/Grid2'
 import ShareIcon from '@mui/icons-material/Share'
@@ -25,6 +26,7 @@ export default function LightDetails({
   onClose, 
   onFullscreen, 
   onShare, 
+  onDelete,
   onLightSettingsChange, 
   setLightUiState 
 }: { 
@@ -36,6 +38,7 @@ export default function LightDetails({
   onClose: () => void, 
   onFullscreen: () => void, 
   onShare: () => void, 
+  onDelete: () => void,
   onLightSettingsChange: (lightSettings: LightSettings) => void, 
   setLightUiState: (lightUiState: LightUiState) => void 
 }) {
@@ -58,7 +61,7 @@ export default function LightDetails({
 
   const buttons = (
     <Stack direction='row'>
-      <IconButton 
+      {/* <IconButton 
         size='large' 
         aria-label="share" 
         onClick={onShare}
@@ -73,6 +76,15 @@ export default function LightDetails({
         edge='end'
       >
         <FullscreenIcon />
+      </IconButton> */}
+
+      <IconButton 
+        size='large' 
+        aria-label="delete" 
+        onClick={onDelete} 
+        edge='end'
+      >
+        <DeleteIcon />
       </IconButton>
     </Stack>
   )
@@ -166,11 +178,11 @@ export default function LightDetails({
           </Grid>
 
           <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems='flex-start'>
-            {/* <Box sx={{ visibility: 'hidden' }}>{buttons}</Box> */}
+            <Box sx={{ visibility: 'hidden' }}>{buttons}</Box>
             <Box sx={{ flex: 1 }}></Box>
             {lightHead}
             <Box sx={{ flex: 1 }}></Box>
-            {/* {buttons} */}
+            {buttons}
           </Grid>
 
           <Grid size={{ xs: 12 }}>

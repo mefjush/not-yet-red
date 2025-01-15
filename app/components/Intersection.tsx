@@ -26,6 +26,7 @@ export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 const historyPush: Options = { history: 'push' }
 
 // TODOs
+// delete one light
 // Offline usage
 // Manual time correction in cookie / local storage
 // blink & beep
@@ -173,6 +174,19 @@ export default function IntersectionComponent({
     setUiMode('none')
   }
 
+  const onDeleteOne = (lightIdx: number) => {
+    const groupIdx = groups[lightIdx]
+    if (grouping[groupIdx].length == 1) {
+      console.log('deleting group ' + groupIdx)
+      onDeleteGroup(groupIdx)
+    } else {
+      setLightSettings([...lightSettings].filter((ls, i) => i != lightIdx))
+      setGroups([...groups].filter((group, i) => i != lightIdx))
+      setUiMode('none')
+    }
+    setExpanded(null)
+  }
+
   const getShareUrl = () => {
     
     const selectedLightSettings = lightSettings.filter((ls, index) => effectivelySelected.includes(index))
@@ -267,6 +281,7 @@ export default function IntersectionComponent({
           onClose={() => setExpanded(null)}
           onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, expanded)}
           onFullscreen={() => enterFullscreenMode([expanded])}
+          onDelete={() => onDeleteOne(expanded)}
           onShare={() => enterShareMode([expanded])}
           setLightUiState={(lightUiState: LightUiState) => updateGroupUiState(lightUiState, groups[expanded])}
         />
