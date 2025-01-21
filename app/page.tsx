@@ -79,7 +79,7 @@ function Content() {
         <ul>
           <li><Button href={toUrl(alternating)}>Alternating traffic</Button></li>
           <li><Button href={toUrl(zebra)}>Zebra crossing</Button></li>
-          <li><Button href={toUrl(tShaped) + "&groups=0,1,2,2"}>T-shaped intersection</Button></li>
+          <li><Button href={toUrl(tShaped) + '&groups=0,1,2%252C3'}>T-shaped intersection</Button></li>
         </ul>
       </Paper>
     </>

@@ -22,22 +22,12 @@ export default function LightCard({
   lightUiState,
   setLightUiState,
   onDelete,
-  onFullscreen, 
-  onShare,
-  onGroup,
-  onUngroup,
-  onAdd,
   lightRecord
 }: { 
   currentTimestamp: number,
   lightUiState: LightUiState
   setLightUiState: (lightUiState: LightUiState) => void,
   onDelete: () => void, 
-  onFullscreen: () => void, 
-  onShare: () => void,
-  onGroup: [() => void, () => void]
-  onUngroup: (splitIdx: number) => void,
-  onAdd: () => void,
   lightRecord: LightRecord
 }) {
 

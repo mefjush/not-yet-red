@@ -30,7 +30,6 @@ const historyPush: Options = { history: 'push' }
 
 // TODOs
 // preview mode (show groups in rows)
-// delete one light
 // Offline usage
 // Manual time correction in cookie / local storage
 // blink & beep
@@ -55,9 +54,9 @@ export default function IntersectionComponent({
     createParser(LightSettingsParser).withDefault([DEFAULT_LIGHT_SETTINGS])
   )
 
-  const [groups, setGroups] = useQueryState<number[]>(
+  const [grouping, setGrouping] = useQueryState<number[][]>(
     "groups", 
-    parseAsArrayOf(parseAsInteger).withDefault(lightSettings.map((_, index) => index))
+    parseAsArrayOf(parseAsArrayOf(parseAsInteger)).withDefault(lightSettings.map((_, index) => [index]))
   )
 
   const [expanded, setExpanded] = useQueryState("e", parseAsInteger.withOptions(historyPush))
@@ -69,8 +68,6 @@ export default function IntersectionComponent({
   const [selected, setSelected] = useState<number[]>([])
 
   const effectivelySelected = selected.length == 0 ? lightSettings.map((ls, index) => index) : selected
-
-  const grouping = Object.values(Object.groupBy(groups.map((_, idx) => idx), (_, lightIdx) => groups[lightIdx])) as number[][]
 
   const [lightUiStates, setLightUiStates] = useState(lightSettings.map((ls) => new LightUiState(ls.phases[0].state)))
 
@@ -140,61 +137,39 @@ export default function IntersectionComponent({
     setLightUiStates([...lightUiStates, new LightUiState(DEFAULT_LIGHT_SETTINGS.phases[0].state)])
     setUiMode('none')
     setExpanded(lightSettings.length)
-    setGroups([...groups, groupIdx])
-  }
-
-  const groupingToGroups = (grouping: number[][]) => {
-    const newGroups = []
-    for (let groupIdx = 0; groupIdx < grouping.length; groupIdx++) {
-      const group = grouping[groupIdx]
-      for (let lightIdx of group) {
-        newGroups[lightIdx] = groupIdx
-      }
+    if (grouping.length == 0 || grouping.length >= groupIdx) {
+      setGrouping([...grouping, [lightSettings.length]])
+    } else {
+      setGrouping(grouping.map((group, idx) => idx == groupIdx ? [...group, lightSettings.length] : group))  
     }
-    return newGroups
   }
 
   const onUngroup = (groupIdx: number, splitIdx: number) => {
     const groupLeft = grouping[groupIdx].filter((x, idx) => idx <= splitIdx)
     const groupRight = grouping[groupIdx].filter((x, idx) => idx > splitIdx)
     const newGrouping = grouping.flatMap((group, idx) => idx == groupIdx ? [groupLeft, groupRight] : [group])
-    setGroups(groupingToGroups(newGrouping))
-  }
-
-  const onGroupUp = (groupIdx: number) => {
-    const initAcc: number[][] = []
-    const newGrouping = grouping.reduce((acc, group, idx) => idx != groupIdx ? [...acc, group] : [...acc.slice(0, -1), [...acc[acc.length - 1], ...group]], initAcc)
-    setGroups(groupingToGroups(newGrouping))
+    setGrouping(newGrouping)
   }
 
   const onGroupDown = (groupIdx: number) => {
     const initAcc: number[][] = []
     const newGrouping = grouping.reduce((acc, group, idx) => idx != groupIdx + 1 ? [...acc, group] : [...acc.slice(0, -1), [...acc[acc.length - 1], ...group]], initAcc)
-    setGroups(groupingToGroups(newGrouping))
+    setGrouping(newGrouping)
   }
 
   const onAdd = () => {
-    onAddToGroup(groups.length == 0 ? 0 : Math.max.apply(null, groups) + 1)
-  }
-
-  const onDeleteGroup = (groupToDelete: number) => {
-    const indicesToDelete = grouping[groupToDelete]
-    setLightSettings([...lightSettings].filter((ls, i) => !indicesToDelete.includes(i)))
-    setGroups([...groups].filter((group, i) => !indicesToDelete.includes(i)).map(group => group > groupToDelete ? group - 1 : group))
-    setUiMode('none')
+    onAddToGroup(grouping.length)
   }
 
   const onDeleteOne = (lightIdx: number) => {
-    const groupIdx = groups[lightIdx]
-    if (grouping[groupIdx].length == 1) {
-      console.log('deleting group ' + groupIdx)
-      onDeleteGroup(groupIdx)
-    } else {
-      setLightSettings([...lightSettings].filter((ls, i) => i != lightIdx))
-      setGroups([...groups].filter((group, i) => i != lightIdx))
-      setUiMode('none')
-    }
+    const newGrouping = [...grouping]
+      .map(group => group.filter(light => light != lightIdx).map(light => light < lightIdx ? light : light - 1))
+      .filter(group => group.length > 0)
+    setLightSettings([...lightSettings].filter((ls, i) => i != lightIdx))
+    setLightUiStates([...lightUiStates].filter((ls, i) => i != lightIdx))
+    setUiMode('none')
     setExpanded(null)
+    setGrouping(newGrouping)
   }
 
   const getShareUrl = () => {
@@ -248,12 +223,7 @@ export default function IntersectionComponent({
             currentTimestamp={currentTimestamp}
             lightUiState={lightUiStates[lightIdx]}
             setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, lightIdx)}
-            onDelete={() => onDeleteGroup(groupIdx)}
-            onFullscreen={() => enterFullscreenMode(lightIndices)}
-            onShare={() => enterShareMode(lightIndices)}
-            onAdd={() => onAddToGroup(groupIdx)}
-            onGroup={[() => onGroupUp(groupIdx), () => onGroupDown(groupIdx)]}
-            onUngroup={(splitIdx) => onUngroup(groupIdx, splitIdx)}
+            onDelete={() => onDeleteOne(lightIdx)}
             lightRecord={lightRecords[lightIdx]}
           />
         </Box>
