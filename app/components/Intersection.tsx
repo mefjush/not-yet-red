@@ -5,7 +5,7 @@ import Clock from '../domain/Clock'
 import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/LightConfig'
 import Failure from '../domain/Failure'
-import { Box, Button, Fab, IconButton, Stack, Typography } from '@mui/material'
+import { Box, Button, Fab, Stack, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { LightSettingsParser, IntersectionSettingsParser } from '../url'
 import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
@@ -18,8 +18,10 @@ import LightDetails from './LightDetails'
 import LightUiState from '../domain/LightUiState'
 import { createParser, Options, parseAsArrayOf, parseAsInteger, useQueryState } from 'nuqs'
 import IntersectionSettingsPanel from './IntersectionSettingsPanel'
-import LightGroup, { LightRecord } from './LightGroup'
+import { LightRecord } from './LightCard'
 import CompressIcon from '@mui/icons-material/Compress'
+import ExpandIcon from '@mui/icons-material/Expand'
+import LightCard from './LightCard'
 
 export type UiMode = 'none' | 'share' | 'fullscreen'
 export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
@@ -27,7 +29,7 @@ export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 const historyPush: Options = { history: 'push' }
 
 // TODOs
-// fix the grouping look and feel, split the selected color once again
+// preview mode (show groups in rows)
 // delete one light
 // Offline usage
 // Manual time correction in cookie / local storage
@@ -70,7 +72,7 @@ export default function IntersectionComponent({
 
   const grouping = Object.values(Object.groupBy(groups.map((_, idx) => idx), (_, lightIdx) => groups[lightIdx])) as number[][]
 
-  const [groupUiStates, setGroupUiStates] = useState(grouping.map((lightIndices) => new LightUiState(lightSettings[lightIndices[0]].phases[0].state)))
+  const [lightUiStates, setLightUiStates] = useState(lightSettings.map((ls) => new LightUiState(ls.phases[0].state)))
 
   const failure = new Failure(intersectionSettings.failure.duration, intersectionSettings.failure.probability)
 
@@ -96,10 +98,10 @@ export default function IntersectionComponent({
     setCurrentTimestamp(clock.now())
   }
 
-  const updateGroupUiState = (lightUiState: LightUiState, groupIdx: number) => {
-    const copy = [...groupUiStates]
-    copy.splice(groupIdx, 1, lightUiState)
-    setGroupUiStates(copy)
+  const updateLightUiState = (lightUiState: LightUiState, lightIdx: number) => {
+    const copy = [...lightUiStates]
+    copy.splice(lightIdx, 1, lightUiState)
+    setLightUiStates(copy)
   }
 
   const wrapListener = {
@@ -135,7 +137,6 @@ export default function IntersectionComponent({
 
   const onAddToGroup = (groupIdx: number) => {
     setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
-    setGroupUiStates([...groupUiStates, new LightUiState(DEFAULT_LIGHT_SETTINGS.phases[0].state)])
     setUiMode('none')
     setExpanded(lightSettings.length)
     setGroups([...groups, groupIdx])
@@ -179,7 +180,6 @@ export default function IntersectionComponent({
     const indicesToDelete = grouping[groupToDelete]
     setLightSettings([...lightSettings].filter((ls, i) => !indicesToDelete.includes(i)))
     setGroups([...groups].filter((group, i) => !indicesToDelete.includes(i)).map(group => group > groupToDelete ? group - 1 : group))
-    setGroupUiStates([...groupUiStates].filter((ui, i) => groupToDelete != i))
     setUiMode('none')
   }
 
@@ -220,34 +220,49 @@ export default function IntersectionComponent({
     }
   })
 
+  const groupBoxStyle = { borderLeft: '5px solid', borderLeftColor: 'primary.main', pl: 2, py: 1 }
+  
   const joinButton = (groupIdx: number): ReactElement => (
-    <Box sx={{ px: 2 }}>
-      {/* <IconButton >
-        <CompressIcon/>
-        Join
-      </IconButton> */}
+    <Box sx={{...groupBoxStyle, borderLeftColor: 'transparent'}}>
       <Button onClick={() => onGroupDown(groupIdx)} startIcon={<CompressIcon />}>
         Group
       </Button>
     </Box>
   )
 
-  const intersectionGroups = grouping.map((lightIndices, groupIdx) => {
+  const splitButton = (groupIdx: number, splitIdx: number): ReactElement => (
+    <Box sx={groupBoxStyle}>
+      <Button onClick={() => onUngroup(groupIdx, splitIdx)} startIcon={<ExpandIcon />}>
+        Split
+      </Button>
+    </Box>
+  )
+  
+  const intersectionGroups = grouping.flatMap((lightIndices, groupIdx) => {
+
+    const groupCards = lightIndices.flatMap((lightIdx, inGroupIdx) => {
+      const card = (
+        <Box sx={{...groupBoxStyle, borderLeftColor: lightIndices.length > 1 ? 'primary.main' : 'transparent'}}>
+          <LightCard
+            currentTimestamp={currentTimestamp}
+            lightUiState={lightUiStates[lightIdx]}
+            setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, lightIdx)}
+            onDelete={() => onDeleteGroup(groupIdx)}
+            onFullscreen={() => enterFullscreenMode(lightIndices)}
+            onShare={() => enterShareMode(lightIndices)}
+            onAdd={() => onAddToGroup(groupIdx)}
+            onGroup={[() => onGroupUp(groupIdx), () => onGroupDown(groupIdx)]}
+            onUngroup={(splitIdx) => onUngroup(groupIdx, splitIdx)}
+            lightRecord={lightRecords[lightIdx]}
+          />
+        </Box>
+      )
+      return inGroupIdx < lightIndices.length - 1 ? [card, splitButton(groupIdx, inGroupIdx)] : [card]
+    })
+
     return (
       <>
-        <LightGroup
-          key={groupIdx}
-          currentTimestamp={currentTimestamp}
-          lightUiState={groupUiStates[groupIdx]}
-          setLightUiState={(lightUiState: LightUiState) => updateGroupUiState(lightUiState, groupIdx)}
-          onDelete={() => onDeleteGroup(groupIdx)}
-          onFullscreen={() => enterFullscreenMode(lightIndices)}
-          onShare={() => enterShareMode(lightIndices)}
-          onAdd={() => onAddToGroup(groupIdx)}
-          onGroup={[() => onGroupUp(groupIdx), () => onGroupDown(groupIdx)]}
-          onUngroup={(splitIdx) => onUngroup(groupIdx, splitIdx)}
-          lightRecords={lightIndices.map(lightIdx => lightRecords[lightIdx])}
-        />
+        { groupCards }
         { groupIdx < grouping.length - 1 && joinButton(groupIdx) }
       </>
     )
@@ -279,7 +294,9 @@ export default function IntersectionComponent({
 
       <Typography variant='h6'>Traffic Lights</Typography>
   
-      {intersectionGroups}
+      <Stack spacing={0}>
+        {intersectionGroups}
+      </Stack>
 
       <Fullscreen
         enabled={uiMode == 'fullscreen'}
@@ -301,13 +318,13 @@ export default function IntersectionComponent({
           currentTimestamp={currentTimestamp}
           light={lights[expanded]}
           lightConfig={lightConfigs[expanded]}
-          lightUiState={groupUiStates[groups[expanded]]}
+          lightUiState={lightUiStates[expanded]}
           onClose={() => setExpanded(null)}
           onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, expanded)}
           onFullscreen={() => enterFullscreenMode([expanded])}
           onDelete={() => onDeleteOne(expanded)}
           onShare={() => enterShareMode([expanded])}
-          setLightUiState={(lightUiState: LightUiState) => updateGroupUiState(lightUiState, groups[expanded])}
+          setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, expanded)}
         />
       }
 
