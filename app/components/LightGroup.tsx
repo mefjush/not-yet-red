@@ -6,7 +6,7 @@ import { Card, CardActions, CardContent, Box, Menu, MenuItem, ListItemIcon, List
 import Grid from '@mui/material/Grid2'
 import { StatePicker } from './PhaseControls'
 import LightHead from './LightHead'
-import React from 'react'
+import React, { ReactElement } from 'react'
 import Timeline from './Timeline'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
@@ -17,6 +17,10 @@ import LightUiState from '../domain/LightUiState'
 import MergeIcon from '@mui/icons-material/Merge'
 import CallSplitIcon from '@mui/icons-material/CallSplit'
 import ExpandIcon from '@mui/icons-material/Expand'
+import { group } from 'console'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import CloseIcon from '@mui/icons-material/Close'
 
 export type LightRecord = {
   light: TrafficLight
@@ -43,8 +47,8 @@ export default function LightGroup({
   onDelete: () => void, 
   onFullscreen: () => void, 
   onShare: () => void,
-  onGroup: () => void,
-  onUngroup: () => void,
+  onGroup: [() => void, () => void]
+  onUngroup: (splitIdx: number) => void,
   onAdd: () => void,
   lightRecords: LightRecord[]
 }) {
@@ -102,7 +106,7 @@ export default function LightGroup({
           selectedState={lightUiState.selectedState}
         />
       </Box>
-
+{/* 
       <IconButton
         style={{ marginLeft: 'auto' }}
         aria-label="more"
@@ -126,7 +130,7 @@ export default function LightGroup({
         <MenuItem 
           onClick={() => {
             onMenuClose()
-            onGroup()
+            onGroup[0]()
           }}
         >
           <ListItemIcon>
@@ -158,34 +162,66 @@ export default function LightGroup({
           </ListItemIcon>
           <ListItemText>Delete</ListItemText>
         </MenuItem>
-      </Menu>
+      </Menu> */}
     </CardActions>
   )
 
+  const paddingLeft = 10
+  const borderLeft = '5px solid rgb(146, 146, 146)'
+
+  const cards: ReactElement[] = lightRecords.map((_, idx) =>
+    <Card>
+      <CardActions>
+        <IconButton style={{ marginLeft: 'auto' }} onClick={onAdd}>
+          <AddIcon/>
+        </IconButton>
+      </CardActions>
+
+      <Grid container justifyContent="center" alignItems="center">
+        <Stack direction='row' alignItems='flex-end'>
+          {lightHeads[idx]}
+        </Stack>
+      </Grid>
+
+      <CardContent>
+        <Stack direction='column'>
+          {timelines[idx]}
+        </Stack>
+      </CardContent>
+
+      {bottomActions}
+
+    </Card>
+  )
+
+
+  const groupBtnStyle = { padding: 0, margin: '0 0 0 -16px' }
+
+  const splitButton = (idx: number): ReactElement => (
+    <Box style={{ marginLeft: '-32px' }}>
+      <IconButton onClick={() => onUngroup(idx)}>
+        <CloseIcon/>
+      </IconButton>
+    </Box>
+  )
+  
+  const items: ReactElement[] = cards.flatMap((card, idx) => [card, splitButton(idx)]).slice(0, -1)
+
   return (
     <>
-      <Card>
-        <CardActions>
-          <IconButton style={{ marginLeft: 'auto' }} onClick={onAdd}>
-            <AddIcon/>
-          </IconButton>
-        </CardActions>
-
-        <Grid container justifyContent="center" alignItems="center">
-          <Stack direction='row' alignItems='flex-end'>
-            {lightHeads}
-          </Stack>
-        </Grid>
-
-        <CardContent>
-          <Stack direction='column'>
-            {timelines}
-          </Stack>
-        </CardContent>
-
-        {bottomActions}
-
-      </Card>
+      <Box style={groupBtnStyle}>
+        <IconButton onClick={onGroup[0]}>
+          <ArrowDropUpIcon/>
+        </IconButton>
+      </Box>
+      <Stack sx={{ marginTop: 0, padding: `0 0 0 ${paddingLeft}px`, borderLeft: borderLeft }} spacing={2}>
+        {items}
+      </Stack>
+      <Box style={groupBtnStyle}>
+        <IconButton onClick={onGroup[1]}>
+          <ArrowDropDownIcon/>
+        </IconButton>
+      </Box>
     </>
   )
 }

@@ -26,6 +26,7 @@ export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 const historyPush: Options = { history: 'push' }
 
 // TODOs
+// fix the grouping look and feel, split the selected color once again
 // delete one light
 // Offline usage
 // Manual time correction in cookie / local storage
@@ -150,15 +151,22 @@ export default function IntersectionComponent({
     return newGroups
   }
 
-  const onUngroup = (groupIdx: number) => {
-    const removedGroup = grouping[groupIdx]
-    const newGrouping = grouping.flatMap((group, idx) => idx == groupIdx ? removedGroup.map(x => [x]) : [group])
+  const onUngroup = (groupIdx: number, splitIdx: number) => {
+    const groupLeft = grouping[groupIdx].filter((x, idx) => idx <= splitIdx)
+    const groupRight = grouping[groupIdx].filter((x, idx) => idx > splitIdx)
+    const newGrouping = grouping.flatMap((group, idx) => idx == groupIdx ? [groupLeft, groupRight] : [group])
     setGroups(groupingToGroups(newGrouping))
   }
 
   const onGroupUp = (groupIdx: number) => {
     const initAcc: number[][] = []
     const newGrouping = grouping.reduce((acc, group, idx) => idx != groupIdx ? [...acc, group] : [...acc.slice(0, -1), [...acc[acc.length - 1], ...group]], initAcc)
+    setGroups(groupingToGroups(newGrouping))
+  }
+
+  const onGroupDown = (groupIdx: number) => {
+    const initAcc: number[][] = []
+    const newGrouping = grouping.reduce((acc, group, idx) => idx != groupIdx + 1 ? [...acc, group] : [...acc.slice(0, -1), [...acc[acc.length - 1], ...group]], initAcc)
     setGroups(groupingToGroups(newGrouping))
   }
 
@@ -222,8 +230,8 @@ export default function IntersectionComponent({
         onFullscreen={() => enterFullscreenMode(lightIndices)}
         onShare={() => enterShareMode(lightIndices)}
         onAdd={() => onAddToGroup(groupIdx)}
-        onGroup={() => onGroupUp(groupIdx)}
-        onUngroup={() => onUngroup(groupIdx)}
+        onGroup={[() => onGroupUp(groupIdx), () => onGroupDown(groupIdx)]}
+        onUngroup={(splitIdx) => onUngroup(groupIdx, splitIdx)}
         lightRecords={lightIndices.map(lightIdx => lightRecords[lightIdx])}
       />
     )
