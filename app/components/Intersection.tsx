@@ -137,6 +137,7 @@ export default function IntersectionComponent({
 
   const onAddToGroup = (groupIdx: number) => {
     setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
+    setLightUiStates([...lightUiStates, new LightUiState(DEFAULT_LIGHT_SETTINGS.phases[0].state)])
     setUiMode('none')
     setExpanded(lightSettings.length)
     setGroups([...groups, groupIdx])
