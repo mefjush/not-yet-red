@@ -2,7 +2,7 @@
 
 import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings } from '../domain/LightConfig'
-import { Card, CardActions, CardContent, Box, Menu, MenuItem, ListItemIcon, ListItemText, Stack, IconButton } from '@mui/material'
+import { Card, CardActions, CardContent, Box, Menu, MenuItem, ListItemIcon, ListItemText, Stack, IconButton, Button } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { StatePicker } from './PhaseControls'
 import LightHead from './LightHead'
@@ -167,7 +167,7 @@ export default function LightGroup({
   )
 
   const paddingLeft = 10
-  const borderLeft = '5px solid rgb(146, 146, 146)'
+  const borderLeft = '5px solid'
 
   const cards: ReactElement[] = lightRecords.map((_, idx) =>
     <Card>
@@ -194,14 +194,11 @@ export default function LightGroup({
     </Card>
   )
 
-
-  const groupBtnStyle = { padding: 0, margin: '0 0 0 -16px' }
-
   const splitButton = (idx: number): ReactElement => (
-    <Box style={{ marginLeft: '-32px' }}>
-      <IconButton onClick={() => onUngroup(idx)}>
-        <CloseIcon/>
-      </IconButton>
+    <Box>
+      <Button onClick={() => onUngroup(idx)} startIcon={<ExpandIcon />}>
+        Split
+      </Button>
     </Box>
   )
   
@@ -209,19 +206,9 @@ export default function LightGroup({
 
   return (
     <>
-      <Box style={groupBtnStyle}>
-        <IconButton onClick={onGroup[0]}>
-          <ArrowDropUpIcon/>
-        </IconButton>
-      </Box>
-      <Stack sx={{ marginTop: 0, padding: `0 0 0 ${paddingLeft}px`, borderLeft: borderLeft }} spacing={2}>
+      <Stack sx={{ marginTop: 0, padding: `0 0 0 ${paddingLeft}px`, borderLeft: borderLeft, borderLeftColor: 'primary.main' }} spacing={2}>
         {items}
       </Stack>
-      <Box style={groupBtnStyle}>
-        <IconButton onClick={onGroup[1]}>
-          <ArrowDropDownIcon/>
-        </IconButton>
-      </Box>
     </>
   )
 }

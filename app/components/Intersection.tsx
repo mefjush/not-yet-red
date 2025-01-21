@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactElement } from 'react'
 import Clock from '../domain/Clock'
 import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/LightConfig'
 import Failure from '../domain/Failure'
-import { Fab, Stack, Typography } from '@mui/material'
+import { Box, Button, Fab, IconButton, Stack, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { LightSettingsParser, IntersectionSettingsParser } from '../url'
 import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
@@ -19,6 +19,7 @@ import LightUiState from '../domain/LightUiState'
 import { createParser, Options, parseAsArrayOf, parseAsInteger, useQueryState } from 'nuqs'
 import IntersectionSettingsPanel from './IntersectionSettingsPanel'
 import LightGroup, { LightRecord } from './LightGroup'
+import CompressIcon from '@mui/icons-material/Compress'
 
 export type UiMode = 'none' | 'share' | 'fullscreen'
 export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
@@ -219,21 +220,36 @@ export default function IntersectionComponent({
     }
   })
 
+  const joinButton = (groupIdx: number): ReactElement => (
+    <Box sx={{ px: 2 }}>
+      {/* <IconButton >
+        <CompressIcon/>
+        Join
+      </IconButton> */}
+      <Button onClick={() => onGroupDown(groupIdx)} startIcon={<CompressIcon />}>
+        Group
+      </Button>
+    </Box>
+  )
+
   const intersectionGroups = grouping.map((lightIndices, groupIdx) => {
     return (
-      <LightGroup
-        key={groupIdx}
-        currentTimestamp={currentTimestamp}
-        lightUiState={groupUiStates[groupIdx]}
-        setLightUiState={(lightUiState: LightUiState) => updateGroupUiState(lightUiState, groupIdx)}
-        onDelete={() => onDeleteGroup(groupIdx)}
-        onFullscreen={() => enterFullscreenMode(lightIndices)}
-        onShare={() => enterShareMode(lightIndices)}
-        onAdd={() => onAddToGroup(groupIdx)}
-        onGroup={[() => onGroupUp(groupIdx), () => onGroupDown(groupIdx)]}
-        onUngroup={(splitIdx) => onUngroup(groupIdx, splitIdx)}
-        lightRecords={lightIndices.map(lightIdx => lightRecords[lightIdx])}
-      />
+      <>
+        <LightGroup
+          key={groupIdx}
+          currentTimestamp={currentTimestamp}
+          lightUiState={groupUiStates[groupIdx]}
+          setLightUiState={(lightUiState: LightUiState) => updateGroupUiState(lightUiState, groupIdx)}
+          onDelete={() => onDeleteGroup(groupIdx)}
+          onFullscreen={() => enterFullscreenMode(lightIndices)}
+          onShare={() => enterShareMode(lightIndices)}
+          onAdd={() => onAddToGroup(groupIdx)}
+          onGroup={[() => onGroupUp(groupIdx), () => onGroupDown(groupIdx)]}
+          onUngroup={(splitIdx) => onUngroup(groupIdx, splitIdx)}
+          lightRecords={lightIndices.map(lightIdx => lightRecords[lightIdx])}
+        />
+        { groupIdx < grouping.length - 1 && joinButton(groupIdx) }
+      </>
     )
   })
 
