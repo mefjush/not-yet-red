@@ -210,12 +210,8 @@ export default function PhaseControls({
   })
 
   return (
-    <StatePicker
-      states={lightConfig.phases.map(p => p.state)} 
-      selectedState={selectedState}
-      setSelectedState={setSelectedState}
-    >
+    <Stack direction='column' spacing={1}>
       {phaseControls}
-    </StatePicker>
+    </Stack>
   )
 }

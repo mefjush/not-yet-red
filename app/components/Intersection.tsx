@@ -5,7 +5,7 @@ import Clock from '../domain/Clock'
 import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/LightConfig'
 import Failure from '../domain/Failure'
-import { Box, Button, Fab, Stack, Typography } from '@mui/material'
+import { Box, Button, Fab, Stack, Typography, useTheme } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { LightSettingsParser, IntersectionSettingsParser } from '../url'
 import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
@@ -35,6 +35,8 @@ const historyPush: Options = { history: 'push' }
 // blink & beep
 // fix the timeline range slider on edge (when expanding)
 // breadcrumbs
+// about page
+// footer description
 
 export default function IntersectionComponent({ 
   uiMode, 
@@ -71,6 +73,8 @@ export default function IntersectionComponent({
 
   const [lightUiStates, setLightUiStates] = useState(lightSettings.map((ls) => new LightUiState(ls.phases[0].state)))
 
+  const theme = useTheme()
+
   const failure = new Failure(intersectionSettings.failure.duration, intersectionSettings.failure.probability)
 
   const hasFailed = failure.currentState(currentTimestamp)
@@ -82,8 +86,9 @@ export default function IntersectionComponent({
   const lightRecords: LightRecord[] = lightConfigs.map((_, index) => ({ 
     light: lights[index],
     lightConfig: lightConfigs[index],
+    expanded: expanded == index,
     onLightSettingsChange: (settings: LightSettings) => updateLightSettings(settings, index),
-    setExpanded: () => setExpanded(index)
+    setExpanded: (expanded: boolean) => setExpanded(expanded ? index : null)
   }))
 
   const clock = new Clock(timeCorrection)
@@ -196,10 +201,10 @@ export default function IntersectionComponent({
     }
   })
 
-  const groupBoxStyle = { borderLeft: '5px solid', borderLeftColor: 'primary.main', pl: 2, py: 1 }
+  const groupBoxStyle = { borderLeftStyle: 'solid', borderWidth: theme.spacing(1), ml: -2, pl: 1, py: 1 }
   
   const joinButton = (groupIdx: number): ReactElement => (
-    <Box sx={{...groupBoxStyle, borderLeftColor: 'transparent'}}>
+    <Box sx={{...groupBoxStyle, borderColor: 'transparent'}}>
       <Button onClick={() => onGroupDown(groupIdx)} startIcon={<CompressIcon />}>
         Group
       </Button>
@@ -207,7 +212,7 @@ export default function IntersectionComponent({
   )
 
   const splitButton = (groupIdx: number, splitIdx: number): ReactElement => (
-    <Box sx={groupBoxStyle}>
+    <Box sx={{...groupBoxStyle, borderColor: 'primary.main'}}>
       <Button onClick={() => onUngroup(groupIdx, splitIdx)} startIcon={<ExpandIcon />}>
         Split
       </Button>
@@ -218,7 +223,7 @@ export default function IntersectionComponent({
 
     const groupCards = lightIndices.flatMap((lightIdx, inGroupIdx) => {
       const card = (
-        <Box sx={{...groupBoxStyle, borderLeftColor: lightIndices.length > 1 ? 'primary.main' : 'transparent'}}>
+        <Box sx={{...groupBoxStyle, borderColor: lightIndices.length > 1 ? 'primary.main' : 'transparent'}}>
           <LightCard
             currentTimestamp={currentTimestamp}
             lightUiState={lightUiStates[lightIdx]}
@@ -283,7 +288,7 @@ export default function IntersectionComponent({
         onClose={exitUiMode}
       />
 
-      {expanded != null &&
+      {/* {expanded != null &&
         <LightDetails
           open={expanded != null}
           currentTimestamp={currentTimestamp}
@@ -297,7 +302,7 @@ export default function IntersectionComponent({
           onShare={() => enterShareMode([expanded])}
           setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, expanded)}
         />
-      }
+      } */}
 
       <Fab 
         color="primary" 

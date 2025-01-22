@@ -2,19 +2,26 @@
 
 import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings } from '../domain/LightConfig'
-import { Card, CardActions, CardContent, Box, Stack, IconButton } from '@mui/material'
+import { Card, CardActions, CardContent, Box, Stack, IconButton, Typography, Collapse, Button } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import Grid from '@mui/material/Grid2'
-import { StatePicker } from './PhaseControls'
+import PhaseControls, { StatePicker } from './PhaseControls'
 import LightHead from './LightHead'
 import React from 'react'
 import Timeline from './Timeline'
 import LightUiState from '../domain/LightUiState'
+import PresetMenu from './PresetMenu'
+import EditIcon from '@mui/icons-material/Edit'
+import CloseIcon from '@mui/icons-material/Close'
+
 
 export type LightRecord = {
   light: TrafficLight
   lightConfig: LightConfig
-  onLightSettingsChange: (lightSettings: LightSettings) => void, 
-  setExpanded: () => void, 
+  expanded: boolean,
+  onLightSettingsChange: (lightSettings: LightSettings) => void,
+  setExpanded: (expanded: boolean) => void, 
 }
 
 export default function LightCard({ 
@@ -31,7 +38,9 @@ export default function LightCard({
   lightRecord: LightRecord
 }) {
 
-  const { light, lightConfig, onLightSettingsChange, setExpanded } = lightRecord
+  const { light, lightConfig, expanded, onLightSettingsChange, setExpanded } = lightRecord
+
+  // const [expandedInternal, setExpandedInternal] = React.useState(false)
 
   const head = (
     <LightHead 
@@ -66,7 +75,7 @@ export default function LightCard({
 
       <Grid container justifyContent="center" alignItems="center">
         <Stack direction='row' alignItems='flex-end'>
-          <IconButton onClick={setExpanded} sx={sx}>
+          <IconButton onClick={() => setExpanded(!expanded)} sx={sx}>
             {head}
           </IconButton>
         </Stack>
@@ -78,16 +87,46 @@ export default function LightCard({
         </Stack>
       </CardContent>
 
-      <CardActions>
-        <Box sx={{ ml: 1 }}>
+      <CardActions sx={{ p: 0 }}>
+        <Box sx={{ mx: 2 }}>
           <StatePicker
             states={lightRecord.lightConfig.phases.map(phase => phase.state)}
             setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
             selectedState={lightUiState.selectedState}
           />
+          
         </Box>
+        <Button fullWidth onClick={() => setExpanded(!expanded)} endIcon={expanded ? <CloseIcon/> : <EditIcon/>}></Button>
       </CardActions>
 
+      <Collapse in={expanded}>
+        <CardContent>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6, lg: 6 }}>
+              <Typography gutterBottom>
+                Phases
+              </Typography>
+              <PhaseControls
+                lightConfig={lightRecord.lightConfig}
+                setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
+                selectedState={lightUiState.selectedState}
+                onLightSettingsChange={onLightSettingsChange}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6, lg: 6 }}>
+              <Typography gutterBottom>
+                Preset
+              </Typography>
+              <PresetMenu
+                lightConfig={lightRecord.lightConfig}
+                lightUiState={lightUiState}
+                onLightSettingsChange={onLightSettingsChange}
+                setLightUiState={setLightUiState}
+              />
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Collapse>
     </Card>
   )
 
