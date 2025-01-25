@@ -2,19 +2,17 @@
 
 import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings } from '../domain/LightConfig'
-import { Card, CardActions, CardContent, Box, Stack, IconButton, Typography, Collapse, Button } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import { Card, CardActions, CardContent, Box, Stack, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, CardActionArea } from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import PhaseControls, { StatePicker } from './PhaseControls'
+import { StatePicker } from './PhaseControls'
 import LightHead from './LightHead'
-import React from 'react'
+import React, {  } from 'react'
 import Timeline from './Timeline'
 import LightUiState from '../domain/LightUiState'
-import PresetMenu from './PresetMenu'
-import EditIcon from '@mui/icons-material/Edit'
-import CloseIcon from '@mui/icons-material/Close'
-
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import DeleteIcon from '@mui/icons-material/Delete'
+import MoveUpIcon from '@mui/icons-material/MoveUp'
+import MoveDownIcon from '@mui/icons-material/MoveDown'
 
 export type LightRecord = {
   light: TrafficLight
@@ -29,18 +27,30 @@ export default function LightCard({
   lightUiState,
   setLightUiState,
   onDelete,
-  lightRecord
+  lightRecord,
+  onMove
 }: { 
   currentTimestamp: number,
   lightUiState: LightUiState
   setLightUiState: (lightUiState: LightUiState) => void,
   onDelete: () => void, 
   lightRecord: LightRecord
+  onMove: (amount: number) => void
 }) {
 
   const { light, lightConfig, expanded, onLightSettingsChange, setExpanded } = lightRecord
 
-  // const [expandedInternal, setExpandedInternal] = React.useState(false)
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null)
+
+  const menuOpen = Boolean(menuAnchorEl)
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setMenuAnchorEl(event.currentTarget);
+  }
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  }
 
   const head = (
     <LightHead 
@@ -51,13 +61,6 @@ export default function LightCard({
       maxWidth={ 1000 } 
     />
   )
-
-  const sx = {
-    borderRadius: 0,
-    '.MuiTouchRipple-ripple .MuiTouchRipple-child': {
-      borderRadius: 0
-    },
-  }
 
   const timeline = (
     <Timeline
@@ -71,15 +74,11 @@ export default function LightCard({
 
   return (
     <Card>
-      <CardActions></CardActions>
-
-      <Grid container justifyContent="center" alignItems="center">
-        <Stack direction='row' alignItems='flex-end'>
-          <IconButton onClick={() => setExpanded(!expanded)} sx={sx}>
-            {head}
-          </IconButton>
-        </Stack>
-      </Grid>
+      <CardActionArea onClick={() => setExpanded(!expanded)} sx={{ py: 1 }}>
+        <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems='flex-start'>
+          {head}
+        </Grid>
+      </CardActionArea>
 
       <CardContent>
         <Stack direction='column'>
@@ -87,47 +86,64 @@ export default function LightCard({
         </Stack>
       </CardContent>
 
-      <CardActions sx={{ p: 0 }}>
-        <Box sx={{ mx: 2 }}>
+      <CardActions disableSpacing>
+        <Box sx={{ ml: 1 }}>
           <StatePicker
             states={lightRecord.lightConfig.phases.map(phase => phase.state)}
             setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
             selectedState={lightUiState.selectedState}
           />
-          
         </Box>
-        <Button fullWidth onClick={() => setExpanded(!expanded)} endIcon={expanded ? <CloseIcon/> : <EditIcon/>}></Button>
-      </CardActions>
+        <IconButton sx={{ ml: 'auto' }} onClick={handleMenuClick}>
+          <MoreVertIcon/>
+        </IconButton>
+        <Menu
+          id="basic-menu"
+          anchorEl={menuAnchorEl}
+          open={menuOpen}
+          onClose={handleMenuClose}
+          MenuListProps={{
+            'aria-labelledby': 'basic-button',
+          }}
+        >
+          <MenuItem 
+            onClick={() => {
+              handleMenuClose()
+              onMove(-1)
+            }
+          }>
+            <ListItemIcon>
+              <MoveUpIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Move up</ListItemText>
+          </MenuItem>
 
-      <Collapse in={expanded}>
-        <CardContent>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 6, lg: 6 }}>
-              <Typography gutterBottom>
-                Phases
-              </Typography>
-              <PhaseControls
-                lightConfig={lightRecord.lightConfig}
-                setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
-                selectedState={lightUiState.selectedState}
-                onLightSettingsChange={onLightSettingsChange}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6, lg: 6 }}>
-              <Typography gutterBottom>
-                Preset
-              </Typography>
-              <PresetMenu
-                lightConfig={lightRecord.lightConfig}
-                lightUiState={lightUiState}
-                onLightSettingsChange={onLightSettingsChange}
-                setLightUiState={setLightUiState}
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Collapse>
+          <MenuItem 
+            onClick={() => {
+              handleMenuClose()
+              onMove(1)
+            }
+          }>
+            <ListItemIcon>
+              <MoveDownIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Move down</ListItemText>
+          </MenuItem>
+
+          <MenuItem 
+            onClick={() => {
+              handleMenuClose()
+              onDelete()
+            }
+          }>
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Delete</ListItemText>
+          </MenuItem>
+
+        </Menu>
+      </CardActions>
     </Card>
   )
-
 }

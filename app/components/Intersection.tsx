@@ -37,6 +37,7 @@ const historyPush: Options = { history: 'push' }
 // breadcrumbs
 // about page
 // footer description
+// android app
 
 export default function IntersectionComponent({ 
   uiMode, 
@@ -162,6 +163,19 @@ export default function IntersectionComponent({
     setGrouping(newGrouping)
   }
 
+  const onMove = (lightIdx: number, amount: number) => {
+    const moveArr = (arr: any[], lightIdx: number, amount: number) => {
+      if (lightIdx + amount < 0 || lightIdx + amount >= arr.length) {
+        return arr
+      }
+      return arr
+        .filter((_, i) => i != lightIdx)
+        .toSpliced(lightIdx + amount, 0, arr[lightIdx])
+    }
+    setLightSettings(moveArr(lightSettings, lightIdx, amount))
+    setLightUiStates(moveArr(lightUiStates, lightIdx, amount))
+  }
+
   const onAdd = () => {
     onAddToGroup(grouping.length)
   }
@@ -230,6 +244,7 @@ export default function IntersectionComponent({
             setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, lightIdx)}
             onDelete={() => onDeleteOne(lightIdx)}
             lightRecord={lightRecords[lightIdx]}
+            onMove={(amount) => onMove(lightIdx, amount)}
           />
         </Box>
       )
@@ -288,7 +303,7 @@ export default function IntersectionComponent({
         onClose={exitUiMode}
       />
 
-      {/* {expanded != null &&
+      {expanded != null &&
         <LightDetails
           open={expanded != null}
           currentTimestamp={currentTimestamp}
@@ -301,8 +316,9 @@ export default function IntersectionComponent({
           onDelete={() => onDeleteOne(expanded)}
           onShare={() => enterShareMode([expanded])}
           setLightUiState={(lightUiState: LightUiState) => updateLightUiState(lightUiState, expanded)}
+          lightRecord={lightRecords[expanded]}
         />
-      } */}
+      }
 
       <Fab 
         color="primary" 

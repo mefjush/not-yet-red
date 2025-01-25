@@ -1,21 +1,14 @@
-import { IconButton, Dialog, Button, AppBar, Toolbar, Typography, Stack, Select, MenuItem, Box, Breadcrumbs, Link } from '@mui/material'
-import DeleteIcon from '@mui/icons-material/Delete'
-import { createElement } from 'react'
+import { IconButton, Dialog, Button, AppBar, Toolbar, Typography, Stack, Box } from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import ShareIcon from '@mui/icons-material/Share'
-import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import Timeline from './Timeline'
 import LightConfig, { LightSettings } from '../domain/LightConfig'
 import LightHead from './LightHead'
 import TrafficLight from '../domain/TrafficLight'
 import TrafficIcon from '@mui/icons-material/Traffic'
-import CircleIcon from '@mui/icons-material/Circle'
-import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
-import NavigateNextIcon from '@mui/icons-material/NavigateNext'
-import HomeIcon from '@mui/icons-material/Home'
-import { PresetId, PRESETS, SYMBOLS, SymbolId } from '../domain/Preset'
 import LightUiState from '../domain/LightUiState'
-import PhaseControls from './PhaseControls'
+import PhaseControls, { StatePicker } from './PhaseControls'
+import PresetMenu from './PresetMenu'
+import { LightRecord } from './LightCard'
 
 export default function LightDetails({ 
   open, 
@@ -28,7 +21,8 @@ export default function LightDetails({
   onShare, 
   onDelete,
   onLightSettingsChange, 
-  setLightUiState 
+  setLightUiState,
+  lightRecord
 }: { 
   open: boolean, 
   lightConfig: LightConfig, 
@@ -40,7 +34,8 @@ export default function LightDetails({
   onShare: () => void, 
   onDelete: () => void,
   onLightSettingsChange: (lightSettings: LightSettings) => void, 
-  setLightUiState: (lightUiState: LightUiState) => void 
+  setLightUiState: (lightUiState: LightUiState) => void,
+  lightRecord: LightRecord
 }) {
 
   const selectedState = lightUiState.selectedState
@@ -59,62 +54,6 @@ export default function LightDetails({
     />
   )
 
-  const buttons = (
-    <Stack direction='row'>
-      {/* <IconButton 
-        size='large' 
-        aria-label="share" 
-        onClick={onShare}
-      >
-        <ShareIcon />
-      </IconButton>
-
-      <IconButton 
-        size='large' 
-        aria-label="fullscreen" 
-        onClick={onFullscreen} 
-        edge='end'
-      >
-        <FullscreenIcon />
-      </IconButton> */}
-
-      <IconButton 
-        size='large' 
-        aria-label="delete" 
-        onClick={onDelete} 
-        edge='end'
-      >
-        <DeleteIcon />
-      </IconButton>
-    </Stack>
-  )
-
-  const generatePresetMenuItems = () => {
-    return Object.values(PRESETS).map(preset => {
-      const icon = preset.symbolId != SymbolId.NONE ? SYMBOLS[preset.symbolId].icon : CircleIcon
-      const iconElement = createElement(icon, {})
-      return (
-        <MenuItem 
-          key={preset.presetId} 
-          value={preset.presetId}
-        >
-          <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
-            {iconElement}
-            <span>{preset.name}</span>
-          </Stack>
-        </MenuItem>
-      )
-    })
-  }
-
-  const changePreset = (presetId: PresetId) => {
-    const supportedStates = PRESETS[presetId].states
-    if (!supportedStates.includes(selectedState)) {
-      setLightUiState(lightUiState.withSelectedState(supportedStates[0]))
-    }
-    onLightSettingsChange(lightConfig.withPreset(presetId))
-  }
-
   return (
     <Dialog
       fullScreen
@@ -123,24 +62,6 @@ export default function LightDetails({
     >
       <AppBar className="mui-fixed">
         <Toolbar>
-          {/* <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" sx={{ mx: -1 }} />} style={{ color: 'white', fontSize: '1.25rem' }} sx={{ flex: 1 }}>
-            <IconButton 
-              size="large" 
-              edge="start" 
-              color='inherit'
-              href='/'
-            >
-              <HomeIcon />
-            </IconButton>
-            
-            <IconButton 
-              size="large" 
-              onClick={handleClose}
-              color='inherit'
-            >
-              <GridGoldenratioIcon />
-            </IconButton> */}
-
           <Stack direction='row' sx={{ flex: 1 }}>
             <IconButton
               edge="start"
@@ -153,7 +74,6 @@ export default function LightDetails({
               Traffic Light
             </Typography>
           </Stack>
-          {/* </Breadcrumbs> */}
 
           <Button color='inherit' onClick={handleClose} style={{ marginRight: '-15px' }}>Ok</Button>
         </Toolbar>
@@ -167,22 +87,16 @@ export default function LightDetails({
             <Typography gutterBottom>
               Preset
             </Typography>
-            <Select 
-              fullWidth 
-              size='small' 
-              value={lightConfig.preset.presetId} 
-              onChange={event => changePreset(event.target.value as PresetId)}
-            >
-              { generatePresetMenuItems() }
-            </Select>
+            <PresetMenu
+              lightConfig={lightRecord.lightConfig}
+              lightUiState={lightUiState}
+              onLightSettingsChange={onLightSettingsChange}
+              setLightUiState={setLightUiState}
+            />
           </Grid>
 
           <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems='flex-start'>
-            <Box sx={{ visibility: 'hidden' }}>{buttons}</Box>
-            <Box sx={{ flex: 1 }}></Box>
             {lightHead}
-            <Box sx={{ flex: 1 }}></Box>
-            {buttons}
           </Grid>
 
           <Grid size={{ xs: 12 }}>
@@ -192,6 +106,14 @@ export default function LightDetails({
               onLightSettingsChange={onLightSettingsChange} 
               selectedState={selectedState}
               editable={true}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <StatePicker
+              states={lightRecord.lightConfig.phases.map(phase => phase.state)}
+              setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
+              selectedState={lightUiState.selectedState}
             />
           </Grid>
 
