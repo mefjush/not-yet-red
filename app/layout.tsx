@@ -3,7 +3,7 @@ import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
-import { Box, IconButton, Stack } from '@mui/material'
+import { Box, Button, IconButton, Stack } from '@mui/material'
 import type { Metadata, Viewport } from 'next'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import TrafficIcon from '@mui/icons-material/Traffic'
@@ -31,7 +31,7 @@ export default function RootLayout({
       <body>
         <NuqsAdapter>
           {children}
-          <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+          <Stack spacing={1} sx={{ pt: 1, pb: 2, m: 1 }}>
             <Box
               display="flex"
               justifyContent="center"
@@ -44,6 +44,15 @@ export default function RootLayout({
               <IconButton size="large" edge="end" href="https://github.com/mefjush/mefjush.github.io">
                 <GitHubIcon />
               </IconButton>
+            </Box>
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Button href="/about">About</Button>
+              <Button href="/ideas">Ideas</Button>
+              <Button href="/intersection">Make your own</Button>
             </Box>
           </Stack>
         </NuqsAdapter>

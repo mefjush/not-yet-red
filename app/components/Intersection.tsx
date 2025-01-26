@@ -29,13 +29,15 @@ export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 const historyPush: Options = { history: 'push' }
 
 // TODOs
+// add a menu
+// better ideas and about page
+// light pattern img
 // preview mode (show groups in rows)
 // Offline usage
 // Manual time correction in cookie / local storage
 // blink & beep
 // fix the timeline range slider on edge (when expanding)
 // breadcrumbs
-// about page
 // footer description
 // android app
 

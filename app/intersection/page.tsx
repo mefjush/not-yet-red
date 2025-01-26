@@ -6,8 +6,6 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import IntersectionComponent, { UiMode } from '../components/Intersection'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
-import HomeIcon from '@mui/icons-material/Home'
-import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import { Suspense, useState } from 'react'
 import { orange, green, yellow, red, grey } from '@mui/material/colors'
 
@@ -105,28 +103,6 @@ function Content() {
           Intersection
         </Typography>
       </Stack>
-      {/* <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" sx={{ mx: -1 }} />} style={{ color: 'white', fontSize: '1.25rem' }} sx={{ flex: 1 }}>
-        <IconButton 
-          size="large" 
-          edge="start" 
-          color='inherit'
-          href='/'
-        >
-          <HomeIcon />
-        </IconButton>
-
-        <Stack direction='row'>
-          <IconButton 
-            size="large" 
-            sx={{ color: 'white' }} 
-          >
-            <GridGoldenratioIcon />
-          </IconButton>
-          <Typography sx={{ display: 'flex', alignItems: 'center' }} variant="h6" color='inherit'>
-            Intersection
-          </Typography>
-        </Stack>
-      </Breadcrumbs> */}
       
       <Box sx={{ flexGrow: 1 }}></Box>
 
