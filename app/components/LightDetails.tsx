@@ -9,6 +9,8 @@ import LightUiState from '../domain/LightUiState'
 import PhaseControls, { StatePicker } from './PhaseControls'
 import PresetMenu from './PresetMenu'
 import { LightRecord } from './LightCard'
+import { useRouter } from 'next/navigation'
+import BackButton from './BackButton'
 
 export default function LightDetails({ 
   open, 
@@ -38,6 +40,8 @@ export default function LightDetails({
   lightRecord: LightRecord
 }) {
 
+  const router = useRouter()
+
   const selectedState = lightUiState.selectedState
 
   const handleClose = () => {
@@ -63,13 +67,7 @@ export default function LightDetails({
       <AppBar className="mui-fixed">
         <Toolbar>
           <Stack direction='row' sx={{ flex: 1 }}>
-            <IconButton
-              edge="start"
-              size="large" 
-              sx={{ color: 'white' }} 
-            >
-              <TrafficIcon />
-            </IconButton>
+            <BackButton />
             <Typography sx={{ display: 'flex', alignItems: 'center' }} variant="h6" color='inherit'>
               Traffic Light
             </Typography>

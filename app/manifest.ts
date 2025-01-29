@@ -5,8 +5,8 @@ export const dynamic = "force-static"
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: 'traffic-lights-by-mefju',
-    name: 'Traffic Lights',
-    short_name: 'Traffic Lights',
+    name: 'Not Yet Red',
+    short_name: 'Not Yet Red',
     description: 'Build your own intersection using smartphones as traffic lights.',
     start_url: '/',
     display: 'standalone',

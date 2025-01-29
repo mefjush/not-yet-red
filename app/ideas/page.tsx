@@ -6,8 +6,8 @@ import LightConfig, { DEFAULT_LIGHT_SETTINGS, LightSettings, Phase } from '../do
 import { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
 import { LightSettingsParser } from '../url'
 import { PresetId, PRESETS } from '../domain/Preset'
-import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates'
 import { State } from '../domain/State'
+import BackButton from '../components/BackButton'
 
 const HALF_OFFSETTED = new LightConfig(DEFAULT_INTERSECTION_SETTINGS, DEFAULT_LIGHT_SETTINGS).withOffset(DEFAULT_INTERSECTION_SETTINGS.cycleLength / 2)
 
@@ -52,13 +52,7 @@ function Content() {
   const toolbarElements = (
     <>
       <Stack direction='row' display={'flex'} sx={{ alignItems: "center" }}>
-        <IconButton 
-          size="large" 
-          edge="start" 
-          color='inherit' 
-        >
-          <TipsAndUpdatesIcon />
-        </IconButton>
+        <BackButton />
         <Typography variant="h6" component="div" noWrap>
           Ideas
         </Typography>
