@@ -70,16 +70,22 @@ function Content() {
     </>
   )
 
+  const subpages = [
+    { name: 'About', icon: <InfoOutlinedIcon/>, href: "/about" }, 
+    { name: 'Ideas', icon: <TipsAndUpdatesIcon/>, href: "/ideas" }, 
+    { name: 'Make your own', icon: <TrafficIcon/>, href: "/intersection" }
+  ]
+
   const drawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={() => setDrawerOpen(false)}>
       <List>
-        {[['About', <InfoOutlinedIcon/>, "/about"], ['Ideas', <TipsAndUpdatesIcon/>, "/ideas"], ['Make your own', <TrafficIcon/>, "/intersection"]].map((item, idx) => (
-          <ListItem key={idx} disablePadding>
-            <ListItemButton href={item[2]}>
+        {subpages.map((item) => (
+          <ListItem key={item.name} disablePadding>
+            <ListItemButton href={item.href}>
               <ListItemIcon>
-                {item[1]}
+                {item.icon}
               </ListItemIcon>
-              <ListItemText primary={item[0]} />
+              <ListItemText primary={item.name} />
             </ListItemButton>
           </ListItem>
         ))}
