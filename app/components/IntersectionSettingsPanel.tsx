@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import Input from './Input'
-import { Card, CardContent, Collapse, Box, Button, Tabs, Tab } from '@mui/material'
+import { Card, CardContent, Collapse, Box, Button, Tabs, Tab, IconButton, CardHeader, CardActions, CardActionArea, Stack, Typography } from '@mui/material'
 import IntersectionSettings from '../domain/IntersectionSettings'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import React from 'react'
 import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
+import SettingsIcon from '@mui/icons-material/Settings'
+import Grid from '@mui/material/Grid2'
 
 export default function IntersectionSettingsPanel({ 
   intersectionSettings, 
@@ -22,24 +24,21 @@ export default function IntersectionSettingsPanel({
   initTimeSync: () => void
 }) {
 
-  const [selectedTab, setSelectedTab] = useState<number | false>(false)
-
-  function a11yProps(index: number) {
-    return {
-      id: `simple-tab-${index}`,
-      'aria-controls': `simple-tabpanel-${index}`,
-      onClick: () => setSelectedTab(index === selectedTab ? false : index),
-    }
-  }
+  const [expanded, setExpanded] = useState(false)
 
   return (
     <Card>
-      <Tabs value={selectedTab} aria-label="basic tabs example">
-        <Tab icon={<GridGoldenratioIcon />} label='Intersection' iconPosition='top' {...a11yProps(0)} />
-        <Tab icon={<AccessTimeIcon />} label='Time' iconPosition='top' {...a11yProps(1)} />
-      </Tabs>
+      <CardActionArea onClick={() => setExpanded(!expanded)}>
+        <CardActions>
+          <Button component='div' size='large' startIcon={<SettingsIcon/>}>Settings</Button>
+          {/* <Stack sx={{ m: 1 }} direction='row' spacing={1} alignItems='center'>
+            <SettingsIcon size='large' />
+            <Typography component='div' variant='h6'>Settings</Typography>
+          </Stack> */}
+        </CardActions>
+      </CardActionArea>
 
-      <Collapse in={selectedTab === 0} unmountOnExit>
+      <Collapse in={expanded}>
         <CardContent>
           <Input 
             label="Cycle length (s)"
@@ -66,10 +65,6 @@ export default function IntersectionSettingsPanel({
             value={Math.round(intersectionSettings.failure.probability * 100)} 
             onChange={ e => updateIntersectionSettings({ ...intersectionSettings, failure: { duration: intersectionSettings.failure.duration, probability: Number(e.target.value) / 100 } }) } 
           />
-        </CardContent>
-      </Collapse>
-      <Collapse in={selectedTab === 1} unmountOnExit>
-        <CardContent>
           <Input 
             label="Time correction (s)" 
             id="time-correction" 

@@ -29,7 +29,7 @@ export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 const historyPush: Options = { history: 'push' }
 
 // TODOs
-// add a menu
+// group-ungroup causes the timeline pointer to reset
 // better ideas and about page
 // light pattern img
 // preview mode (show groups in rows)
@@ -275,7 +275,7 @@ export default function IntersectionComponent({
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
    
-      <Typography variant='h6'>Settings</Typography>
+      {/* <Typography variant='h6'>Settings</Typography> */}
       
       <IntersectionSettingsPanel
         intersectionSettings={intersectionSettings}
@@ -285,7 +285,7 @@ export default function IntersectionComponent({
         initTimeSync={initTimeSync}
       />
 
-      <Typography variant='h6'>Traffic Lights</Typography>
+      {/* <Typography variant='h6'>Traffic Lights</Typography> */}
   
       <Stack spacing={0}>
         {intersectionGroups}
