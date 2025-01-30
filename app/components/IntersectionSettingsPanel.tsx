@@ -31,10 +31,6 @@ export default function IntersectionSettingsPanel({
       <CardActionArea onClick={() => setExpanded(!expanded)}>
         <CardActions>
           <Button component='div' size='large' startIcon={<SettingsIcon/>}>Settings</Button>
-          {/* <Stack sx={{ m: 1 }} direction='row' spacing={1} alignItems='center'>
-            <SettingsIcon size='large' />
-            <Typography component='div' variant='h6'>Settings</Typography>
-          </Stack> */}
         </CardActions>
       </CardActionArea>
 

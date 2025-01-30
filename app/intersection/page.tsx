@@ -9,6 +9,55 @@ import { Suspense, useState } from 'react'
 import TrafficIcon from '@mui/icons-material/Traffic'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates'
+import styled, { keyframes, css } from "styled-components"
+import { green, yellow, red } from '@mui/material/colors'
+
+
+const duration = 20
+
+const fadeSpan = (color: string) => {
+  var colors = keyframes`
+    0% { color: #ffffff; }
+    1% { color: ${color}; }
+    5% { color: ${color}; }
+    6% { color: #ffffff; }
+  `;
+  
+  return styled.span`
+    animation: ${duration}s ${colors} infinite linear;
+  `
+}
+
+const fadeMiddle = (color: string) => {
+  var colors = keyframes`
+    5% { color: #ffffff; }
+    6% { color: ${color}; }
+    10% { color: ${color}; }
+    11% { color: #ffffff; }
+  `;
+  
+  return styled.span`
+    animation: ${duration}s ${colors} infinite linear;
+  `
+}
+
+const fadeLast = (color: string) => {
+  var colors = keyframes`
+    0% { color: #ffffff; }
+    11% { color: #ffffff; }
+    12% { color: ${color}; }
+    100% { color: ${color}; }
+  `;
+  
+  return styled.span`
+    animation: ${duration}s ${colors} infinite linear;
+    color: ${color};
+  `
+}
+
+const FadeGreen = fadeSpan(green[500])
+const FadeYellow = fadeMiddle(yellow[500])
+const FadeRed = fadeLast(red[500])
 
 function Content() {
 
@@ -43,7 +92,7 @@ function Content() {
           <TrafficIcon />
         </IconButton>
         <Typography variant="h6" component="div" noWrap>
-          Not Yet Red
+          <FadeGreen>Not</FadeGreen> <FadeYellow>Yet</FadeYellow> <FadeRed>Red</FadeRed>
         </Typography>
       </Stack>
       
