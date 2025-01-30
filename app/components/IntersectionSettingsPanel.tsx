@@ -2,13 +2,10 @@
 
 import { useState } from 'react'
 import Input from './Input'
-import { Card, CardContent, Collapse, Box, Button, Tabs, Tab, IconButton, CardHeader, CardActions, CardActionArea, Stack, Typography } from '@mui/material'
+import { Card, CardContent, Collapse, Button, CardActions, CardActionArea } from '@mui/material'
 import IntersectionSettings from '../domain/IntersectionSettings'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import React from 'react'
-import GridGoldenratioIcon from '@mui/icons-material/GridGoldenratio'
 import SettingsIcon from '@mui/icons-material/Settings'
-import Grid from '@mui/material/Grid2'
 
 export default function IntersectionSettingsPanel({ 
   intersectionSettings, 
@@ -30,7 +27,16 @@ export default function IntersectionSettingsPanel({
     <Card>
       <CardActionArea onClick={() => setExpanded(!expanded)}>
         <CardActions>
-          <Button component='div' size='large' startIcon={<SettingsIcon/>}>Settings</Button>
+          <Button 
+            disableFocusRipple 
+            disableRipple 
+            disableElevation 
+            component='div' 
+            size='large' 
+            startIcon={<SettingsIcon/>}
+          >
+            Settings
+          </Button>
         </CardActions>
       </CardActionArea>
 

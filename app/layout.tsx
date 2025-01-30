@@ -54,7 +54,7 @@ export default function RootLayout({
               >
                 <Button href="/about">About</Button>
                 <Button href="/ideas">Ideas</Button>
-                <Button href="/intersection">Make your own</Button>
+                <Button href="/intersection">Create new</Button>
               </Box>
             </Stack>
           </NuqsAdapter>

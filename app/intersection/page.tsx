@@ -9,55 +9,23 @@ import { Suspense, useState } from 'react'
 import TrafficIcon from '@mui/icons-material/Traffic'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates'
-import styled, { keyframes, css } from "styled-components"
+import styled, { keyframes } from "styled-components"
 import { green, yellow, red } from '@mui/material/colors'
 
-
-const duration = 20
-
-const fadeSpan = (color: string) => {
-  var colors = keyframes`
-    0% { color: #ffffff; }
-    1% { color: ${color}; }
-    5% { color: ${color}; }
-    6% { color: #ffffff; }
+const colorFadeSpan = (color: string, start: number, end: number) => {
+  const colors = keyframes`
+    ${start}% { color: #ffffff; }
+    ${start + 1}% { color: ${color}; }
+    ${end}% { color: ${color}; }
+    ${end + 1}% { color: #ffffff; }
   `;
   
-  return styled.span`
-    animation: ${duration}s ${colors} infinite linear;
-  `
+  return styled.span`animation: 25s ${colors} infinite linear;`
 }
 
-const fadeMiddle = (color: string) => {
-  var colors = keyframes`
-    5% { color: #ffffff; }
-    6% { color: ${color}; }
-    10% { color: ${color}; }
-    11% { color: #ffffff; }
-  `;
-  
-  return styled.span`
-    animation: ${duration}s ${colors} infinite linear;
-  `
-}
-
-const fadeLast = (color: string) => {
-  var colors = keyframes`
-    0% { color: #ffffff; }
-    11% { color: #ffffff; }
-    12% { color: ${color}; }
-    99% { color: ${color}; }
-    1000% { color: #ffffff; }
-  `;
-  
-  return styled.span`
-    animation: ${duration}s ${colors} infinite linear;
-  `
-}
-
-const FadeGreen = fadeSpan(green[500])
-const FadeYellow = fadeMiddle(yellow[500])
-const FadeRed = fadeLast(red[500])
+const FadeGreen = colorFadeSpan(green[500], 0, 5)
+const FadeYellow = colorFadeSpan(yellow[500], 5, 10)
+const FadeRed = colorFadeSpan(red[500], 10, 99)
 
 function Content() {
 
@@ -87,12 +55,13 @@ function Content() {
         <IconButton 
           size="large" 
           edge="start" 
-          color='inherit' 
+          color='inherit'
+          href="/"
         >
           <TrafficIcon />
         </IconButton>
         <Typography variant="h6" component="div" noWrap>
-          <FadeGreen>Not</FadeGreen> <FadeYellow>Yet</FadeYellow> <FadeRed>Red</FadeRed>
+          <FadeGreen>Not</FadeGreen>.<FadeYellow>Yet</FadeYellow>.<FadeRed>Red</FadeRed>
         </Typography>
       </Stack>
       
@@ -122,7 +91,7 @@ function Content() {
   const subpages = [
     { name: 'About', icon: <InfoOutlinedIcon/>, href: "/about" }, 
     { name: 'Ideas', icon: <TipsAndUpdatesIcon/>, href: "/ideas" }, 
-    { name: 'Make your own', icon: <TrafficIcon/>, href: "/intersection" }
+    { name: 'Create new', icon: <TrafficIcon/>, href: "/intersection" }
   ]
 
   const drawerList = (

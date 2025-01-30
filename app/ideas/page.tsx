@@ -77,7 +77,10 @@ function Content() {
           <li><Button href={toUrl(staticLights)}>Static</Button></li>
         </ul>
 
-        <Typography variant='h5' sx={{ mt: 2 }}>Or <Button sx={{ my: 2 }} href='/intersection'>Make your own</Button></Typography>
+        <Typography variant='h5' sx={{ mt: 2 }}>Or...</Typography>
+        <ul>
+          <li><Button href='/intersection'>Start from scratch</Button></li>
+        </ul>
         
       </Paper>
     </>

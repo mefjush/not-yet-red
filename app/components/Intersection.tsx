@@ -5,7 +5,7 @@ import Clock from '../domain/Clock'
 import TrafficLight from '../domain/TrafficLight'
 import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from '../domain/LightConfig'
 import Failure from '../domain/Failure'
-import { Box, Button, Fab, Stack, Typography, useTheme } from '@mui/material'
+import { Box, Button, Fab, Stack, useTheme } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { LightSettingsParser, IntersectionSettingsParser } from '../url'
 import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from '../domain/IntersectionSettings'
@@ -30,7 +30,7 @@ const historyPush: Options = { history: 'push' }
 
 // TODOs
 // group-ungroup causes the timeline pointer to reset
-// better ideas and about page
+// better ideas page
 // light pattern img
 // preview mode (show groups in rows)
 // Offline usage
@@ -275,8 +275,6 @@ export default function IntersectionComponent({
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
    
-      {/* <Typography variant='h6'>Settings</Typography> */}
-      
       <IntersectionSettingsPanel
         intersectionSettings={intersectionSettings}
         updateIntersectionSettings={updateIntersectionSettings}
@@ -285,8 +283,6 @@ export default function IntersectionComponent({
         initTimeSync={initTimeSync}
       />
 
-      {/* <Typography variant='h6'>Traffic Lights</Typography> */}
-  
       <Stack spacing={0}>
         {intersectionGroups}
       </Stack>
