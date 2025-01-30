@@ -46,12 +46,12 @@ const fadeLast = (color: string) => {
     0% { color: #ffffff; }
     11% { color: #ffffff; }
     12% { color: ${color}; }
-    100% { color: ${color}; }
+    99% { color: ${color}; }
+    1000% { color: #ffffff; }
   `;
   
   return styled.span`
     animation: ${duration}s ${colors} infinite linear;
-    color: ${color};
   `
 }
 
