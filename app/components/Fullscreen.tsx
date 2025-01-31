@@ -100,8 +100,6 @@ export default function Fullscreen({
         style={{ height: '100%', width: '100%' }}
         modules={[Pagination]}
         pagination={{ clickable: true }}
-        onSlideChange={() => console.log('slide change')}
-        onSwiper={(swiper) => console.log(swiper)}
       >
         {slides}
       </Swiper>

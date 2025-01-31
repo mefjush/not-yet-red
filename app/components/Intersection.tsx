@@ -29,7 +29,6 @@ export type SelectionMode = 'none' | 'some' | 'all' | 'set-all' | 'set-none'
 const historyPush: Options = { history: 'push' }
 
 // TODOs
-// group-ungroup causes the timeline pointer to reset
 // better ideas page
 // light pattern img
 // preview mode (show groups in rows)
@@ -140,18 +139,6 @@ export default function IntersectionComponent({
     setCurrentTimestamp(clock.now())
   }
 
-  const onAddToGroup = (groupIdx: number) => {
-    setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
-    setLightUiStates([...lightUiStates, new LightUiState(DEFAULT_LIGHT_SETTINGS.phases[0].state)])
-    setUiMode('none')
-    setExpanded(lightSettings.length)
-    if (grouping.length == 0 || grouping.length >= groupIdx) {
-      setGrouping([...grouping, [lightSettings.length]])
-    } else {
-      setGrouping(grouping.map((group, idx) => idx == groupIdx ? [...group, lightSettings.length] : group))  
-    }
-  }
-
   const onUngroup = (groupIdx: number, splitIdx: number) => {
     const groupLeft = grouping[groupIdx].filter((x, idx) => idx <= splitIdx)
     const groupRight = grouping[groupIdx].filter((x, idx) => idx > splitIdx)
@@ -179,7 +166,10 @@ export default function IntersectionComponent({
   }
 
   const onAdd = () => {
-    onAddToGroup(grouping.length)
+    setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
+    setLightUiStates([...lightUiStates, new LightUiState(DEFAULT_LIGHT_SETTINGS.phases[0].state)])
+    setExpanded(lightSettings.length)
+    setGrouping([...grouping, [lightSettings.length]])
   }
 
   const onDeleteOne = (lightIdx: number) => {
@@ -253,12 +243,7 @@ export default function IntersectionComponent({
       return inGroupIdx < lightIndices.length - 1 ? [card, splitButton(groupIdx, inGroupIdx)] : [card]
     })
 
-    return (
-      <>
-        { groupCards }
-        { groupIdx < grouping.length - 1 && joinButton(groupIdx) }
-      </>
-    )
+    return groupIdx < grouping.length - 1 ? [ ...groupCards, joinButton(groupIdx) ] : groupCards
   })
 
   const fullscreenContents = lights.map((light, index) => (
