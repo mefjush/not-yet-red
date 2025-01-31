@@ -7,10 +7,9 @@ import IntersectionComponent, { UiMode } from '../components/Intersection'
 import MenuIcon from '@mui/icons-material/Menu'
 import { Suspense, useState } from 'react'
 import TrafficIcon from '@mui/icons-material/Traffic'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates'
 import styled, { keyframes } from "styled-components"
 import { green, yellow, red } from '@mui/material/colors'
+import { MENU_ITEMS } from '../components/MenuItems'
 
 const colorFadeSpan = (color: string, start: number, end: number) => {
   const colors = keyframes`
@@ -88,16 +87,10 @@ function Content() {
     </>
   )
 
-  const subpages = [
-    { name: 'About', icon: <InfoOutlinedIcon/>, href: "/about" }, 
-    { name: 'Ideas', icon: <TipsAndUpdatesIcon/>, href: "/ideas" }, 
-    { name: 'Create new', icon: <TrafficIcon/>, href: "/intersection" }
-  ]
-
   const drawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={() => setDrawerOpen(false)}>
       <List>
-        {subpages.map((item) => (
+        {MENU_ITEMS.map((item) => (
           <ListItem key={item.name} disablePadding>
             <ListItemButton href={item.href}>
               <ListItemIcon>

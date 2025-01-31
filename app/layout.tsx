@@ -9,6 +9,7 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import TrafficIcon from '@mui/icons-material/Traffic'
 import GitHubIcon from '@mui/icons-material/GitHub'
 import ThemeClient from './ThemeClient'
+import { MENU_ITEMS } from './components/MenuItems'
 
 export const metadata: Metadata = {
   title: 'Traffic Lights',
@@ -52,9 +53,9 @@ export default function RootLayout({
                 justifyContent="center"
                 alignItems="center"
               >
-                <Button href="/about">About</Button>
-                <Button href="/ideas">Ideas</Button>
-                <Button href="/intersection">Create new</Button>
+                { MENU_ITEMS.map((item) => (
+                  <Button key={item.name} href={item.href}>{item.name}</Button>
+                ))}
               </Box>
             </Stack>
           </NuqsAdapter>
