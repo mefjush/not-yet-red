@@ -37,7 +37,7 @@ export default function Fullscreen({
         requestWakeLock()
       }
     })
-  }, [])
+  }, [onDisabled])
 
   useEffect(() => {
     setHiddenChildren([])
