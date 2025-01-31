@@ -2,7 +2,7 @@
 
 import { Box, Stack } from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import React, { ReactElement, useEffect, useRef, useState } from 'react'
+import React, { ReactElement, useEffect, useRef } from 'react'
 import useWindowSize from '../hooks/useWindowSize'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination } from 'swiper/modules'
@@ -24,23 +24,26 @@ export default function Fullscreen({
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
   
-  const [hiddenChildren, setHiddenChildren] = useState<number[]>([])
   const [windowWidth, windowHeight] = useWindowSize()
+
+  const fullscreenchange = () => {
+    if (!document.fullscreenElement) {
+      releaseWakeLock()
+      onDisabled()
+    } else {
+      requestWakeLock()
+    }
+  }
 
   // once
   useEffect(() => {
-    document.addEventListener("fullscreenchange", (event) => {
-      if (!document.fullscreenElement) {
-        releaseWakeLock()
-        onDisabled()
-      } else {
-        requestWakeLock()
-      }
-    })
+    document.addEventListener("fullscreenchange", fullscreenchange)
+    return () => {
+      document.removeEventListener("fullscreenchange", fullscreenchange)
+    }
   })
 
   useEffect(() => {
-    setHiddenChildren([])
     if (enabled) {
       fullscreenRef.current?.requestFullscreen({ navigationUI: 'hide' })
     }
@@ -70,7 +73,7 @@ export default function Fullscreen({
 
   const groupToRender = (children: ReactElement[]) => {
     const heightConstrainedSize = windowHeight
-    const widthConstrainedSize = windowWidth / (children.length - hiddenChildren.length)
+    const widthConstrainedSize = windowWidth / children.length
 
     return children.map((child) => React.cloneElement(child, { 
       maxWidth: widthConstrainedSize, 
