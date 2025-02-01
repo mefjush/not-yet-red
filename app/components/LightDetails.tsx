@@ -123,7 +123,6 @@ export default function LightDetails({
               lightConfig={lightConfig}
               onLightSettingsChange={onLightSettingsChange}
               setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
-              selectedState={selectedState}
             />
           </Grid>
         </Grid>

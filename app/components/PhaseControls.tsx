@@ -183,12 +183,10 @@ export function StatePicker({
 
 export default function PhaseControls({ 
   lightConfig,
-  selectedState,
   onLightSettingsChange, 
   setSelectedState
 }: { 
   lightConfig: LightConfig,
-  selectedState?: State, 
   onLightSettingsChange: (lightSettings: LightSettings) => void, 
   setSelectedState: (state: State) => void, 
 }) {
