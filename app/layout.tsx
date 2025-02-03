@@ -12,7 +12,7 @@ import ThemeClient from './ThemeClient'
 import { MENU_ITEMS } from './components/MenuItems'
 
 export const metadata: Metadata = {
-  title: 'Traffic Lights',
+  title: 'Not Yet Red',
   description: 'Change your smartphone into a traffic light!',
 }
 

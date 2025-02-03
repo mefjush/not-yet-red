@@ -26,6 +26,7 @@ export default function Timeline({
   const [transitionStartTime, setTransitionStartTime] = useState(-1)
   
   const hasPageBeenRendered = useRef(false)
+
   const uiOffset = useRef(0)
 
   const cycleLength = lightConfig.cycleLength()
@@ -136,8 +137,6 @@ export default function Timeline({
       }}
       sx={{
         ...slideWithThumbOnly,
-        // paddingBottom: 0,
-        // marginY: 0,
         marginBottom: 0,
         color: `${STATE_ATTRIBUTES[selectedState].color}.main`,
       }}

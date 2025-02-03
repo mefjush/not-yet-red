@@ -5,5 +5,5 @@ import TrafficIcon from '@mui/icons-material/Traffic';
 export const MENU_ITEMS = [
   { name: 'About', icon: <InfoOutlinedIcon/>, href: "/about" }, 
   { name: 'Ideas', icon: <TipsAndUpdatesIcon/>, href: "/ideas" }, 
-  { name: 'Create new', icon: <TrafficIcon/>, href: "/intersection" }
+  { name: 'Home', icon: <TrafficIcon/>, href: "/" }
 ]

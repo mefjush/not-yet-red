@@ -1,6 +1,6 @@
 "use client"
 
-import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
+import { AppBar, Box, IconButton, Toolbar, Typography, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Link } from '@mui/material'
 import ShareIcon from '@mui/icons-material/Share'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import IntersectionComponent, { UiMode } from '../components/Intersection'
@@ -11,20 +11,40 @@ import styled, { keyframes } from "styled-components"
 import { green, yellow, red } from '@mui/material/colors'
 import { MENU_ITEMS } from '../components/MenuItems'
 
-const colorFadeSpan = (color: string, start: number, end: number) => {
+const colorFadeSpan = (phase: number) => {
   const colors = keyframes`
-    ${start}% { color: #ffffff; }
-    ${start + 1}% { color: ${color}; }
-    ${end}% { color: ${color}; }
-    ${end + 1}% { color: #ffffff; }
+    ${0}%   { color: ${phase == 0 ? green[500]  : 'inherit'}; }
+    ${5}%   { color: ${phase == 0 ? green[500]  : 'inherit'}; }
+    ${6}%   { color: ${phase == 1 ? yellow[500] : 'inherit'}; }
+    ${11}%  { color: ${phase == 1 ? yellow[500] : 'inherit'}; }
+    ${12}%  { color: ${phase == 2 ? red[500]    : 'inherit'}; }
+    ${99}%  { color: ${phase == 2 ? red[500]    : 'inherit'}; }
+    ${100}% { color: ${phase == 0 ? green[500]  : 'inherit'}; }
   `;
   
   return styled.span`animation: 25s ${colors} infinite linear;`
 }
 
-const FadeGreen = colorFadeSpan(green[500], 0, 5)
-const FadeYellow = colorFadeSpan(yellow[500], 5, 10)
-const FadeRed = colorFadeSpan(red[500], 10, 99)
+const FadeGreen = colorFadeSpan(0)
+const FadeYellow = colorFadeSpan(1)
+const FadeRed = colorFadeSpan(2)
+
+const HoverContainer = styled.div`
+  &:hover {
+    ${FadeGreen} {
+      color: ${green[500]};
+      animation: none;
+    }
+    ${FadeYellow} {
+      color: ${yellow[500]};
+      animation: none;
+    }
+    ${FadeRed} {
+      color: ${red[500]};
+      animation: none;
+    }
+  }
+`
 
 function Content() {
 
@@ -59,9 +79,12 @@ function Content() {
         >
           <TrafficIcon />
         </IconButton>
-        <Typography variant="h6" component="div" noWrap>
-          <FadeGreen>Not</FadeGreen>.<FadeYellow>Yet</FadeYellow>.<FadeRed>Red</FadeRed>
-        </Typography>
+
+        <HoverContainer>
+          <Typography variant="h6" noWrap component={Link} href="/" color='inherit' sx={{ textDecoration: 'none' }}>
+            <FadeGreen>Not</FadeGreen>.<FadeYellow>Yet</FadeYellow>.<FadeRed>Red</FadeRed>
+          </Typography>
+        </HoverContainer>
       </Stack>
       
       <Box sx={{ flexGrow: 1 }}></Box>
