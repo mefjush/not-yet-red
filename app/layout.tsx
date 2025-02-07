@@ -44,7 +44,7 @@ export default function RootLayout({
                   <TrafficIcon />
                 </IconButton> 
                 <p>2025 <strong>Not Yet Red</strong> by mefju</p>
-                <IconButton size="large" edge="end" href="https://github.com/mefjush/mefjush.github.io">
+                <IconButton size="large" edge="end" href="https://github.com/mefjush/not-yet-red">
                   <GitHubIcon />
                 </IconButton>
               </Box>
