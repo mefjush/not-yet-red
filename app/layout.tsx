@@ -57,6 +57,17 @@ export default function RootLayout({
                   <Button key={item.name} href={item.href}>{item.name}</Button>
                 ))}
               </Box>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <p style={{ textAlign: 'center' }}>
+                  <b>Not Yet Red</b> turns any space into a traffic playground using smartphones as traffic lights. 
+                  <br />  
+                  Fun, interactive, and perfect for kids to learn road rules while playing! 🚦😊
+                </p>
+              </Box>
             </Stack>
           </NuqsAdapter>
         </ThemeClient>
