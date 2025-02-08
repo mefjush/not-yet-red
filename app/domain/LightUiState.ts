@@ -1,7 +1,6 @@
 import { State } from "./State"
 
 export default class LightUiState {
-
   selectedState: State
 
   constructor(selectedState: State) {

@@ -1,72 +1,86 @@
 "use client"
 
-import TrafficLight from '../domain/TrafficLight'
-import LightConfig, { LightSettings } from '../domain/LightConfig'
-import { Card, CardActions, CardContent, Box, Stack, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, CardActionArea } from '@mui/material'
-import Grid from '@mui/material/Grid2'
-import { StatePicker } from './PhaseControls'
-import LightHead from './LightHead'
-import React, {  } from 'react'
-import Timeline from './Timeline'
-import LightUiState from '../domain/LightUiState'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import DeleteIcon from '@mui/icons-material/Delete'
-import MoveUpIcon from '@mui/icons-material/MoveUp'
-import MoveDownIcon from '@mui/icons-material/MoveDown'
+import TrafficLight from "../domain/TrafficLight"
+import LightConfig, { LightSettings } from "../domain/LightConfig"
+import {
+  Card,
+  CardActions,
+  CardContent,
+  Box,
+  Stack,
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  CardActionArea,
+} from "@mui/material"
+import Grid from "@mui/material/Grid2"
+import { StatePicker } from "./PhaseControls"
+import LightHead from "./LightHead"
+import React from "react"
+import Timeline from "./Timeline"
+import LightUiState from "../domain/LightUiState"
+import MoreVertIcon from "@mui/icons-material/MoreVert"
+import DeleteIcon from "@mui/icons-material/Delete"
+import MoveUpIcon from "@mui/icons-material/MoveUp"
+import MoveDownIcon from "@mui/icons-material/MoveDown"
 
 export type LightRecord = {
   light: TrafficLight
   lightConfig: LightConfig
-  expanded: boolean,
-  onLightSettingsChange: (lightSettings: LightSettings) => void,
-  setExpanded: (expanded: boolean) => void, 
+  expanded: boolean
+  onLightSettingsChange: (lightSettings: LightSettings) => void
+  setExpanded: (expanded: boolean) => void
 }
 
-export default function LightCard({ 
+export default function LightCard({
   currentTimestamp,
   lightUiState,
   setLightUiState,
   onDelete,
   lightRecord,
-  onMove
-}: { 
-  currentTimestamp: number,
+  onMove,
+}: {
+  currentTimestamp: number
   lightUiState: LightUiState
-  setLightUiState: (lightUiState: LightUiState) => void,
-  onDelete: () => void, 
+  setLightUiState: (lightUiState: LightUiState) => void
+  onDelete: () => void
   lightRecord: LightRecord
   onMove: (amount: number) => void
 }) {
+  const { light, lightConfig, expanded, onLightSettingsChange, setExpanded } =
+    lightRecord
 
-  const { light, lightConfig, expanded, onLightSettingsChange, setExpanded } = lightRecord
-
-  const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
+    null,
+  )
 
   const menuOpen = Boolean(menuAnchorEl)
 
   const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setMenuAnchorEl(event.currentTarget);
+    setMenuAnchorEl(event.currentTarget)
   }
 
   const handleMenuClose = () => {
-    setMenuAnchorEl(null);
+    setMenuAnchorEl(null)
   }
 
   const head = (
-    <LightHead 
-      currentTimestamp={currentTimestamp} 
-      light={light} 
-      lightConfig={lightConfig} 
-      maxHeight={ 100 } 
-      maxWidth={ 1000 } 
+    <LightHead
+      currentTimestamp={currentTimestamp}
+      light={light}
+      lightConfig={lightConfig}
+      maxHeight={100}
+      maxWidth={1000}
     />
   )
 
   const timeline = (
     <Timeline
-      currentTimestamp={currentTimestamp} 
-      lightConfig={lightConfig} 
-      onLightSettingsChange={onLightSettingsChange} 
+      currentTimestamp={currentTimestamp}
+      lightConfig={lightConfig}
+      onLightSettingsChange={onLightSettingsChange}
       selectedState={lightUiState.selectedState}
       editable={true}
     />
@@ -75,27 +89,32 @@ export default function LightCard({
   return (
     <Card>
       <CardActionArea onClick={() => setExpanded(!expanded)} sx={{ py: 1 }}>
-        <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems='flex-start'>
+        <Grid
+          size={{ xs: 12 }}
+          display="flex"
+          justifyContent="center"
+          alignItems="flex-start"
+        >
           {head}
         </Grid>
       </CardActionArea>
 
       <CardContent>
-        <Stack direction='column'>
-          {timeline}
-        </Stack>
+        <Stack direction="column">{timeline}</Stack>
       </CardContent>
 
       <CardActions disableSpacing>
         <Box sx={{ ml: 1 }}>
           <StatePicker
-            states={lightRecord.lightConfig.phases.map(phase => phase.state)}
-            setSelectedState={(state) => setLightUiState(lightUiState.withSelectedState(state))}
+            states={lightRecord.lightConfig.phases.map((phase) => phase.state)}
+            setSelectedState={(state) =>
+              setLightUiState(lightUiState.withSelectedState(state))
+            }
             selectedState={lightUiState.selectedState}
           />
         </Box>
-        <IconButton sx={{ ml: 'auto' }} onClick={handleMenuClick}>
-          <MoreVertIcon/>
+        <IconButton sx={{ ml: "auto" }} onClick={handleMenuClick}>
+          <MoreVertIcon />
         </IconButton>
         <Menu
           id="basic-menu"
@@ -103,45 +122,44 @@ export default function LightCard({
           open={menuOpen}
           onClose={handleMenuClose}
           MenuListProps={{
-            'aria-labelledby': 'basic-button',
+            "aria-labelledby": "basic-button",
           }}
         >
-          <MenuItem 
+          <MenuItem
             onClick={() => {
               handleMenuClose()
               onMove(-1)
-            }
-          }>
+            }}
+          >
             <ListItemIcon>
               <MoveUpIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>Move up</ListItemText>
           </MenuItem>
 
-          <MenuItem 
+          <MenuItem
             onClick={() => {
               handleMenuClose()
               onMove(1)
-            }
-          }>
+            }}
+          >
             <ListItemIcon>
               <MoveDownIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>Move down</ListItemText>
           </MenuItem>
 
-          <MenuItem 
+          <MenuItem
             onClick={() => {
               handleMenuClose()
               onDelete()
-            }
-          }>
+            }}
+          >
             <ListItemIcon>
               <DeleteIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>Delete</ListItemText>
           </MenuItem>
-
         </Menu>
       </CardActions>
     </Card>

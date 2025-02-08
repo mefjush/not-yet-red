@@ -1,23 +1,23 @@
 "use client"
 
-import { createTheme, ThemeProvider } from '@mui/material'
-import { orange, green, yellow, red, grey } from '@mui/material/colors'
+import { createTheme, ThemeProvider } from "@mui/material"
+import { orange, green, yellow, red, grey } from "@mui/material/colors"
 
 //https://mui.com/material-ui/customization/palette/
 declare module "@mui/material/styles" {
   interface Palette {
-    tlRed: Palette['primary']
-    tlYellow: Palette['primary']
-    tlOrange: Palette['primary']
-    tlGreen: Palette['primary']
-    tlGrey: Palette['primary']
+    tlRed: Palette["primary"]
+    tlYellow: Palette["primary"]
+    tlOrange: Palette["primary"]
+    tlGreen: Palette["primary"]
+    tlGrey: Palette["primary"]
   }
   interface PaletteOptions {
-    tlRed: Palette['primary']
-    tlYellow: Palette['primary']
-    tlOrange: Palette['primary']
-    tlGreen: Palette['primary']
-    tlGrey: Palette['primary']
+    tlRed: Palette["primary"]
+    tlYellow: Palette["primary"]
+    tlOrange: Palette["primary"]
+    tlGreen: Palette["primary"]
+    tlGrey: Palette["primary"]
   }
 }
 
@@ -71,19 +71,15 @@ const theme = createTheme({
     tlGreen: palette.augmentColor({ color: green }),
     tlGrey: palette.augmentColor({ color: grey }),
     primary: {
-      main: '#333333',
-    }
-  }
+      main: "#333333",
+    },
+  },
 })
 
 export default function ThemeClient({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return (
-    <ThemeProvider theme={theme}>
-      {children}
-    </ThemeProvider>
-  )
-} 
+  return <ThemeProvider theme={theme}>{children}</ThemeProvider>
+}

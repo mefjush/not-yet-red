@@ -6,8 +6,8 @@ export const DEFAULT_INTERSECTION_SETTINGS = {
   cycleLength: DEFAULT_CYCLE_LENGTH,
   failure: {
     probability: DEFAULT_FAILURE_PROBABILITY,
-    duration: DEFAULT_FAILURE_DURATION
-  }
+    duration: DEFAULT_FAILURE_DURATION,
+  },
 }
 
 export default interface IntersectionSettings {

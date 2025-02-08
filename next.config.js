@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export'
+  output: "export",
 }
 
 const {
@@ -16,8 +16,8 @@ module.exports = async (phase) => {
     const withSerwist = (await import("@serwist/next")).default({
       swSrc: "app/sw.ts",
       swDest: "public/sw.js",
-      scope: '/',
-      additionalPrecacheEntries: ['/', '/index.txt']
+      scope: "/",
+      additionalPrecacheEntries: ["/", "/index.txt"],
     })
     return withSerwist(nextConfig)
   }

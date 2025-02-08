@@ -6,7 +6,7 @@ const DEFAULT_OFFSET = 0
 
 const FAILURE_PHASES = [
   new Phase(State.YELLOW, 1000),
-  new Phase(State.NONE, 1000)
+  new Phase(State.NONE, 1000),
 ]
 
 export default class TrafficLight {
@@ -20,12 +20,15 @@ export default class TrafficLight {
     this.lightConfig = lightConfig
     this.phases = failed ? FAILURE_PHASES : lightConfig.phases
     this.offset = failed ? 0 : lightConfig.offset || DEFAULT_OFFSET
-    this.intervals = this.phases.map(phase => phase.duration)
+    this.intervals = this.phases.map((phase) => phase.duration)
     this.cycleLength = this.intervals.reduce((sum, a) => sum + a, 0)
   }
 
   nextTransition(currentTimestamp: number) {
-    const cycleStart = Math.floor((currentTimestamp - this.offset) / this.cycleLength) * this.cycleLength + this.offset
+    const cycleStart =
+      Math.floor((currentTimestamp - this.offset) / this.cycleLength) *
+        this.cycleLength +
+      this.offset
     let cycleTimestamp = cycleStart
     let phaseIdx = 0
     while (cycleTimestamp <= currentTimestamp) {
@@ -34,7 +37,7 @@ export default class TrafficLight {
     }
     return {
       phaseIdx: phaseIdx,
-      timestamp: cycleTimestamp
+      timestamp: cycleTimestamp,
     }
   }
 
@@ -43,7 +46,10 @@ export default class TrafficLight {
   }
 
   currentPhase(currentTimestamp: number) {
-    const phaseIdx = negativeSafeMod(this.nextTransition(currentTimestamp).phaseIdx - 1, this.intervals.length)
+    const phaseIdx = negativeSafeMod(
+      this.nextTransition(currentTimestamp).phaseIdx - 1,
+      this.intervals.length,
+    )
     return this.phases[phaseIdx]
   }
 }

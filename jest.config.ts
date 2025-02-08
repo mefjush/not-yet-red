@@ -3,7 +3,7 @@
  * https://jestjs.io/docs/configuration
  */
 
-import type {Config} from 'jest';
+import type { Config } from "jest"
 
 const config: Config = {
   // All imported modules in your tests should be mocked automatically
@@ -178,7 +178,7 @@ const config: Config = {
   // transform: undefined,
 
   transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest"
+    "^.+\\.(ts|tsx)$": "ts-jest",
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
@@ -198,6 +198,6 @@ const config: Config = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
-};
+}
 
-export default config;
+export default config

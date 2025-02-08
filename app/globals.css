@@ -1,9 +1,9 @@
 body {
   margin: 0;
-  background-color: #F3F6F9;
+  background-color: #f3f6f9;
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
 }
 
 .fullscreen::backdrop {
-  background-color: #F3F6F9;
+  background-color: #f3f6f9;
 }

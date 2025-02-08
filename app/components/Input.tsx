@@ -1,10 +1,16 @@
 "use client"
 
-import { Box, Slider, Typography, Input as MuiInput, Stack } from '@mui/material'
-import { styled } from '@mui/material/styles'
+import {
+  Box,
+  Slider,
+  Typography,
+  Input as MuiInput,
+  Stack,
+} from "@mui/material"
+import { styled } from "@mui/material/styles"
 
 const MInput = styled(MuiInput)({
-  width: '65px'
+  width: "65px",
 })
 
 interface ChangeEvent {
@@ -14,24 +20,23 @@ interface ChangeEvent {
 }
 
 export default function Input({
-  id, 
-  label, 
-  min, 
-  max, 
-  step, 
-  value, 
-  onChange
+  id,
+  label,
+  min,
+  max,
+  step,
+  value,
+  onChange,
 }: {
-  id: string, 
-  label: string, 
-  min?: number, 
-  max?: number, 
-  step?: number, 
-  value: number, 
-  onChange: ((e: ChangeEvent) => void)
+  id: string
+  label: string
+  min?: number
+  max?: number
+  step?: number
+  value: number
+  onChange: (e: ChangeEvent) => void
 }) {
-
-  const toEvent = (val: any) => ({ target: { value: Number(val) }})
+  const toEvent = (val: any) => ({ target: { value: Number(val) } })
 
   const fix = (inVal: number) => {
     let outVal: number = inVal
@@ -52,17 +57,17 @@ export default function Input({
   }
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(toEvent(event.target.value === '' ? 0 : Number(event.target.value)))
+    onChange(
+      toEvent(event.target.value === "" ? 0 : Number(event.target.value)),
+    )
   }
 
   return (
     <Box>
-      <Typography gutterBottom>
-        {label}
-      </Typography>
+      <Typography gutterBottom>{label}</Typography>
       <Stack direction="row" spacing={2}>
         <Slider
-          value={typeof value === 'number' ? value : 0}
+          value={typeof value === "number" ? value : 0}
           step={step || 1}
           min={min}
           max={max}
@@ -74,11 +79,11 @@ export default function Input({
           size="small"
           onChange={handleInputChange}
           inputProps={{
-            step: (step || 1),
+            step: step || 1,
             min: min,
             max: max,
-            type: 'number',
-            'aria-labelledby': id
+            type: "number",
+            "aria-labelledby": id,
           }}
         />
       </Stack>
