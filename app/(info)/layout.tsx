@@ -1,8 +1,9 @@
 "use client"
 
-import { AppBar, Paper, Stack, Toolbar, Typography } from "@mui/material"
+import { Paper, Stack, Typography } from "@mui/material"
 import BackButton from "../components/BackButton"
 import { useSelectedLayoutSegment } from 'next/navigation'
+import AppToolbar from "../components/AppToolbar"
 
 export default function InfoLayout({
     children,
@@ -25,10 +26,9 @@ export default function InfoLayout({
 
     return (
       <>
-        <AppBar position="fixed">
-          <Toolbar>{toolbarElements}</Toolbar>
-        </AppBar>
-        <Toolbar />
+        <AppToolbar>
+          {toolbarElements}
+        </AppToolbar>
         <Paper sx={{ p: 2, m: 2 }}>
           {children}
         </Paper>

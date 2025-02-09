@@ -1,10 +1,8 @@
 "use client"
 
 import {
-  AppBar,
   Box,
   IconButton,
-  Toolbar,
   Typography,
   Stack,
   Drawer,
@@ -24,6 +22,7 @@ import TrafficIcon from "@mui/icons-material/Traffic"
 import styled, { keyframes } from "styled-components"
 import { green, yellow, red } from "@mui/material/colors"
 import { MENU_ITEMS } from "../components/MenuItems"
+import AppToolbar from "../components/AppToolbar"
 
 const colorFadeSpan = (phase: number) => {
   const colors = keyframes`
@@ -149,10 +148,9 @@ function Content() {
 
   return (
     <>
-      <AppBar position="fixed">
-        <Toolbar>{toolbarElements}</Toolbar>
-      </AppBar>
-      <Toolbar />
+      <AppToolbar>
+        {toolbarElements}
+      </AppToolbar>
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         {drawerList}
       </Drawer>
