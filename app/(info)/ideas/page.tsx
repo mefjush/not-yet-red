@@ -1,9 +1,6 @@
 "use client"
 
-import {
-  Typography,
-  Button,
-} from "@mui/material"
+import { Typography, Button } from "@mui/material"
 import LightConfig, {
   DEFAULT_LIGHT_SETTINGS,
   LightSettings,

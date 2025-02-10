@@ -1,11 +1,10 @@
 import { AppBar, Toolbar } from "@mui/material"
 
 export default function AppToolbar({
-    children,
-  }: {
-    children: React.ReactNode,
-  }) {
-
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <>
       <AppBar position="fixed">
@@ -15,5 +14,3 @@ export default function AppToolbar({
     </>
   )
 }
-
-

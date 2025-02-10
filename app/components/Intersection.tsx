@@ -40,6 +40,8 @@ export type SelectionMode = "none" | "some" | "all" | "set-all" | "set-none"
 const historyPush: Options = { history: "push" }
 
 // TODOs
+// merge grouping / light parameter
+// cleanup light settings/config
 // better ideas page
 // back button a bit confusing in expand mode
 // light pattern img
@@ -269,7 +271,10 @@ export default function IntersectionComponent({
   }
 
   const joinButton = (groupIdx: number): ReactElement => (
-    <Box key={`join-${groupIdx}`} sx={{ ...groupBoxStyle, borderColor: "transparent" }}>
+    <Box
+      key={`join-${groupIdx}`}
+      sx={{ ...groupBoxStyle, borderColor: "transparent" }}
+    >
       <Button
         onClick={() => onGroupDown(groupIdx)}
         startIcon={<CompressIcon />}
@@ -280,7 +285,10 @@ export default function IntersectionComponent({
   )
 
   const splitButton = (groupIdx: number, splitIdx: number): ReactElement => (
-    <Box key={`split-${groupIdx}-${splitIdx}`} sx={{ ...groupBoxStyle, borderColor: "primary.main" }}>
+    <Box
+      key={`split-${groupIdx}-${splitIdx}`}
+      sx={{ ...groupBoxStyle, borderColor: "primary.main" }}
+    >
       <Button
         onClick={() => onUngroup(groupIdx, splitIdx)}
         startIcon={<ExpandIcon />}
