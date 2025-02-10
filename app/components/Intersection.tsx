@@ -54,6 +54,11 @@ const historyPush: Options = { history: "push" }
 // footer description
 // android app
 
+type LightId = {
+  groupIdx: number
+  inGroupIdx: number
+}
+
 export default function IntersectionComponent({
   uiMode,
   setUiMode,
@@ -73,7 +78,7 @@ export default function IntersectionComponent({
     parseAsArrayOf(createParser(LightSettingsParser).withDefault([DEFAULT_LIGHT_SETTINGS])).withDefault([[DEFAULT_LIGHT_SETTINGS]]),
   )
 
-  const lightSettings = lightGroups.flatMap(lg => lg)
+  const lightSettings = lightGroups.flatMap(lightGroup => lightGroup)
 
   const buildGrouping = () => {
     const grouping = []
@@ -90,34 +95,34 @@ export default function IntersectionComponent({
   }
 
   const buildIndexing = () => {
-    const indexing: number[] = []
+    const indexing: LightId[] = []
     let lightIdx  = 0
     for (let lightGroupIdx = 0; lightGroupIdx < lightGroups.length; lightGroupIdx++) {
+      let inGroupIdx = 0
       for (let light of lightGroups[lightGroupIdx]) {
-        indexing[lightIdx] = lightGroupIdx
+        indexing[lightIdx] = {
+          groupIdx: lightGroupIdx,
+          inGroupIdx: inGroupIdx
+        }
         lightIdx += 1
+        inGroupIdx +=1
       }
     }
     return indexing
   }
 
-  const buildIndexing2 = () => {
-    const indexing2: number[] = []
-    let lightIdx = 0
-    for (let lightGroupIdx = 0; lightGroupIdx < lightGroups.length; lightGroupIdx++) {
-      let inGroupIdx = 0
-      for (let light of lightGroups[lightGroupIdx]) {
-        indexing2[lightIdx] = inGroupIdx
-        lightIdx += 1
-        inGroupIdx +=1
-      }
-    }
-    return indexing2
+  const lookup = (lightIdx: number): LightSettings => {
+    const lightId = indexing[lightIdx]
+    return lightGroups[lightId.groupIdx][lightId.inGroupIdx]
+  }
+
+  const set = (lightGroups: LightSettings[][], lightIdx: number, lightSettings: LightSettings) => {
+    const lightId = indexing[lightIdx]
+    lightGroups[lightId.groupIdx][lightId.inGroupIdx] = lightSettings
   }
 
   const grouping: number[][] = buildGrouping()
-  const indexing: number[] = buildIndexing()
-  const indexing2: number[] = buildIndexing2()
+  const indexing: LightId[] = buildIndexing()
 
   const [expanded, setExpanded] = useQueryState(
     "e",
@@ -167,8 +172,8 @@ export default function IntersectionComponent({
 
   const updateLightSettings = (settings: LightSettings, index: number) => {
     const copy = [...lightGroups.map(x => [...x])]
-    const groupIdx: number = indexing[index]
-    const inGroupIdx: number = indexing2[index]
+    const groupIdx: number = indexing[index].groupIdx
+    const inGroupIdx: number = indexing[index].inGroupIdx
     copy[groupIdx][inGroupIdx] = settings
 
     setLightGroups(copy)
@@ -255,11 +260,11 @@ export default function IntersectionComponent({
 
     const copy = [...lightGroups.map(x => [...x])]
 
-    const groupIdx: number = indexing[lightIdx]
-    const inGroupIdx: number = indexing2[lightIdx]
+    const groupIdx: number = indexing[lightIdx].groupIdx
+    const inGroupIdx: number = indexing[lightIdx].inGroupIdx
 
-    const otherGroupIdx: number = indexing[lightIdx + amount]
-    const otherInGroupIdx: number = indexing2[lightIdx + amount]
+    const otherGroupIdx: number = indexing[lightIdx + amount].groupIdx
+    const otherInGroupIdx: number = indexing[lightIdx + amount].inGroupIdx
 
     const tmp = copy[groupIdx][inGroupIdx]
     copy[groupIdx][inGroupIdx] = copy[otherGroupIdx][otherInGroupIdx]
@@ -280,8 +285,8 @@ export default function IntersectionComponent({
 
   const onDeleteOne = (lightIdx: number) => {
     const copy = [...lightGroups.map(x => [...x])]
-    const groupIdx: number = indexing[lightIdx]
-    const inGroupIdx: number = indexing2[lightIdx]
+    const groupIdx: number = indexing[lightIdx].groupIdx
+    const inGroupIdx: number = indexing[lightIdx].inGroupIdx
     const group = copy[groupIdx]
     delete group[inGroupIdx]
     setLightGroups(copy.filter(group => group.length > 0))
