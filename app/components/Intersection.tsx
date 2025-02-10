@@ -20,7 +20,6 @@ import React from "react"
 import ShareDialog from "./ShareDialog"
 import timeSync from "../domain/timeSync"
 import LightDetails from "./LightDetails"
-import LightUiState from "../domain/LightUiState"
 import {
   createParser,
   Options,
@@ -33,6 +32,7 @@ import { LightRecord } from "./LightCard"
 import CompressIcon from "@mui/icons-material/Compress"
 import ExpandIcon from "@mui/icons-material/Expand"
 import LightCard from "./LightCard"
+import { State } from "../domain/State"
 
 export type UiMode = "none" | "share" | "fullscreen"
 export type SelectionMode = "none" | "some" | "all" | "set-all" | "set-none"
@@ -92,8 +92,8 @@ export default function IntersectionComponent({
   const effectivelySelected =
     selected.length == 0 ? lightSettings.map((ls, index) => index) : selected
 
-  const [lightUiStates, setLightUiStates] = useState(
-    lightSettings.map((ls) => new LightUiState(ls.phases[0].state)),
+  const [selectedStates, setSelectedStates] = useState(
+    lightSettings.map((ls) => ls.phases[0].state),
   )
 
   const theme = useTheme()
@@ -131,10 +131,10 @@ export default function IntersectionComponent({
     setCurrentTimestamp(clock.now())
   }
 
-  const updateLightUiState = (lightUiState: LightUiState, lightIdx: number) => {
-    const copy = [...lightUiStates]
-    copy.splice(lightIdx, 1, lightUiState)
-    setLightUiStates(copy)
+  const updateSelectedState = (state: State, lightIdx: number) => {
+    const copy = [...selectedStates]
+    copy.splice(lightIdx, 1, state)
+    setSelectedStates(copy)
   }
 
   const wrapListener = {
@@ -204,14 +204,14 @@ export default function IntersectionComponent({
         .toSpliced(lightIdx + amount, 0, arr[lightIdx])
     }
     setLightSettings(moveArr(lightSettings, lightIdx, amount))
-    setLightUiStates(moveArr(lightUiStates, lightIdx, amount))
+    setSelectedStates(moveArr(selectedStates, lightIdx, amount))
   }
 
   const onAdd = () => {
     setLightSettings([...lightSettings, DEFAULT_LIGHT_SETTINGS])
-    setLightUiStates([
-      ...lightUiStates,
-      new LightUiState(DEFAULT_LIGHT_SETTINGS.phases[0].state),
+    setSelectedStates([
+      ...selectedStates,
+      DEFAULT_LIGHT_SETTINGS.phases[0].state,
     ])
     setExpanded(lightSettings.length)
     setGrouping([...grouping, [lightSettings.length]])
@@ -226,7 +226,7 @@ export default function IntersectionComponent({
       )
       .filter((group) => group.length > 0)
     setLightSettings([...lightSettings].filter((ls, i) => i != lightIdx))
-    setLightUiStates([...lightUiStates].filter((ls, i) => i != lightIdx))
+    setSelectedStates([...selectedStates].filter((ls, i) => i != lightIdx))
     setUiMode("none")
     setExpanded(null)
     setGrouping(newGrouping)
@@ -269,7 +269,7 @@ export default function IntersectionComponent({
   }
 
   const joinButton = (groupIdx: number): ReactElement => (
-    <Box sx={{ ...groupBoxStyle, borderColor: "transparent" }}>
+    <Box key={`join-${groupIdx}`} sx={{ ...groupBoxStyle, borderColor: "transparent" }}>
       <Button
         onClick={() => onGroupDown(groupIdx)}
         startIcon={<CompressIcon />}
@@ -280,7 +280,7 @@ export default function IntersectionComponent({
   )
 
   const splitButton = (groupIdx: number, splitIdx: number): ReactElement => (
-    <Box sx={{ ...groupBoxStyle, borderColor: "primary.main" }}>
+    <Box key={`split-${groupIdx}-${splitIdx}`} sx={{ ...groupBoxStyle, borderColor: "primary.main" }}>
       <Button
         onClick={() => onUngroup(groupIdx, splitIdx)}
         startIcon={<ExpandIcon />}
@@ -294,6 +294,7 @@ export default function IntersectionComponent({
     const groupCards = lightIndices.flatMap((lightIdx, inGroupIdx) => {
       const card = (
         <Box
+          key={`light-${lightIdx}`}
           sx={{
             ...groupBoxStyle,
             borderColor:
@@ -302,9 +303,9 @@ export default function IntersectionComponent({
         >
           <LightCard
             currentTimestamp={currentTimestamp}
-            lightUiState={lightUiStates[lightIdx]}
-            setLightUiState={(lightUiState: LightUiState) =>
-              updateLightUiState(lightUiState, lightIdx)
+            selectedState={selectedStates[lightIdx]}
+            setSelectedState={(state: State) =>
+              updateSelectedState(state, lightIdx)
             }
             onDelete={() => onDeleteOne(lightIdx)}
             lightRecord={lightRecords[lightIdx]}
@@ -365,7 +366,7 @@ export default function IntersectionComponent({
           currentTimestamp={currentTimestamp}
           light={lights[expanded]}
           lightConfig={lightConfigs[expanded]}
-          lightUiState={lightUiStates[expanded]}
+          selectedState={selectedStates[expanded]}
           onClose={() => setExpanded(null)}
           onLightSettingsChange={(settings: LightSettings) =>
             updateLightSettings(settings, expanded)
@@ -373,8 +374,8 @@ export default function IntersectionComponent({
           onFullscreen={() => enterFullscreenMode([expanded])}
           onDelete={() => onDeleteOne(expanded)}
           onShare={() => enterShareMode([expanded])}
-          setLightUiState={(lightUiState: LightUiState) =>
-            updateLightUiState(lightUiState, expanded)
+          setSelectedState={(state: State) =>
+            updateSelectedState(state, expanded)
           }
           lightRecord={lightRecords[expanded]}
         />

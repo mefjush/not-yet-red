@@ -1,56 +1,51 @@
 import {
-  IconButton,
   Dialog,
   Button,
   AppBar,
   Toolbar,
   Typography,
   Stack,
-  Box,
 } from "@mui/material"
 import Grid from "@mui/material/Grid2"
 import Timeline from "./Timeline"
 import LightConfig, { LightSettings } from "../domain/LightConfig"
 import LightHead from "./LightHead"
 import TrafficLight from "../domain/TrafficLight"
-import TrafficIcon from "@mui/icons-material/Traffic"
-import LightUiState from "../domain/LightUiState"
 import PhaseControls, { StatePicker } from "./PhaseControls"
 import PresetMenu from "./PresetMenu"
 import { LightRecord } from "./LightCard"
 import { useRouter } from "next/navigation"
 import BackButton from "./BackButton"
+import { State } from "../domain/State"
 
 export default function LightDetails({
   open,
   lightConfig,
   currentTimestamp,
   light,
-  lightUiState,
+  selectedState,
   onClose,
   onFullscreen,
   onShare,
   onDelete,
   onLightSettingsChange,
-  setLightUiState,
+  setSelectedState,
   lightRecord,
 }: {
   open: boolean
   lightConfig: LightConfig
   currentTimestamp: number
   light: TrafficLight
-  lightUiState: LightUiState
+  selectedState: State
   onClose: () => void
   onFullscreen: () => void
   onShare: () => void
   onDelete: () => void
   onLightSettingsChange: (lightSettings: LightSettings) => void
-  setLightUiState: (lightUiState: LightUiState) => void
+  setSelectedState: (state: State) => void
   lightRecord: LightRecord
 }) {
   const router = useRouter()
-
-  const selectedState = lightUiState.selectedState
 
   const handleClose = () => {
     onClose()
@@ -103,9 +98,9 @@ export default function LightDetails({
             <Typography gutterBottom>Preset</Typography>
             <PresetMenu
               lightConfig={lightRecord.lightConfig}
-              lightUiState={lightUiState}
+              selectedState={selectedState}
               onLightSettingsChange={onLightSettingsChange}
-              setLightUiState={setLightUiState}
+              setSelectedState={setSelectedState}
             />
           </Grid>
 
@@ -133,10 +128,8 @@ export default function LightDetails({
               states={lightRecord.lightConfig.phases.map(
                 (phase) => phase.state,
               )}
-              setSelectedState={(state) =>
-                setLightUiState(lightUiState.withSelectedState(state))
-              }
-              selectedState={lightUiState.selectedState}
+              setSelectedState={setSelectedState}
+              selectedState={selectedState}
             />
           </Grid>
 
@@ -145,9 +138,7 @@ export default function LightDetails({
             <PhaseControls
               lightConfig={lightConfig}
               onLightSettingsChange={onLightSettingsChange}
-              setSelectedState={(state) =>
-                setLightUiState(lightUiState.withSelectedState(state))
-              }
+              setSelectedState={setSelectedState}
             />
           </Grid>
         </Grid>

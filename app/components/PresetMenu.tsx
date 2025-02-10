@@ -3,21 +3,19 @@ import { createElement } from "react"
 import LightConfig, { LightSettings } from "../domain/LightConfig"
 import CircleIcon from "@mui/icons-material/Circle"
 import { PresetId, PRESETS, SYMBOLS, SymbolId } from "../domain/Preset"
-import LightUiState from "../domain/LightUiState"
+import { State } from "../domain/State"
 
 export default function PresetMenu({
   lightConfig,
-  lightUiState,
+  selectedState,
   onLightSettingsChange,
-  setLightUiState,
+  setSelectedState,
 }: {
   lightConfig: LightConfig
-  lightUiState: LightUiState
+  selectedState: State
   onLightSettingsChange: (lightSettings: LightSettings) => void
-  setLightUiState: (lightUiState: LightUiState) => void
+  setSelectedState: (state: State) => void
 }) {
-  const selectedState = lightUiState.selectedState
-
   const generatePresetMenuItems = () => {
     return Object.values(PRESETS).map((preset) => {
       const icon =
@@ -39,7 +37,7 @@ export default function PresetMenu({
   const changePreset = (presetId: PresetId) => {
     const supportedStates = PRESETS[presetId].states
     if (!supportedStates.includes(selectedState)) {
-      setLightUiState(lightUiState.withSelectedState(supportedStates[0]))
+      setSelectedState(supportedStates[0])
     }
     onLightSettingsChange(lightConfig.withPreset(presetId))
   }

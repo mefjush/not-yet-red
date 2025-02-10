@@ -20,11 +20,11 @@ import { StatePicker } from "./PhaseControls"
 import LightHead from "./LightHead"
 import React from "react"
 import Timeline from "./Timeline"
-import LightUiState from "../domain/LightUiState"
 import MoreVertIcon from "@mui/icons-material/MoreVert"
 import DeleteIcon from "@mui/icons-material/Delete"
 import MoveUpIcon from "@mui/icons-material/MoveUp"
 import MoveDownIcon from "@mui/icons-material/MoveDown"
+import { State } from "../domain/State"
 
 export type LightRecord = {
   light: TrafficLight
@@ -36,15 +36,15 @@ export type LightRecord = {
 
 export default function LightCard({
   currentTimestamp,
-  lightUiState,
-  setLightUiState,
+  selectedState,
+  setSelectedState,
   onDelete,
   lightRecord,
   onMove,
 }: {
   currentTimestamp: number
-  lightUiState: LightUiState
-  setLightUiState: (lightUiState: LightUiState) => void
+  selectedState: State
+  setSelectedState: (state: State) => void
   onDelete: () => void
   lightRecord: LightRecord
   onMove: (amount: number) => void
@@ -81,7 +81,7 @@ export default function LightCard({
       currentTimestamp={currentTimestamp}
       lightConfig={lightConfig}
       onLightSettingsChange={onLightSettingsChange}
-      selectedState={lightUiState.selectedState}
+      selectedState={selectedState}
       editable={true}
     />
   )
@@ -107,10 +107,8 @@ export default function LightCard({
         <Box sx={{ ml: 1 }}>
           <StatePicker
             states={lightRecord.lightConfig.phases.map((phase) => phase.state)}
-            setSelectedState={(state) =>
-              setLightUiState(lightUiState.withSelectedState(state))
-            }
-            selectedState={lightUiState.selectedState}
+            setSelectedState={setSelectedState}
+            selectedState={selectedState}
           />
         </Box>
         <IconButton sx={{ ml: "auto" }} onClick={handleMenuClick}>
