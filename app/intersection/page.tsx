@@ -14,7 +14,7 @@ import ShareIcon from "@mui/icons-material/Share"
 import FullscreenIcon from "@mui/icons-material/Fullscreen"
 import IntersectionComponent, { UiMode } from "../components/Intersection"
 import MenuIcon from "@mui/icons-material/Menu"
-import { Suspense, useState } from "react"
+import { useState } from "react"
 import { MENU_ITEMS } from "../components/MenuItems"
 import AppToolbar from "../components/AppToolbar"
 import AnimatedLogo from "../components/AnimatedLogo"
@@ -103,9 +103,7 @@ function Content() {
 export default function Home() {
   return (
     <main>
-      <Suspense>
-        <Content />
-      </Suspense>
+      <Content />
     </main>
   )
 }
