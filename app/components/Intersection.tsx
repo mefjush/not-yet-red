@@ -41,7 +41,6 @@ export type SelectionMode = "none" | "some" | "all" | "set-all" | "set-none"
 const historyPush: Options = { history: "push" }
 
 // TODOs
-// test light grouping
 // cleanup light settings/config
 // better ideas page
 // back button a bit confusing in expand mode
