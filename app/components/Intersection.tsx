@@ -41,7 +41,6 @@ export type SelectionMode = "none" | "some" | "all" | "set-all" | "set-none"
 const historyPush: Options = { history: "push" }
 
 // TODOs
-// join/split buttons behave weird when clicking
 // test light grouping
 // cleanup light settings/config
 // better ideas page
@@ -128,7 +127,7 @@ export default function IntersectionComponent({
   const clock = new Clock(timeCorrection)
 
   const updateLightSettings = (settings: LightSettings, index: number) => {
-    setLightGroups(theLightGroups.with(index, settings).raw())
+    setLightGroups(theLightGroups.withLightReplaced(index, settings).raw())
     setCurrentTimestamp(clock.now())
   }
 
@@ -201,18 +200,15 @@ export default function IntersectionComponent({
 
     setLightGroups(
       theLightGroups
-        .with(lightIdx, otherEl)
-        .with(lightIdx + amount, idxEl)
-        .raw(),
+        .withLightReplaced(lightIdx, otherEl)
+        .withLightReplaced(lightIdx + amount, idxEl)
+        .raw()
     )
     setSelectedStates(moveArr(selectedStates, lightIdx, amount))
   }
 
   const onAdd = () => {
-    setLightGroups([
-      ...lightGroups.map((x) => [...x]),
-      [DEFAULT_LIGHT_SETTINGS],
-    ])
+    setLightGroups(theLightGroups.withLightAdded(DEFAULT_LIGHT_SETTINGS).raw())
     setSelectedStates([
       ...selectedStates,
       DEFAULT_LIGHT_SETTINGS.phases[0].state,
@@ -221,7 +217,7 @@ export default function IntersectionComponent({
   }
 
   const onDeleteOne = (lightIdx: number) => {
-    setLightGroups(theLightGroups.withDeleted(lightIdx).raw())
+    setLightGroups(theLightGroups.withLightDeleted(lightIdx).raw())
     setSelectedStates([...selectedStates].filter((ls, i) => i != lightIdx))
     setUiMode("none")
     setExpanded(null)
@@ -229,7 +225,7 @@ export default function IntersectionComponent({
 
   const getShareUrl = () => {
     const selectedLightSettings = lightSettings.filter((ls, index) =>
-      effectivelySelected.includes(index),
+      effectivelySelected.includes(index)
     )
 
     const search = `?intersection=${IntersectionSettingsParser.serialize(intersectionSettings)}&lights=${LightSettingsParser.serialize(selectedLightSettings)}`

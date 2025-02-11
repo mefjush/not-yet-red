@@ -6,6 +6,7 @@ export type LightId = {
 }
 
 export default class LightGroups {
+
   indexing: LightId[]
 
   constructor(private lightGroups: LightSettings[][]) {
@@ -42,11 +43,20 @@ export default class LightGroups {
     )
   }
 
-  with(lightIdx: number, lightSettings: LightSettings) {
+  withLightReplaced(lightIdx: number, lightSettings: LightSettings) {
     const lightId = this.indexing[lightIdx]
     const copy = this.copied()
     copy[lightId.groupIdx][lightId.inGroupIdx] = lightSettings
     return new LightGroups(copy)
+  }
+
+  withLightAdded(lightSettings: LightSettings): LightGroups {
+    return new LightGroups(
+      [
+        ...this.lightGroups.map((x) => [...x]),
+        [lightSettings],
+      ]
+    )
   }
 
   ungrouped(groupIdx: number, splitIdx: number) {
@@ -74,7 +84,7 @@ export default class LightGroups {
     return new LightGroups(newGrouping)
   }
 
-  withDeleted(lightIdx: number) {
+  withLightDeleted(lightIdx: number) {
     const copy = this.copied()
 
     const groupIdx: number = this.indexing[lightIdx].groupIdx
