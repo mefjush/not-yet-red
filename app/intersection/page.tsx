@@ -19,7 +19,6 @@ import { MENU_ITEMS } from "../components/MenuItems"
 import AppToolbar from "../components/AppToolbar"
 import AnimatedLogo from "../components/AnimatedLogo"
 
-
 function Content() {
   const [uiMode, setUiMode] = useState<UiMode>("none")
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -89,9 +88,7 @@ function Content() {
 
   return (
     <>
-      <AppToolbar>
-        {toolbarElements}
-      </AppToolbar>
+      <AppToolbar>{toolbarElements}</AppToolbar>
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         {drawerList}
       </Drawer>

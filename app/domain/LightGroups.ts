@@ -6,22 +6,24 @@ export type LightId = {
 }
 
 export default class LightGroups {
-
   indexing: LightId[]
 
   constructor(private lightGroups: LightSettings[][]) {
-
     const indexing: LightId[] = []
-    let lightIdx  = 0
-    for (let lightGroupIdx = 0; lightGroupIdx < lightGroups.length; lightGroupIdx++) {
+    let lightIdx = 0
+    for (
+      let lightGroupIdx = 0;
+      lightGroupIdx < lightGroups.length;
+      lightGroupIdx++
+    ) {
       let inGroupIdx = 0
       for (let light of lightGroups[lightGroupIdx]) {
         indexing[lightIdx] = {
           groupIdx: lightGroupIdx,
-          inGroupIdx: inGroupIdx
+          inGroupIdx: inGroupIdx,
         }
         lightIdx += 1
-        inGroupIdx +=1
+        inGroupIdx += 1
       }
     }
     this.indexing = indexing
@@ -33,7 +35,11 @@ export default class LightGroups {
   }
 
   idLookup(groupIdx: number, inGroupIdx: number) {
-    return this.lightGroups.filter((group, idx) => idx < groupIdx).reduce((acc, group) => acc + group.length, 0) + inGroupIdx
+    return (
+      this.lightGroups
+        .filter((group, idx) => idx < groupIdx)
+        .reduce((acc, group) => acc + group.length, 0) + inGroupIdx
+    )
   }
 
   with(lightIdx: number, lightSettings: LightSettings) {
@@ -44,8 +50,12 @@ export default class LightGroups {
   }
 
   ungrouped(groupIdx: number, splitIdx: number) {
-    const groupLeft = this.lightGroups[groupIdx].filter((x, idx) => idx <= splitIdx)
-    const groupRight = this.lightGroups[groupIdx].filter((x, idx) => idx > splitIdx)
+    const groupLeft = this.lightGroups[groupIdx].filter(
+      (x, idx) => idx <= splitIdx,
+    )
+    const groupRight = this.lightGroups[groupIdx].filter(
+      (x, idx) => idx > splitIdx,
+    )
     const newGrouping = this.lightGroups.flatMap((group, idx) =>
       idx == groupIdx ? [groupLeft, groupRight] : [group],
     )
@@ -71,13 +81,13 @@ export default class LightGroups {
     const inGroupIdx: number = this.indexing[lightIdx].inGroupIdx
 
     const group = copy[groupIdx]
-    group.splice(inGroupIdx, 1);
+    group.splice(inGroupIdx, 1)
 
-    return new LightGroups(copy.filter(g => g.length > 0))
+    return new LightGroups(copy.filter((g) => g.length > 0))
   }
 
   private copied() {
-    return [...this.lightGroups.map(x => [...x])]
+    return [...this.lightGroups.map((x) => [...x])]
   }
 
   size(): number {
@@ -87,5 +97,4 @@ export default class LightGroups {
   raw(): LightSettings[][] {
     return this.lightGroups
   }
-
 }

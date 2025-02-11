@@ -41,7 +41,7 @@ export type SelectionMode = "none" | "some" | "all" | "set-all" | "set-none"
 const historyPush: Options = { history: "push" }
 
 // TODOs
-// merge grouping / light parameter
+// test light grouping
 // cleanup light settings/config
 // better ideas page
 // back button a bit confusing in expand mode
@@ -71,12 +71,14 @@ export default function IntersectionComponent({
 
   const [lightGroups, setLightGroups] = useQueryState(
     "lights",
-    parseAsArrayOf(createParser(LightSettingsParser).withDefault([DEFAULT_LIGHT_SETTINGS])).withDefault([[DEFAULT_LIGHT_SETTINGS]]),
+    parseAsArrayOf(
+      createParser(LightSettingsParser).withDefault([DEFAULT_LIGHT_SETTINGS]),
+    ).withDefault([[DEFAULT_LIGHT_SETTINGS]]),
   )
 
   const theLightGroups = new LightGroups(lightGroups)
 
-  const lightSettings = lightGroups.flatMap(lightGroup => lightGroup)
+  const lightSettings = lightGroups.flatMap((lightGroup) => lightGroup)
 
   const [expanded, setExpanded] = useQueryState(
     "e",
@@ -196,12 +198,20 @@ export default function IntersectionComponent({
     const idxEl = theLightGroups.lookup(lightIdx)
     const otherEl = theLightGroups.lookup(lightIdx + amount)
 
-    setLightGroups(theLightGroups.with(lightIdx, otherEl).with(lightIdx + amount, idxEl).raw())
+    setLightGroups(
+      theLightGroups
+        .with(lightIdx, otherEl)
+        .with(lightIdx + amount, idxEl)
+        .raw(),
+    )
     setSelectedStates(moveArr(selectedStates, lightIdx, amount))
   }
 
   const onAdd = () => {
-    setLightGroups([...lightGroups.map(x => [...x]), [DEFAULT_LIGHT_SETTINGS]])
+    setLightGroups([
+      ...lightGroups.map((x) => [...x]),
+      [DEFAULT_LIGHT_SETTINGS],
+    ])
     setSelectedStates([
       ...selectedStates,
       DEFAULT_LIGHT_SETTINGS.phases[0].state,
@@ -210,9 +220,6 @@ export default function IntersectionComponent({
   }
 
   const onDeleteOne = (lightIdx: number) => {
-    console.log(("del"))
-    console.log(theLightGroups.withDeleted(lightIdx).raw())
-
     setLightGroups(theLightGroups.withDeleted(lightIdx).raw())
     setSelectedStates([...selectedStates].filter((ls, i) => i != lightIdx))
     setUiMode("none")
@@ -291,8 +298,7 @@ export default function IntersectionComponent({
           key={`light-${groupIdx}-${inGroupIdx}`}
           sx={{
             ...groupBoxStyle,
-            borderColor:
-              lightGroup.length > 1 ? "primary.main" : "transparent",
+            borderColor: lightGroup.length > 1 ? "primary.main" : "transparent",
           }}
         >
           <LightCard

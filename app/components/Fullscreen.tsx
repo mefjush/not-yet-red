@@ -84,7 +84,9 @@ export default function Fullscreen({
   }
 
   const slides = lightGroups.raw().map((group, idx) => {
-    const groupChildren = group.map((_, inGroupIdx) => lightGroups.idLookup(idx, inGroupIdx)).map(lightIdx => children[lightIdx])
+    const groupChildren = group
+      .map((_, inGroupIdx) => lightGroups.idLookup(idx, inGroupIdx))
+      .map((lightIdx) => children[lightIdx])
     const render = groupToRender(groupChildren)
     return (
       <SwiperSlide key={idx}>
