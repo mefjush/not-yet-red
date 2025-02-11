@@ -41,6 +41,7 @@ export type SelectionMode = "none" | "some" | "all" | "set-all" | "set-none"
 const historyPush: Options = { history: "push" }
 
 // TODOs
+// join/split buttons behave weird when clicking
 // test light grouping
 // cleanup light settings/config
 // better ideas page
@@ -262,9 +263,9 @@ export default function IntersectionComponent({
     py: 1,
   }
 
-  const joinButton = (groupIdx: number): ReactElement => (
+  const joinButton = (groupIdx: number, lightIdx: number): ReactElement => (
     <Box
-      key={`join-${groupIdx}`}
+      key={`join-${lightIdx}`}
       sx={{ ...groupBoxStyle, borderColor: "transparent" }}
     >
       <Button
@@ -276,9 +277,9 @@ export default function IntersectionComponent({
     </Box>
   )
 
-  const splitButton = (groupIdx: number, splitIdx: number): ReactElement => (
+  const splitButton = (groupIdx: number, splitIdx: number, lightIdx: number): ReactElement => (
     <Box
-      key={`split-${groupIdx}-${splitIdx}`}
+      key={`split-${lightIdx}`}
       sx={{ ...groupBoxStyle, borderColor: "primary.main" }}
     >
       <Button
@@ -295,7 +296,7 @@ export default function IntersectionComponent({
       const lightIdx = theLightGroups.idLookup(groupIdx, inGroupIdx)
       const card = (
         <Box
-          key={`light-${groupIdx}-${inGroupIdx}`}
+          key={`light-${lightIdx}`}
           sx={{
             ...groupBoxStyle,
             borderColor: lightGroup.length > 1 ? "primary.main" : "transparent",
@@ -314,12 +315,14 @@ export default function IntersectionComponent({
         </Box>
       )
       return inGroupIdx < lightGroup.length - 1
-        ? [card, splitButton(groupIdx, inGroupIdx)]
+        ? [card, splitButton(groupIdx, inGroupIdx, lightIdx)]
         : [card]
     })
 
+    const lightIdx = theLightGroups.idLookup(groupIdx, lightGroup.length - 1)
+
     return groupIdx < lightGroups.length - 1
-      ? [...groupCards, joinButton(groupIdx)]
+      ? [...groupCards, joinButton(groupIdx, lightIdx)]
       : groupCards
   })
 
