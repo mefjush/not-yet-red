@@ -33,6 +33,7 @@ import CompressIcon from "@mui/icons-material/Compress"
 import ExpandIcon from "@mui/icons-material/Expand"
 import LightCard from "./LightCard"
 import { State } from "../domain/State"
+import LightGroups from "../domain/LightGroups"
 
 export type UiMode = "none" | "share" | "fullscreen"
 export type SelectionMode = "none" | "some" | "all" | "set-all" | "set-none"
@@ -54,11 +55,6 @@ const historyPush: Options = { history: "push" }
 // footer description
 // android app
 
-type LightId = {
-  groupIdx: number
-  inGroupIdx: number
-}
-
 export default function IntersectionComponent({
   uiMode,
   setUiMode,
@@ -78,6 +74,8 @@ export default function IntersectionComponent({
     parseAsArrayOf(createParser(LightSettingsParser).withDefault([DEFAULT_LIGHT_SETTINGS])).withDefault([[DEFAULT_LIGHT_SETTINGS]]),
   )
 
+  const theLightGroups = new LightGroups(lightGroups)
+
   const lightSettings = lightGroups.flatMap(lightGroup => lightGroup)
 
   const buildGrouping = () => {
@@ -94,35 +92,7 @@ export default function IntersectionComponent({
     return grouping
   }
 
-  const buildIndexing = () => {
-    const indexing: LightId[] = []
-    let lightIdx  = 0
-    for (let lightGroupIdx = 0; lightGroupIdx < lightGroups.length; lightGroupIdx++) {
-      let inGroupIdx = 0
-      for (let light of lightGroups[lightGroupIdx]) {
-        indexing[lightIdx] = {
-          groupIdx: lightGroupIdx,
-          inGroupIdx: inGroupIdx
-        }
-        lightIdx += 1
-        inGroupIdx +=1
-      }
-    }
-    return indexing
-  }
-
-  const lookup = (lightIdx: number): LightSettings => {
-    const lightId = indexing[lightIdx]
-    return lightGroups[lightId.groupIdx][lightId.inGroupIdx]
-  }
-
-  const set = (lightGroups: LightSettings[][], lightIdx: number, lightSettings: LightSettings) => {
-    const lightId = indexing[lightIdx]
-    lightGroups[lightId.groupIdx][lightId.inGroupIdx] = lightSettings
-  }
-
   const grouping: number[][] = buildGrouping()
-  const indexing: LightId[] = buildIndexing()
 
   const [expanded, setExpanded] = useQueryState(
     "e",
@@ -171,13 +141,7 @@ export default function IntersectionComponent({
   const clock = new Clock(timeCorrection)
 
   const updateLightSettings = (settings: LightSettings, index: number) => {
-    const copy = [...lightGroups.map(x => [...x])]
-    const groupIdx: number = indexing[index].groupIdx
-    const inGroupIdx: number = indexing[index].inGroupIdx
-    copy[groupIdx][inGroupIdx] = settings
-
-    setLightGroups(copy)
-
+    setLightGroups(theLightGroups.with(index, settings).raw())
     setCurrentTimestamp(clock.now())
   }
 
@@ -224,24 +188,11 @@ export default function IntersectionComponent({
   }
 
   const onUngroup = (groupIdx: number, splitIdx: number) => {
-    const groupLeft = lightGroups[groupIdx].filter((x, idx) => idx <= splitIdx)
-    const groupRight = lightGroups[groupIdx].filter((x, idx) => idx > splitIdx)
-    const newGrouping = lightGroups.flatMap((group, idx) =>
-      idx == groupIdx ? [groupLeft, groupRight] : [group],
-    )
-    setLightGroups(newGrouping)
+    setLightGroups(theLightGroups.ungrouped(groupIdx, splitIdx).raw())
   }
 
   const onGroupDown = (groupIdx: number) => {
-    const initAcc: LightSettings[][] = []
-    const newGrouping = lightGroups.reduce(
-      (acc, group, idx) =>
-        idx != groupIdx + 1
-          ? [...acc, group]
-          : [...acc.slice(0, -1), [...acc[acc.length - 1], ...group]],
-      initAcc,
-    )
-    setLightGroups(newGrouping)
+    setLightGroups(theLightGroups.groupedDown(groupIdx).raw())
   }
 
   const onMove = (lightIdx: number, amount: number) => {
@@ -254,23 +205,14 @@ export default function IntersectionComponent({
         .toSpliced(lightIdx + amount, 0, arr[lightIdx])
     }
 
-    if (lightIdx + amount < 0 || lightIdx + amount >= indexing.length) {
+    if (lightIdx + amount < 0 || lightIdx + amount >= theLightGroups.size()) {
       return
     }
 
-    const copy = [...lightGroups.map(x => [...x])]
+    const idxEl = theLightGroups.lookup(lightIdx)
+    const otherEl = theLightGroups.lookup(lightIdx + amount)
 
-    const groupIdx: number = indexing[lightIdx].groupIdx
-    const inGroupIdx: number = indexing[lightIdx].inGroupIdx
-
-    const otherGroupIdx: number = indexing[lightIdx + amount].groupIdx
-    const otherInGroupIdx: number = indexing[lightIdx + amount].inGroupIdx
-
-    const tmp = copy[groupIdx][inGroupIdx]
-    copy[groupIdx][inGroupIdx] = copy[otherGroupIdx][otherInGroupIdx]
-    copy[otherGroupIdx][otherInGroupIdx] = tmp
-
-    setLightGroups(copy)
+    setLightGroups(theLightGroups.with(lightIdx, otherEl).with(lightIdx + amount, idxEl).raw())
     setSelectedStates(moveArr(selectedStates, lightIdx, amount))
   }
 
@@ -284,12 +226,10 @@ export default function IntersectionComponent({
   }
 
   const onDeleteOne = (lightIdx: number) => {
-    const copy = [...lightGroups.map(x => [...x])]
-    const groupIdx: number = indexing[lightIdx].groupIdx
-    const inGroupIdx: number = indexing[lightIdx].inGroupIdx
-    const group = copy[groupIdx]
-    delete group[inGroupIdx]
-    setLightGroups(copy.filter(group => group.length > 0))
+    console.log(("del"))
+    console.log(theLightGroups.withDeleted(lightIdx).raw())
+
+    setLightGroups(theLightGroups.withDeleted(lightIdx).raw())
     setSelectedStates([...selectedStates].filter((ls, i) => i != lightIdx))
     setUiMode("none")
     setExpanded(null)
