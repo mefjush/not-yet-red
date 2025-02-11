@@ -78,22 +78,6 @@ export default function IntersectionComponent({
 
   const lightSettings = lightGroups.flatMap(lightGroup => lightGroup)
 
-  const buildGrouping = () => {
-    const grouping = []
-    let lightIdx  = 0
-    for (let lightGroup of lightGroups) {
-      let group: number[] = []
-      for (let light of lightGroup) {
-        group.push(lightIdx)
-        lightIdx += 1
-      }
-      grouping.push(group)
-    }
-    return grouping
-  }
-
-  const grouping: number[][] = buildGrouping()
-
   const [expanded, setExpanded] = useQueryState(
     "e",
     parseAsInteger.withOptions(historyPush),
@@ -299,15 +283,16 @@ export default function IntersectionComponent({
     </Box>
   )
 
-  const intersectionGroups = grouping.flatMap((lightIndices, groupIdx) => {
-    const groupCards = lightIndices.flatMap((lightIdx, inGroupIdx) => {
+  const intersectionGroups = lightGroups.flatMap((lightGroup, groupIdx) => {
+    const groupCards = lightGroup.flatMap((lightSetting, inGroupIdx) => {
+      const lightIdx = theLightGroups.idLookup(groupIdx, inGroupIdx)
       const card = (
         <Box
-          key={`light-${lightIdx}`}
+          key={`light-${groupIdx}-${inGroupIdx}`}
           sx={{
             ...groupBoxStyle,
             borderColor:
-              lightIndices.length > 1 ? "primary.main" : "transparent",
+              lightGroup.length > 1 ? "primary.main" : "transparent",
           }}
         >
           <LightCard
@@ -322,12 +307,12 @@ export default function IntersectionComponent({
           />
         </Box>
       )
-      return inGroupIdx < lightIndices.length - 1
+      return inGroupIdx < lightGroup.length - 1
         ? [card, splitButton(groupIdx, inGroupIdx)]
         : [card]
     })
 
-    return groupIdx < grouping.length - 1
+    return groupIdx < lightGroups.length - 1
       ? [...groupCards, joinButton(groupIdx)]
       : groupCards
   })
@@ -358,7 +343,7 @@ export default function IntersectionComponent({
       <Fullscreen
         enabled={uiMode == "fullscreen"}
         onDisabled={exitUiMode}
-        grouping={grouping}
+        lightGroups={theLightGroups}
       >
         {fullscreenContents}
       </Fullscreen>

@@ -8,17 +8,18 @@ import { Swiper, SwiperSlide } from "swiper/react"
 import { Pagination } from "swiper/modules"
 import "swiper/css"
 import "swiper/css/pagination"
+import LightGroups from "../domain/LightGroups"
 
 export default function Fullscreen({
   enabled,
   children,
   onDisabled,
-  grouping,
+  lightGroups,
 }: {
   enabled: boolean
   children: ReactElement[]
   onDisabled: () => void
-  grouping: number[][]
+  lightGroups: LightGroups
 }) {
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -82,10 +83,9 @@ export default function Fullscreen({
     )
   }
 
-  const slides = grouping.map((group, idx) => {
-    const groupChildren = groupToRender(
-      group.map((lightIdx) => children[lightIdx]),
-    )
+  const slides = lightGroups.raw().map((group, idx) => {
+    const groupChildren = group.map((_, inGroupIdx) => lightGroups.idLookup(idx, inGroupIdx)).map(lightIdx => children[lightIdx])
+    const render = groupToRender(groupChildren)
     return (
       <SwiperSlide key={idx}>
         <Grid
@@ -95,7 +95,7 @@ export default function Fullscreen({
           sx={{ height: "100%", width: "100%" }}
         >
           <Stack direction="row" alignItems="flex-end" spacing={0}>
-            {groupChildren}
+            {render}
           </Stack>
         </Grid>
       </SwiperSlide>

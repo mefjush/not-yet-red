@@ -32,6 +32,10 @@ export default class LightGroups {
     return this.lightGroups[lightId.groupIdx][lightId.inGroupIdx]
   }
 
+  idLookup(groupIdx: number, inGroupIdx: number) {
+    return this.lightGroups.filter((group, idx) => idx < groupIdx).reduce((acc, group) => acc + group.length, 0) + inGroupIdx
+  }
+
   with(lightIdx: number, lightSettings: LightSettings) {
     const lightId = this.indexing[lightIdx]
     const copy = this.copied()
@@ -83,4 +87,5 @@ export default class LightGroups {
   raw(): LightSettings[][] {
     return this.lightGroups
   }
+
 }
