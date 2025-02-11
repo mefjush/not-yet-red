@@ -55,6 +55,10 @@ const historyPush: Options = { history: "push" }
 // footer description
 // android app
 
+const LightGroupsParser = parseAsArrayOf(
+  createParser(LightSettingsParser).withDefault([DEFAULT_LIGHT_SETTINGS]),
+).withDefault([[DEFAULT_LIGHT_SETTINGS]])
+
 export default function IntersectionComponent({
   uiMode,
   setUiMode,
@@ -71,14 +75,8 @@ export default function IntersectionComponent({
 
   const [lightGroups, setLightGroups] = useQueryState(
     "lights",
-    parseAsArrayOf(
-      createParser(LightSettingsParser).withDefault([DEFAULT_LIGHT_SETTINGS]),
-    ).withDefault([[DEFAULT_LIGHT_SETTINGS]]),
+    LightGroupsParser,
   )
-
-  const theLightGroups = new LightGroups(lightGroups)
-
-  const lightSettings = lightGroups.flatMap((lightGroup) => lightGroup)
 
   const [expanded, setExpanded] = useQueryState(
     "e",
@@ -89,10 +87,9 @@ export default function IntersectionComponent({
 
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
-  const [selected, setSelected] = useState<number[]>([])
+  const theLightGroups = new LightGroups(lightGroups)
 
-  const effectivelySelected =
-    selected.length == 0 ? lightSettings.map((ls, index) => index) : selected
+  const lightSettings = lightGroups.flatMap((lightGroup) => lightGroup)
 
   const [selectedStates, setSelectedStates] = useState(
     lightSettings.map((ls) => ls.phases[0].state),
@@ -143,23 +140,11 @@ export default function IntersectionComponent({
       intersectionSettings.cycleLength,
   }
 
-  const enterUiMode = (idx: number[], uiMode: UiMode) => {
-    setSelected(idx)
-    setUiMode(uiMode)
-  }
+  const exitUiMode = () => setUiMode("none")
 
-  const exitUiMode = () => {
-    setUiMode("none")
-    setSelected([])
-  }
+  const enterFullscreenMode = () => setUiMode("fullscreen")
 
-  const enterFullscreenMode = (idx: number[]) => {
-    enterUiMode(idx, "fullscreen")
-  }
-
-  const enterShareMode = (idx: number[]) => {
-    enterUiMode(idx, "share")
-  }
+  const enterShareMode = () => setUiMode("share")
 
   const initTimeSync = () =>
     timeSync()
@@ -182,29 +167,27 @@ export default function IntersectionComponent({
   }
 
   const onMove = (lightIdx: number, amount: number) => {
-    const moveArr = (arr: any[], lightIdx: number, amount: number) => {
-      if (lightIdx + amount < 0 || lightIdx + amount >= arr.length) {
-        return arr
-      }
-      return arr
-        .filter((_, i) => i != lightIdx)
-        .toSpliced(lightIdx + amount, 0, arr[lightIdx])
-    }
+    const otherIdx = lightIdx + amount
 
-    if (lightIdx + amount < 0 || lightIdx + amount >= theLightGroups.size()) {
+    if (otherIdx < 0 || otherIdx >= theLightGroups.size()) {
       return
     }
 
-    const idxEl = theLightGroups.lookup(lightIdx)
-    const otherEl = theLightGroups.lookup(lightIdx + amount)
+    const movedEl = theLightGroups.lookup(lightIdx)
+    const otherEl = theLightGroups.lookup(otherIdx)
 
     setLightGroups(
       theLightGroups
         .withLightReplaced(lightIdx, otherEl)
-        .withLightReplaced(lightIdx + amount, idxEl)
-        .raw()
+        .withLightReplaced(otherIdx, movedEl)
+        .raw(),
     )
-    setSelectedStates(moveArr(selectedStates, lightIdx, amount))
+
+    setSelectedStates(
+      selectedStates
+        .filter((_, i) => i != lightIdx)
+        .toSpliced(otherIdx, 0, selectedStates[lightIdx]),
+    )
   }
 
   const onAdd = () => {
@@ -224,11 +207,7 @@ export default function IntersectionComponent({
   }
 
   const getShareUrl = () => {
-    const selectedLightSettings = lightSettings.filter((ls, index) =>
-      effectivelySelected.includes(index)
-    )
-
-    const search = `?intersection=${IntersectionSettingsParser.serialize(intersectionSettings)}&lights=${LightSettingsParser.serialize(selectedLightSettings)}`
+    const search = `?intersection=${IntersectionSettingsParser.serialize(intersectionSettings)}&lights=${LightGroupsParser.serialize(theLightGroups.raw())}`
 
     const baseUrl =
       typeof window === "undefined"
@@ -273,7 +252,11 @@ export default function IntersectionComponent({
     </Box>
   )
 
-  const splitButton = (groupIdx: number, splitIdx: number, lightIdx: number): ReactElement => (
+  const splitButton = (
+    groupIdx: number,
+    splitIdx: number,
+    lightIdx: number,
+  ): ReactElement => (
     <Box
       key={`split-${lightIdx}`}
       sx={{ ...groupBoxStyle, borderColor: "primary.main" }}
@@ -370,9 +353,9 @@ export default function IntersectionComponent({
           onLightSettingsChange={(settings: LightSettings) =>
             updateLightSettings(settings, expanded)
           }
-          onFullscreen={() => enterFullscreenMode([expanded])}
+          onFullscreen={enterFullscreenMode}
           onDelete={() => onDeleteOne(expanded)}
-          onShare={() => enterShareMode([expanded])}
+          onShare={enterShareMode}
           setSelectedState={(state: State) =>
             updateSelectedState(state, expanded)
           }

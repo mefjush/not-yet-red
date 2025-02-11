@@ -6,7 +6,6 @@ export type LightId = {
 }
 
 export default class LightGroups {
-
   indexing: LightId[]
 
   constructor(private lightGroups: LightSettings[][]) {
@@ -51,12 +50,10 @@ export default class LightGroups {
   }
 
   withLightAdded(lightSettings: LightSettings): LightGroups {
-    return new LightGroups(
-      [
-        ...this.lightGroups.map((x) => [...x]),
-        [lightSettings],
-      ]
-    )
+    return new LightGroups([
+      ...this.lightGroups.map((x) => [...x]),
+      [lightSettings],
+    ])
   }
 
   ungrouped(groupIdx: number, splitIdx: number) {
