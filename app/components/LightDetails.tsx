@@ -11,7 +11,6 @@ import LightHead from "./LightHead"
 import TrafficLight from "../domain/TrafficLight"
 import PhaseControls, { StatePicker } from "./PhaseControls"
 import PresetMenu from "./PresetMenu"
-import { LightRecord } from "./LightCard"
 import { useRouter } from "next/navigation"
 import BackButton from "./BackButton"
 import { State } from "../domain/State"
@@ -24,12 +23,8 @@ export default function LightDetails({
   light,
   selectedState,
   onClose,
-  onFullscreen,
-  onShare,
-  onDelete,
   onLightSettingsChange,
   setSelectedState,
-  lightRecord,
 }: {
   open: boolean
   lightConfig: LightConfig
@@ -37,12 +32,8 @@ export default function LightDetails({
   light: TrafficLight
   selectedState: State
   onClose: () => void
-  onFullscreen: () => void
-  onShare: () => void
-  onDelete: () => void
   onLightSettingsChange: (lightSettings: LightSettings) => void
   setSelectedState: (state: State) => void
-  lightRecord: LightRecord
 }) {
   const router = useRouter()
 
@@ -92,7 +83,7 @@ export default function LightDetails({
           <Grid size={{ xs: 12, md: 4, lg: 3 }}>
             <Typography gutterBottom>Preset</Typography>
             <PresetMenu
-              lightConfig={lightRecord.lightConfig}
+              lightConfig={lightConfig}
               selectedState={selectedState}
               onLightSettingsChange={onLightSettingsChange}
               setSelectedState={setSelectedState}
@@ -120,7 +111,7 @@ export default function LightDetails({
 
           <Grid size={{ xs: 12 }}>
             <StatePicker
-              states={lightRecord.lightConfig.phases.map(
+              states={lightConfig.phases.map(
                 (phase) => phase.state,
               )}
               setSelectedState={setSelectedState}

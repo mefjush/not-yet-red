@@ -26,31 +26,29 @@ import MoveUpIcon from "@mui/icons-material/MoveUp"
 import MoveDownIcon from "@mui/icons-material/MoveDown"
 import { State } from "../domain/State"
 
-export type LightRecord = {
-  light: TrafficLight
-  lightConfig: LightConfig
-  expanded: boolean
-  onLightSettingsChange: (lightSettings: LightSettings) => void
-  setExpanded: (expanded: boolean) => void
-}
-
 export default function LightCard({
   currentTimestamp,
   selectedState,
   setSelectedState,
   onDelete,
-  lightRecord,
   onMove,
+  light,
+  lightConfig,
+  expanded,
+  onLightSettingsChange,
+  setExpanded,
 }: {
   currentTimestamp: number
   selectedState: State
   setSelectedState: (state: State) => void
   onDelete: () => void
-  lightRecord: LightRecord
   onMove: (amount: number) => void
+  light: TrafficLight
+  lightConfig: LightConfig
+  expanded: boolean
+  onLightSettingsChange: (lightSettings: LightSettings) => void
+  setExpanded: (expanded: boolean) => void
 }) {
-  const { light, lightConfig, expanded, onLightSettingsChange, setExpanded } =
-    lightRecord
 
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
     null,
@@ -106,7 +104,7 @@ export default function LightCard({
       <CardActions disableSpacing>
         <Box sx={{ ml: 1 }}>
           <StatePicker
-            states={lightRecord.lightConfig.phases.map((phase) => phase.state)}
+            states={lightConfig.phases.map((phase) => phase.state)}
             setSelectedState={setSelectedState}
             selectedState={selectedState}
           />

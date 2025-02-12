@@ -28,7 +28,6 @@ import {
   useQueryState,
 } from "nuqs"
 import IntersectionSettingsPanel from "./IntersectionSettingsPanel"
-import { LightRecord } from "./LightCard"
 import LightCard from "./LightCard"
 import { State } from "../domain/State"
 import LightGroups from "../domain/LightGroups"
@@ -105,15 +104,6 @@ export default function IntersectionComponent({
   const lights = lightConfigs.map(
     (lightConfig) => new TrafficLight(lightConfig, hasFailed),
   )
-
-  const lightRecords: LightRecord[] = lightConfigs.map((_, index) => ({
-    light: lights[index],
-    lightConfig: lightConfigs[index],
-    expanded: expanded == index,
-    onLightSettingsChange: (settings: LightSettings) =>
-      updateLightSettings(settings, index),
-    setExpanded: (expanded: boolean) => setExpanded(expanded ? index : null),
-  }))
 
   const clock = new Clock(timeCorrection)
 
@@ -268,12 +258,14 @@ export default function IntersectionComponent({
           <LightCard
             currentTimestamp={currentTimestamp}
             selectedState={selectedStates[lightIdx]}
-            setSelectedState={(state: State) =>
-              updateSelectedState(state, lightIdx)
-            }
+            setSelectedState={(state: State) => updateSelectedState(state, lightIdx)}
             onDelete={() => onDeleteOne(lightIdx)}
-            lightRecord={lightRecords[lightIdx]}
-            onMove={(amount) => onMove(lightIdx, amount)}
+            onMove={(amount) => onMove(lightIdx, amount)} 
+            light={lights[lightIdx]}
+            lightConfig={lightConfigs[lightIdx]}
+            expanded={expanded == lightIdx}
+            onLightSettingsChange={(settings: LightSettings) => updateLightSettings(settings, lightIdx)}
+            setExpanded={(expanded: boolean) => setExpanded(expanded ? lightIdx : null)}
           />
         </Box>
       )
@@ -337,13 +329,9 @@ export default function IntersectionComponent({
           onLightSettingsChange={(settings: LightSettings) =>
             updateLightSettings(settings, expanded)
           }
-          onFullscreen={enterFullscreenMode}
-          onDelete={() => onDeleteOne(expanded)}
-          onShare={enterShareMode}
           setSelectedState={(state: State) =>
             updateSelectedState(state, expanded)
           }
-          lightRecord={lightRecords[expanded]}
         />
       )}
 
