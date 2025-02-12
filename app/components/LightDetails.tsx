@@ -1,8 +1,6 @@
 import {
   Dialog,
   Button,
-  AppBar,
-  Toolbar,
   Typography,
   Stack,
 } from "@mui/material"
@@ -17,6 +15,7 @@ import { LightRecord } from "./LightCard"
 import { useRouter } from "next/navigation"
 import BackButton from "./BackButton"
 import { State } from "../domain/State"
+import AppToolbar from "./AppToolbar"
 
 export default function LightDetails({
   open,
@@ -63,30 +62,26 @@ export default function LightDetails({
 
   return (
     <Dialog fullScreen open={open} onClose={handleClose}>
-      <AppBar className="mui-fixed">
-        <Toolbar>
-          <Stack direction="row" sx={{ flex: 1 }}>
-            <BackButton />
-            <Typography
-              sx={{ display: "flex", alignItems: "center" }}
-              variant="h6"
-              color="inherit"
-            >
-              Traffic Light
-            </Typography>
-          </Stack>
-
-          <Button
+      <AppToolbar>
+        <Stack direction="row" sx={{ flex: 1 }}>
+          <BackButton />
+          <Typography
+            sx={{ display: "flex", alignItems: "center" }}
+            variant="h6"
             color="inherit"
-            onClick={handleClose}
-            style={{ marginRight: "-15px" }}
           >
-            Ok
-          </Button>
-        </Toolbar>
-      </AppBar>
+            Traffic Light
+          </Typography>
+        </Stack>
 
-      <Toolbar />
+        <Button
+          color="inherit"
+          onClick={handleClose}
+          style={{ marginRight: "-15px" }}
+        >
+          Ok
+        </Button>
+      </AppToolbar>
 
       <Stack spacing={2} sx={{ p: 3 }}>
         <Grid

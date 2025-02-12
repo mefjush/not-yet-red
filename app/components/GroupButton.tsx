@@ -19,9 +19,9 @@ export default function GroupButton({
     >
       <Button
         onClick={onClick}
-        startIcon={grouped ? <CompressIcon /> : <ExpandIcon />}
+        startIcon={grouped ? <ExpandIcon /> : <CompressIcon />}
       >
-        { grouped ? "Group" : "Split" }
+        { grouped ? "Split" : "Group" }
       </Button>
     </Box>
   )
