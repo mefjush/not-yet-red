@@ -87,10 +87,10 @@ export default function IntersectionComponent({
 
   const theLightGroups = new LightGroups(lightGroups)
 
-  const lightSettings = lightGroups.flatMap((lightGroup) => lightGroup)
+  const lightConfigs = lightGroups.flatMap((x) => x).map((lightSetting) => new LightConfig(intersectionSettings, lightSetting))
 
   const [selectedStates, setSelectedStates] = useState(
-    lightSettings.map((ls) => ls.phases[0].state),
+    lightConfigs.map((lightConfig) => lightConfig.phases[0].state)
   )
 
   const theme = useTheme()
@@ -101,10 +101,6 @@ export default function IntersectionComponent({
   )
 
   const hasFailed = failure.currentState(currentTimestamp)
-
-  const lightConfigs = lightSettings.map(
-    (lightSetting) => new LightConfig(intersectionSettings, lightSetting),
-  )
 
   const lights = lightConfigs.map(
     (lightConfig) => new TrafficLight(lightConfig, hasFailed),
@@ -194,7 +190,7 @@ export default function IntersectionComponent({
       ...selectedStates,
       DEFAULT_LIGHT_SETTINGS.phases[0].state,
     ])
-    setExpanded(lightSettings.length)
+    setExpanded(lightConfigs.length)
   }
 
   const onDeleteOne = (lightIdx: number) => {
