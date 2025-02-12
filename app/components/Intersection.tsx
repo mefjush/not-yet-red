@@ -8,7 +8,7 @@ import LightConfig, {
   DEFAULT_LIGHT_SETTINGS,
 } from "../domain/LightConfig"
 import Failure from "../domain/Failure"
-import { Box, Button, Fab, Stack, useTheme } from "@mui/material"
+import { Box, Fab, Stack, useTheme } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import { LightSettingsParser, IntersectionSettingsParser } from "../url"
 import IntersectionSettings, {
@@ -29,11 +29,10 @@ import {
 } from "nuqs"
 import IntersectionSettingsPanel from "./IntersectionSettingsPanel"
 import { LightRecord } from "./LightCard"
-import CompressIcon from "@mui/icons-material/Compress"
-import ExpandIcon from "@mui/icons-material/Expand"
 import LightCard from "./LightCard"
 import { State } from "../domain/State"
 import LightGroups from "../domain/LightGroups"
+import GroupButton from "./GroupButton"
 
 export type UiMode = "none" | "share" | "fullscreen"
 export type SelectionMode = "none" | "some" | "all" | "set-all" | "set-none"
@@ -157,7 +156,7 @@ export default function IntersectionComponent({
     setCurrentTimestamp(clock.now())
   }
 
-  const onUngroup = (groupIdx: number, splitIdx: number) => {
+  const onSplit = (groupIdx: number, splitIdx: number) => {
     setLightGroups(theLightGroups.ungrouped(groupIdx, splitIdx).raw())
   }
 
@@ -238,17 +237,12 @@ export default function IntersectionComponent({
   }
 
   const joinButton = (groupIdx: number, lightIdx: number): ReactElement => (
-    <Box
-      key={`join-${lightIdx}`}
+    <GroupButton
+      grouped={false}
+      key={`group-button-${lightIdx}`}
+      onClick={() => onGroupDown(groupIdx)}
       sx={{ ...groupBoxStyle, borderColor: "transparent" }}
-    >
-      <Button
-        onClick={() => onGroupDown(groupIdx)}
-        startIcon={<CompressIcon />}
-      >
-        Group
-      </Button>
-    </Box>
+    />
   )
 
   const splitButton = (
@@ -256,17 +250,12 @@ export default function IntersectionComponent({
     splitIdx: number,
     lightIdx: number,
   ): ReactElement => (
-    <Box
-      key={`split-${lightIdx}`}
+    <GroupButton
+      grouped={true}
+      key={`group-button-${lightIdx}`}
+      onClick={() => onSplit(groupIdx, splitIdx)}
       sx={{ ...groupBoxStyle, borderColor: "primary.main" }}
-    >
-      <Button
-        onClick={() => onUngroup(groupIdx, splitIdx)}
-        startIcon={<ExpandIcon />}
-      >
-        Split
-      </Button>
-    </Box>
+    />
   )
 
   const intersectionGroups = lightGroups.flatMap((lightGroup, groupIdx) => {
