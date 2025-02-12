@@ -80,7 +80,7 @@ export default class LightConfig {
     const preset = PRESETS[presetId]
     const newPhases = preset.states.map(
       (state) =>
-        this.phases.find((ph) => ph.state == state) ||
+        this.phases.find((phase) => phase.state == state) ||
         new Phase(state, DEFAULT_NEW_PHASE_DURATION),
     )
     return { offset: this.offset, phases: newPhases, presetId: presetId }
