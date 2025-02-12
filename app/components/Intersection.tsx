@@ -126,10 +126,6 @@ export default function IntersectionComponent({
 
   const exitUiMode = () => setUiMode("none")
 
-  const enterFullscreenMode = () => setUiMode("fullscreen")
-
-  const enterShareMode = () => setUiMode("share")
-
   const initTimeSync = () =>
     timeSync()
       .then((correction) => setTimeCorrection(correction))
