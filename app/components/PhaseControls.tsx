@@ -37,13 +37,7 @@ const fix = (inVal: number, min?: number, max?: number, step?: number) => {
   return toEvent(outVal)
 }
 
-function DelayedTextField({
-  value,
-  onChange,
-}: {
-  value: number
-  onChange: (v: number) => void
-}) {
+function DelayedTextField({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const lastLegalValue = useRef(value)
   const [uiValue, setUiValue] = useState(value + "")
 
@@ -102,8 +96,7 @@ function PhaseControl({
   style?: React.CSSProperties
   onChange: (e: ChangeEvent) => void
 }) {
-  const [longPressInterval, setLongPressInterval] =
-    useState<NodeJS.Timeout | null>(null)
+  const [longPressInterval, setLongPressInterval] = useState<NodeJS.Timeout | null>(null)
 
   const clearLongPressInterval = () => {
     if (longPressInterval) {
@@ -149,10 +142,7 @@ function PhaseControl({
         >
           -
         </Button>
-        <DelayedTextField
-          value={value}
-          onChange={(val) => onChange(fix(val, min, max, step))}
-        />
+        <DelayedTextField value={value} onChange={(val) => onChange(fix(val, min, max, step))} />
         <Button
           {...bindInc()}
           color={color}
@@ -184,9 +174,7 @@ export function StatePicker({
   const entries = states.map((state, idx) => {
     const color = STATE_ATTRIBUTES[state].color
 
-    const radio = (
-      <Radio size="small" color={`${color}`} sx={{ color: `${color}.main` }} />
-    )
+    const radio = <Radio size="small" color={`${color}`} sx={{ color: `${color}.main` }} />
 
     return (
       <Stack direction="row" key={state}>
@@ -204,17 +192,10 @@ export function StatePicker({
         name="radio-buttons-group"
         value={selectedState}
         onChange={(event) =>
-          setSelectedState(
-            State[
-              (event.target as HTMLInputElement).value as keyof typeof State
-            ],
-          )
+          setSelectedState(State[(event.target as HTMLInputElement).value as keyof typeof State])
         }
       >
-        <Stack
-          direction={expanded ? "column" : "row"}
-          spacing={expanded ? 1 : 0}
-        >
+        <Stack direction={expanded ? "column" : "row"} spacing={expanded ? 1 : 0}>
           {entries}
         </Stack>
       </RadioGroup>
@@ -240,9 +221,7 @@ export default function PhaseControls({
         value={phase.duration / 1000}
         onChange={(e) => {
           setSelectedState(phase.state)
-          onLightSettingsChange(
-            lightConfig.withStateDuration(phase.state, e.target.value * 1000),
-          )
+          onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))
         }}
         color={phase.stateAttributes().color}
       />

@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  Box,
-  Slider,
-  Typography,
-  Input as MuiInput,
-  Stack,
-} from "@mui/material"
+import { Box, Slider, Typography, Input as MuiInput, Stack } from "@mui/material"
 import { styled } from "@mui/material/styles"
 
 const MInput = styled(MuiInput)({
@@ -57,9 +51,7 @@ export default function Input({
   }
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(
-      toEvent(event.target.value === "" ? 0 : Number(event.target.value)),
-    )
+    onChange(toEvent(event.target.value === "" ? 0 : Number(event.target.value)))
   }
 
   return (

@@ -18,10 +18,7 @@ export default function PresetMenu({
 }) {
   const generatePresetMenuItems = () => {
     return Object.values(PRESETS).map((preset) => {
-      const icon =
-        preset.symbolId != SymbolId.NONE
-          ? SYMBOLS[preset.symbolId].icon
-          : CircleIcon
+      const icon = preset.symbolId != SymbolId.NONE ? SYMBOLS[preset.symbolId].icon : CircleIcon
       const iconElement = createElement(icon, {})
       return (
         <MenuItem key={preset.presetId} value={preset.presetId}>

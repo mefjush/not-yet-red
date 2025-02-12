@@ -55,8 +55,7 @@ export default function AnimatedLogo() {
           color="inherit"
           sx={{ textDecoration: "none" }}
         >
-          <FadeGreen>Not</FadeGreen>.<FadeYellow>Yet</FadeYellow>.
-          <FadeRed>Red</FadeRed>
+          <FadeGreen>Not</FadeGreen>.<FadeYellow>Yet</FadeYellow>.<FadeRed>Red</FadeRed>
         </Typography>
       </HoverContainer>
     </Stack>

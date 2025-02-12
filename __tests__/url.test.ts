@@ -8,20 +8,14 @@ describe("Url", () => {
 
     console.log(serialized)
 
-    expect(LightSettingsParser.parse(serialized)).toEqual([
-      DEFAULT_LIGHT_SETTINGS,
-    ])
+    expect(LightSettingsParser.parse(serialized)).toEqual([DEFAULT_LIGHT_SETTINGS])
   })
 
   it("serializes IntersectionSettings back and forth", () => {
-    const serialized = IntersectionSettingsParser.serialize(
-      DEFAULT_INTERSECTION_SETTINGS,
-    )
+    const serialized = IntersectionSettingsParser.serialize(DEFAULT_INTERSECTION_SETTINGS)
 
     console.log(serialized)
 
-    expect(IntersectionSettingsParser.parse(serialized)).toEqual(
-      DEFAULT_INTERSECTION_SETTINGS,
-    )
+    expect(IntersectionSettingsParser.parse(serialized)).toEqual(DEFAULT_INTERSECTION_SETTINGS)
   })
 })

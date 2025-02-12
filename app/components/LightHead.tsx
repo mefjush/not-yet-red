@@ -10,12 +10,7 @@ import { SymbolId, SYMBOLS } from "../domain/Preset"
 
 const TRANSITION_DURATION = "300ms"
 
-const StyledImgAvatar = styled(Avatar)<AvatarProps>(({
-  theme,
-  color,
-  prefix,
-  itemType,
-}) => {
+const StyledImgAvatar = styled(Avatar)<AvatarProps>(({ theme, color, prefix, itemType }) => {
   let alphaCenter = prefix == "on" && itemType != "black-background" ? 1 : 0.15
   let alphaEdge = prefix == "on" ? 0.2 : 0.05
   let gradientEnd = prefix == "on" ? 80 : 100

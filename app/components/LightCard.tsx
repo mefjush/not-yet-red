@@ -49,10 +49,7 @@ export default function LightCard({
   onLightSettingsChange: (lightSettings: LightSettings) => void
   setExpanded: (expanded: boolean) => void
 }) {
-
-  const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
-    null,
-  )
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null)
 
   const menuOpen = Boolean(menuAnchorEl)
 
@@ -87,12 +84,7 @@ export default function LightCard({
   return (
     <Card>
       <CardActionArea onClick={() => setExpanded(!expanded)} sx={{ py: 1 }}>
-        <Grid
-          size={{ xs: 12 }}
-          display="flex"
-          justifyContent="center"
-          alignItems="flex-start"
-        >
+        <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="flex-start">
           {head}
         </Grid>
       </CardActionArea>

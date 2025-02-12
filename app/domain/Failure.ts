@@ -11,10 +11,7 @@ export default class Failure {
     const currentState = this.currentState(currentTimestamp)
 
     let bucket = Math.floor(currentTimestamp / this.duration) + 1
-    while (
-      this.state(bucket) == currentState ||
-      this.nextTransition < currentTimestamp
-    ) {
+    while (this.state(bucket) == currentState || this.nextTransition < currentTimestamp) {
       bucket += 1
       this.nextTransition = bucket * this.duration
       if (this.nextTransition - currentTimestamp > MAX_NEXT_TRANSITION_WAIT) {

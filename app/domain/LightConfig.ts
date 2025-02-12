@@ -46,8 +46,7 @@ export interface LightSettings {
   presetId: PresetId
 }
 
-const sortByOrder = (a: Phase, b: Phase) =>
-  a.stateAttributes().order - b.stateAttributes().order
+const sortByOrder = (a: Phase, b: Phase) => a.stateAttributes().order - b.stateAttributes().order
 const sortByPriority = (a: Phase, b: Phase) =>
   a.stateAttributes().priority - b.stateAttributes().priority
 
@@ -57,10 +56,7 @@ export default class LightConfig {
   phases: Phase[]
   preset: Preset
 
-  constructor(
-    intersectionSettings: IntersectionSettings,
-    lightSettings: LightSettings,
-  ) {
+  constructor(intersectionSettings: IntersectionSettings, lightSettings: LightSettings) {
     this.intersectionSettings = intersectionSettings
     this.offset = lightSettings.offset
     this.phases = this.rescale(intersectionSettings, lightSettings).phases
@@ -106,14 +102,8 @@ export default class LightConfig {
     return Math.round(duration / 1000) * 1000
   }
 
-  rescale(
-    intersectionSettings: IntersectionSettings,
-    lightSettings: LightSettings,
-  ): LightSettings {
-    const phasesLength = lightSettings.phases.reduce(
-      (acc, phase) => acc + phase.duration,
-      0,
-    )
+  rescale(intersectionSettings: IntersectionSettings, lightSettings: LightSettings): LightSettings {
+    const phasesLength = lightSettings.phases.reduce((acc, phase) => acc + phase.duration, 0)
     const diff = intersectionSettings.cycleLength - phasesLength
 
     if (Math.abs(diff) == 0) {
@@ -124,9 +114,7 @@ export default class LightConfig {
     const diffPerPhase = this.roundSeconds(diff / fixableCount)
     let diffRemainder = diff
 
-    let fixedPhases = lightSettings.phases.toSorted(
-      (a, b) => b.duration - a.duration,
-    )
+    let fixedPhases = lightSettings.phases.toSorted((a, b) => b.duration - a.duration)
 
     const fixStrategies = [
       { precondition: this.isFixable, applicableDiff: () => diffPerPhase },
@@ -134,20 +122,13 @@ export default class LightConfig {
       { precondition: (p: Phase) => true, applicableDiff: () => diffRemainder },
     ]
 
-    for (
-      let i = 0;
-      i < fixStrategies.length && Math.abs(diffRemainder) != 0;
-      i++
-    ) {
+    for (let i = 0; i < fixStrategies.length && Math.abs(diffRemainder) != 0; i++) {
       const strategy = fixStrategies[i]
       fixedPhases = fixedPhases.map((phase) => {
         if (!strategy.precondition(phase)) {
           return phase
         }
-        const applicableDiff = Math.max(
-          strategy.applicableDiff(),
-          -phase.duration,
-        )
+        const applicableDiff = Math.max(strategy.applicableDiff(), -phase.duration)
         diffRemainder -= applicableDiff
         return new Phase(phase.state, phase.duration + applicableDiff)
       })
@@ -188,12 +169,9 @@ export default class LightConfig {
 
     fixedRemaining.push(new Phase(state, newDuration + diff))
 
-    const newPhases = fixedRemaining
-      .concat(unfixablePhases)
-      .toSorted(sortByOrder)
+    const newPhases = fixedRemaining.concat(unfixablePhases).toSorted(sortByOrder)
 
-    const offsetDiff =
-      calculateStateOffset(this.phases) - calculateStateOffset(newPhases)
+    const offsetDiff = calculateStateOffset(this.phases) - calculateStateOffset(newPhases)
 
     return {
       offset: negativeSafeMod(this.offset + offsetDiff, this.cycleLength()),
@@ -203,9 +181,7 @@ export default class LightConfig {
   }
 
   getTimeRange(state: State): TimeRange {
-    const selectedPhaseIndex = this.phases.findIndex(
-      (phase) => phase.state == state,
-    )
+    const selectedPhaseIndex = this.phases.findIndex((phase) => phase.state == state)
     const start =
       this.offset +
       this.phases
@@ -220,13 +196,8 @@ export default class LightConfig {
   withStateTimeRange(state: State, newTimeRange: TimeRange): LightSettings {
     const currentTimeRange = this.getTimeRange(state)
 
-    const selectedPhaseIndex = this.phases.findIndex(
-      (phase) => phase.state == state,
-    )
-    const withNewDuration = this.withStateDuration(
-      state,
-      newTimeRange.duration(),
-    )
+    const selectedPhaseIndex = this.phases.findIndex((phase) => phase.state == state)
+    const withNewDuration = this.withStateDuration(state, newTimeRange.duration())
 
     const phaseStart = withNewDuration.phases
       .slice(0, selectedPhaseIndex)
@@ -237,8 +208,7 @@ export default class LightConfig {
 
     const finalOffset = adjustToRangeStart
       ? newTimeRange.start - phaseStart
-      : newTimeRange.end -
-        (phaseStart + withNewDuration.phases[selectedPhaseIndex].duration)
+      : newTimeRange.end - (phaseStart + withNewDuration.phases[selectedPhaseIndex].duration)
     return {
       ...withNewDuration,
       offset: negativeSafeMod(finalOffset, this.cycleLength()),

@@ -11,11 +11,7 @@ export default class LightGroups {
   constructor(private lightGroups: LightSettings[][]) {
     const indexing: LightId[] = []
     let lightIdx = 0
-    for (
-      let lightGroupIdx = 0;
-      lightGroupIdx < lightGroups.length;
-      lightGroupIdx++
-    ) {
+    for (let lightGroupIdx = 0; lightGroupIdx < lightGroups.length; lightGroupIdx++) {
       let inGroupIdx = 0
       for (let light of lightGroups[lightGroupIdx]) {
         indexing[lightIdx] = {
@@ -50,19 +46,12 @@ export default class LightGroups {
   }
 
   withLightAdded(lightSettings: LightSettings): LightGroups {
-    return new LightGroups([
-      ...this.lightGroups.map((x) => [...x]),
-      [lightSettings],
-    ])
+    return new LightGroups([...this.lightGroups.map((x) => [...x]), [lightSettings]])
   }
 
   ungrouped(groupIdx: number, splitIdx: number) {
-    const groupLeft = this.lightGroups[groupIdx].filter(
-      (x, idx) => idx <= splitIdx,
-    )
-    const groupRight = this.lightGroups[groupIdx].filter(
-      (x, idx) => idx > splitIdx,
-    )
+    const groupLeft = this.lightGroups[groupIdx].filter((x, idx) => idx <= splitIdx)
+    const groupRight = this.lightGroups[groupIdx].filter((x, idx) => idx > splitIdx)
     const newGrouping = this.lightGroups.flatMap((group, idx) =>
       idx == groupIdx ? [groupLeft, groupRight] : [group],
     )

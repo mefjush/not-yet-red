@@ -17,19 +17,14 @@ export default class Clock {
 
   register(listeners: ClockListener[]): Promise<number> {
     const currentTimestamp = this.now()
-    const timestamps = listeners.map((listener) =>
-      listener.nextStateTimestamp(currentTimestamp),
-    )
+    const timestamps = listeners.map((listener) => listener.nextStateTimestamp(currentTimestamp))
     const nextTimestamp = Math.min(...timestamps)
     const timeToNextTick = Math.max(0, nextTimestamp - currentTimestamp)
 
     const that = this
 
     return new Promise(function (resolve, reject) {
-      that.nextTimeout = setTimeout(
-        () => resolve(nextTimestamp),
-        timeToNextTick,
-      )
+      that.nextTimeout = setTimeout(() => resolve(nextTimestamp), timeToNextTick)
     })
   }
 

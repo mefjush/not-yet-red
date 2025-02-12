@@ -5,23 +5,16 @@ import ExpandIcon from "@mui/icons-material/Expand"
 export default function GroupButton({
   grouped,
   onClick,
-  sx = []
+  sx = [],
 }: {
   grouped: boolean
-  onClick: () => void,
+  onClick: () => void
   sx: SxProps<Theme>
 }) {
   return (
-    <Box
-      sx={[
-        ...(Array.isArray(sx) ? sx : [sx]),
-      ]}
-    >
-      <Button
-        onClick={onClick}
-        startIcon={grouped ? <ExpandIcon /> : <CompressIcon />}
-      >
-        { grouped ? "Split" : "Group" }
+    <Box sx={[...(Array.isArray(sx) ? sx : [sx])]}>
+      <Button onClick={onClick} startIcon={grouped ? <ExpandIcon /> : <CompressIcon />}>
+        {grouped ? "Split" : "Group"}
       </Button>
     </Box>
   )

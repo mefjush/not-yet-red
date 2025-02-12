@@ -2,14 +2,7 @@
 
 import { useState } from "react"
 import Input from "./Input"
-import {
-  Card,
-  CardContent,
-  Collapse,
-  Button,
-  CardActions,
-  CardActionArea,
-} from "@mui/material"
+import { Card, CardContent, Collapse, Button, CardActions, CardActionArea } from "@mui/material"
 import IntersectionSettings from "../domain/IntersectionSettings"
 import React from "react"
 import SettingsIcon from "@mui/icons-material/Settings"
@@ -22,9 +15,7 @@ export default function IntersectionSettingsPanel({
   initTimeSync,
 }: {
   intersectionSettings: IntersectionSettings
-  updateIntersectionSettings: (
-    intersectionSettings: IntersectionSettings,
-  ) => void
+  updateIntersectionSettings: (intersectionSettings: IntersectionSettings) => void
   timeCorrection: number
   setTimeCorrection: (timeCorrection: number) => void
   initTimeSync: () => void

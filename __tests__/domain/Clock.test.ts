@@ -19,8 +19,6 @@ describe("Clock", () => {
 
     const clock = new Clock(0)
 
-    return expect(clock.register([lateListener, earlyListener])).resolves.toBe(
-      10000,
-    )
+    return expect(clock.register([lateListener, earlyListener])).resolves.toBe(10000)
   })
 })

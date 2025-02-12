@@ -76,10 +76,6 @@ const theme = createTheme({
   },
 })
 
-export default function ThemeClient({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function ThemeClient({ children }: { children: React.ReactNode }) {
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>
 }

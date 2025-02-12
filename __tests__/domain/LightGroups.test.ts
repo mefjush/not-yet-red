@@ -1,7 +1,4 @@
-import {
-  DEFAULT_LIGHT_SETTINGS,
-  TEST_LIGHT_SETTINGS,
-} from "../../app/domain/LightConfig"
+import { DEFAULT_LIGHT_SETTINGS, TEST_LIGHT_SETTINGS } from "../../app/domain/LightConfig"
 import LightGroups from "../../app/domain/LightGroups"
 
 const light1 = TEST_LIGHT_SETTINGS

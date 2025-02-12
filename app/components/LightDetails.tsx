@@ -1,9 +1,4 @@
-import {
-  Dialog,
-  Button,
-  Typography,
-  Stack,
-} from "@mui/material"
+import { Dialog, Button, Typography, Stack } from "@mui/material"
 import Grid from "@mui/material/Grid2"
 import Timeline from "./Timeline"
 import LightConfig, { LightSettings } from "../domain/LightConfig"
@@ -56,30 +51,18 @@ export default function LightDetails({
       <AppToolbar>
         <Stack direction="row" sx={{ flex: 1 }}>
           <BackButton />
-          <Typography
-            sx={{ display: "flex", alignItems: "center" }}
-            variant="h6"
-            color="inherit"
-          >
+          <Typography sx={{ display: "flex", alignItems: "center" }} variant="h6" color="inherit">
             Traffic Light
           </Typography>
         </Stack>
 
-        <Button
-          color="inherit"
-          onClick={handleClose}
-          style={{ marginRight: "-15px" }}
-        >
+        <Button color="inherit" onClick={handleClose} style={{ marginRight: "-15px" }}>
           Ok
         </Button>
       </AppToolbar>
 
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Grid
-          container
-          sx={{ justifyContent: "space-between", alignItems: "center" }}
-          spacing={2}
-        >
+        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={2}>
           <Grid size={{ xs: 12, md: 4, lg: 3 }}>
             <Typography gutterBottom>Preset</Typography>
             <PresetMenu
@@ -90,12 +73,7 @@ export default function LightDetails({
             />
           </Grid>
 
-          <Grid
-            size={{ xs: 12 }}
-            display="flex"
-            justifyContent="center"
-            alignItems="flex-start"
-          >
+          <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="flex-start">
             {lightHead}
           </Grid>
 
@@ -111,9 +89,7 @@ export default function LightDetails({
 
           <Grid size={{ xs: 12 }}>
             <StatePicker
-              states={lightConfig.phases.map(
-                (phase) => phase.state,
-              )}
+              states={lightConfig.phases.map((phase) => phase.state)}
               setSelectedState={setSelectedState}
               selectedState={selectedState}
             />

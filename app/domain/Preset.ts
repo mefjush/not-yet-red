@@ -44,9 +44,7 @@ export class Symbol {
   }
 
   getIcon(segmentColor: SegmentColor): SvgIconComponent {
-    return segmentColor == "tlGreen" && this.iconGreen
-      ? this.iconGreen
-      : this.icon
+    return segmentColor == "tlGreen" && this.iconGreen ? this.iconGreen : this.icon
   }
 
   isInverted(segmentColor: SegmentColor): boolean {
@@ -100,49 +98,13 @@ export enum PresetId {
 
 export const PRESETS = Object.fromEntries(
   [
-    new Preset(
-      PresetId.FOUR_PHASE,
-      "4-Phase",
-      SymbolId.NONE,
-      THREE_COLOR,
-      FOUR_STATE,
-    ),
-    new Preset(
-      PresetId.THREE_PHASE,
-      "3-Phase",
-      SymbolId.NONE,
-      THREE_COLOR,
-      THREE_STATE,
-    ),
-    new Preset(
-      PresetId.PEDESTRIAN,
-      "Pedestrian",
-      SymbolId.PEDESTRIAN,
-      TWO_COLOR,
-      TWO_STATE,
-    ),
+    new Preset(PresetId.FOUR_PHASE, "4-Phase", SymbolId.NONE, THREE_COLOR, FOUR_STATE),
+    new Preset(PresetId.THREE_PHASE, "3-Phase", SymbolId.NONE, THREE_COLOR, THREE_STATE),
+    new Preset(PresetId.PEDESTRIAN, "Pedestrian", SymbolId.PEDESTRIAN, TWO_COLOR, TWO_STATE),
     new Preset(PresetId.LEFT, "Left", SymbolId.LEFT, THREE_COLOR, FOUR_STATE),
-    new Preset(
-      PresetId.RIGHT,
-      "Right",
-      SymbolId.RIGHT,
-      THREE_COLOR,
-      FOUR_STATE,
-    ),
-    new Preset(
-      PresetId.STRAIGHT,
-      "Straight",
-      SymbolId.STRAIGHT,
-      THREE_COLOR,
-      FOUR_STATE,
-    ),
-    new Preset(
-      PresetId.UTURN,
-      "U-Turn",
-      SymbolId.UTURN,
-      THREE_COLOR,
-      FOUR_STATE,
-    ),
+    new Preset(PresetId.RIGHT, "Right", SymbolId.RIGHT, THREE_COLOR, FOUR_STATE),
+    new Preset(PresetId.STRAIGHT, "Straight", SymbolId.STRAIGHT, THREE_COLOR, FOUR_STATE),
+    new Preset(PresetId.UTURN, "U-Turn", SymbolId.UTURN, THREE_COLOR, FOUR_STATE),
     new Preset(
       PresetId.CONDITIONAL_RIGHT,
       "Conditional Right",

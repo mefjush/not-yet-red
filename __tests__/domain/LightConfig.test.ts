@@ -212,10 +212,7 @@ describe("LightConfig", () => {
   })
 
   it("dragging maxed out red right thumb results in offset change", () => {
-    const lightConfig = new LightConfig(
-      intersectionSettings,
-      MAXED_OUT_TEST_LIGHT_SETTINGS,
-    )
+    const lightConfig = new LightConfig(intersectionSettings, MAXED_OUT_TEST_LIGHT_SETTINGS)
     const modified = lightConfig.withStateTimeRange(
       State.RED,
       new TimeRange(9_000, 6_000, lightConfig.cycleLength()),
@@ -229,10 +226,7 @@ describe("LightConfig", () => {
   })
 
   it("dragging maxed out red left thumb results in offset change", () => {
-    const lightConfig = new LightConfig(
-      intersectionSettings,
-      MAXED_OUT_TEST_LIGHT_SETTINGS,
-    )
+    const lightConfig = new LightConfig(intersectionSettings, MAXED_OUT_TEST_LIGHT_SETTINGS)
     const modified = lightConfig.withStateTimeRange(
       State.RED,
       new TimeRange(10_000, 7_000, lightConfig.cycleLength()),
@@ -246,10 +240,7 @@ describe("LightConfig", () => {
   })
 
   it("conditional right phases can be altered", () => {
-    const lightConfig = new LightConfig(
-      intersectionSettings,
-      CONDITIONAL_RIGHT_TEST_LIGHT_SETTINGS,
-    )
+    const lightConfig = new LightConfig(intersectionSettings, CONDITIONAL_RIGHT_TEST_LIGHT_SETTINGS)
     const modified = lightConfig.withStateTimeRange(
       State.GREEN,
       new TimeRange(0, 15_000, lightConfig.cycleLength()),

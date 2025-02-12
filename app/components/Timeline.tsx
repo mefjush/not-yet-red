@@ -39,18 +39,13 @@ export default function Timeline({
     : new TimeRange(0, 0, 0)
 
   const toUiFirendlyTimeRange = (timeRange: TimeRange): TimeRange =>
-    new TimeRange(
-      timeRange.start,
-      timeRange.end == 0 ? cycleLength : timeRange.end,
-      cycleLength,
-    )
+    new TimeRange(timeRange.start, timeRange.end == 0 ? cycleLength : timeRange.end, cycleLength)
 
   const uiRange = useRef(toUiFirendlyTimeRange(timeRange))
 
   const markPosition = currentTimestamp % cycleLength
 
-  const needsTransition =
-    hasPageBeenRendered && transitionStartTime == markPosition
+  const needsTransition = hasPageBeenRendered && transitionStartTime == markPosition
 
   const transitionDuration = needsTransition ? cycleLength - markPosition : 0
   const markPositionToSet = needsTransition ? cycleLength : markPosition
@@ -75,19 +70,13 @@ export default function Timeline({
     uiRange.current = toUiFirendlyTimeRange(timeRange)
   }
 
-  const offsetSliderValue: number = modCycle(
-    timeRange.start + timeRange.duration() / 2,
-  )
+  const offsetSliderValue: number = modCycle(timeRange.start + timeRange.duration() / 2)
   const offsetChanged = offsetSliderValue != modCycle(uiOffset.current)
   if (offsetChanged) {
     uiOffset.current = offsetSliderValue
   }
 
-  const onPhaseSliderChange = (
-    state: State,
-    newRange: number[],
-    activeThumb: number,
-  ) => {
+  const onPhaseSliderChange = (state: State, newRange: number[], activeThumb: number) => {
     const newValRaw = newRange[activeThumb]
 
     uiRange.current =
@@ -123,9 +112,7 @@ export default function Timeline({
       step={1000}
       min={0}
       max={cycleLength}
-      onChange={(e, newValue) =>
-        onLightSettingsChange(lightConfig.withOffset(newValue as number))
-      }
+      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number))}
       aria-label="Offset"
       slots={{
         track: Tune,
@@ -195,14 +182,10 @@ export default function Timeline({
     />
   )
 
-  const invisibleSlider = (
-    <Slider key="hidden-range-slider" style={{ visibility: "hidden" }} />
-  )
+  const invisibleSlider = <Slider key="hidden-range-slider" style={{ visibility: "hidden" }} />
 
   const rangeSlider =
-    editable && theSelectedState
-      ? getRangeSlider(theSelectedState)
-      : invisibleSlider
+    editable && theSelectedState ? getRangeSlider(theSelectedState) : invisibleSlider
 
   return (
     <Box sx={{ my: 2 }}>

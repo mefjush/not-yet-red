@@ -6,12 +6,7 @@ export default function BackButton() {
   const router = useRouter()
 
   return (
-    <IconButton
-      edge="start"
-      size="large"
-      sx={{ color: "white" }}
-      onClick={() => router.back()}
-    >
+    <IconButton edge="start" size="large" sx={{ color: "white" }} onClick={() => router.back()}>
       <ArrowBackIcon />
     </IconButton>
   )

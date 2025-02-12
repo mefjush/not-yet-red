@@ -31,12 +31,7 @@ function Content() {
 
   const toolbarElements = (
     <>
-      <IconButton
-        size="large"
-        edge="start"
-        color="inherit"
-        onClick={() => setDrawerOpen(true)}
-      >
+      <IconButton size="large" edge="start" color="inherit" onClick={() => setDrawerOpen(true)}>
         <MenuIcon />
       </IconButton>
 
@@ -46,12 +41,7 @@ function Content() {
 
       <Box sx={{ flexGrow: 1 }}></Box>
 
-      <IconButton
-        size="large"
-        color="inherit"
-        aria-label="share"
-        onClick={buttonAction("share")}
-      >
+      <IconButton size="large" color="inherit" aria-label="share" onClick={buttonAction("share")}>
         <ShareIcon />
       </IconButton>
 
@@ -68,11 +58,7 @@ function Content() {
   )
 
   const drawerList = (
-    <Box
-      sx={{ width: 250 }}
-      role="presentation"
-      onClick={() => setDrawerOpen(false)}
-    >
+    <Box sx={{ width: 250 }} role="presentation" onClick={() => setDrawerOpen(false)}>
       <List>
         {MENU_ITEMS.map((item) => (
           <ListItem key={item.name} disablePadding>

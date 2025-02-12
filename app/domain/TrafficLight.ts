@@ -4,10 +4,7 @@ import { negativeSafeMod } from "../utils"
 
 const DEFAULT_OFFSET = 0
 
-const FAILURE_PHASES = [
-  new Phase(State.YELLOW, 1000),
-  new Phase(State.NONE, 1000),
-]
+const FAILURE_PHASES = [new Phase(State.YELLOW, 1000), new Phase(State.NONE, 1000)]
 
 export default class TrafficLight {
   phases: Phase[]
@@ -26,8 +23,7 @@ export default class TrafficLight {
 
   nextTransition(currentTimestamp: number) {
     const cycleStart =
-      Math.floor((currentTimestamp - this.offset) / this.cycleLength) *
-        this.cycleLength +
+      Math.floor((currentTimestamp - this.offset) / this.cycleLength) * this.cycleLength +
       this.offset
     let cycleTimestamp = cycleStart
     let phaseIdx = 0

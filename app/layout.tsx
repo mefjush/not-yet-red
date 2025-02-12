@@ -23,11 +23,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -42,11 +38,7 @@ export default function RootLayout({
                 <p>
                   2025 <strong>Not Yet Red</strong> by mefju
                 </p>
-                <IconButton
-                  size="large"
-                  edge="end"
-                  href="https://github.com/mefjush/not-yet-red"
-                >
+                <IconButton size="large" edge="end" href="https://github.com/mefjush/not-yet-red">
                   <GitHubIcon />
                 </IconButton>
               </Box>
@@ -59,11 +51,10 @@ export default function RootLayout({
               </Box>
               <Box display="flex" justifyContent="center" alignItems="center">
                 <p style={{ textAlign: "center" }}>
-                  <b>Not Yet Red</b> turns any space into a traffic playground
-                  using smartphones as traffic lights.
+                  <b>Not Yet Red</b> turns any space into a traffic playground using smartphones as
+                  traffic lights.
                   <br />
-                  Fun, interactive, and perfect for kids to learn road rules
-                  while playing! 🚦😊
+                  Fun, interactive, and perfect for kids to learn road rules while playing! 🚦😊
                 </p>
               </Box>
             </Stack>

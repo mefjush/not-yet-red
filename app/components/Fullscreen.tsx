@@ -105,11 +105,7 @@ export default function Fullscreen({
   })
 
   return (
-    <Box
-      ref={fullscreenRef}
-      className="fullscreen"
-      display={enabled ? "block" : "none"}
-    >
+    <Box ref={fullscreenRef} className="fullscreen" display={enabled ? "block" : "none"}>
       <Swiper
         style={{ height: "100%", width: "100%" }}
         modules={[Pagination]}
