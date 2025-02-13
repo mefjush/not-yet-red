@@ -209,43 +209,40 @@ export default function IntersectionComponent({
     />
   )
 
-  const intersectionGroups = lightGroups.flatMap((lightGroup, groupIdx) => {
-    const groupCards = lightGroup.flatMap((lightSetting, inGroupIdx) => {
-      const lightIdx = theLightGroups.idLookup(groupIdx, inGroupIdx)
-      const card = (
-        <Box
-          key={`light-${lightIdx}`}
-          sx={{
-            ...groupBoxStyle,
-            borderColor: lightGroup.length > 1 ? "primary.main" : "transparent",
-          }}
-        >
-          <LightCard
-            currentTimestamp={currentTimestamp}
-            selectedState={selectedStates[lightIdx]}
-            setSelectedState={(state: State) => updateSelectedState(state, lightIdx)}
-            onDelete={() => onDeleteOne(lightIdx)}
-            onMove={(amount) => onMove(lightIdx, amount)}
-            light={lights[lightIdx]}
-            lightConfig={lightConfigs[lightIdx]}
-            expanded={expanded == lightIdx}
-            onLightSettingsChange={(settings: LightSettings) =>
-              updateLightSettings(settings, lightIdx)
-            }
-            setExpanded={(expanded: boolean) => setExpanded(expanded ? lightIdx : null)}
-          />
-        </Box>
-      )
-      return inGroupIdx < lightGroup.length - 1
-        ? [card, splitButton(groupIdx, inGroupIdx, lightIdx)]
-        : [card]
-    })
+  const intersectionGroups = lightConfigs.map((_, lightIdx) => {
+    const { groupIdx, inGroupIdx } = theLightGroups.indexing[lightIdx]
 
-    const lightIdx = theLightGroups.idLookup(groupIdx, lightGroup.length - 1)
+    const card = (
+      <Box
+        key={`light-${lightIdx}`}
+        sx={{
+          ...groupBoxStyle,
+          borderColor: lightGroups[groupIdx].length > 1 ? "primary.main" : "transparent",
+        }}
+      >
+        <LightCard
+          currentTimestamp={currentTimestamp}
+          selectedState={selectedStates[lightIdx]}
+          setSelectedState={(state: State) => updateSelectedState(state, lightIdx)}
+          onDelete={() => onDeleteOne(lightIdx)}
+          onMove={(amount) => onMove(lightIdx, amount)}
+          light={lights[lightIdx]}
+          lightConfig={lightConfigs[lightIdx]}
+          expanded={expanded == lightIdx}
+          onLightSettingsChange={(settings: LightSettings) =>
+            updateLightSettings(settings, lightIdx)
+          }
+          setExpanded={(expanded: boolean) => setExpanded(expanded ? lightIdx : null)}
+        />
+      </Box>
+    )
 
-    return groupIdx < lightGroups.length - 1
-      ? [...groupCards, joinButton(groupIdx, lightIdx)]
-      : groupCards
+    const groupButton =
+      inGroupIdx < lightGroups[groupIdx].length - 1
+        ? splitButton(groupIdx, inGroupIdx, lightIdx)
+        : joinButton(groupIdx, lightIdx)
+
+    return lightIdx < lightConfigs.length - 1 ? [card, groupButton] : [card]
   })
 
   const fullscreenContents = lights.map((light, index) => (
