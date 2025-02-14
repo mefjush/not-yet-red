@@ -1,6 +1,6 @@
 import { Stack, Select, MenuItem } from "@mui/material"
 import { createElement } from "react"
-import LightConfig, { LightSettings } from "../domain/LightConfig"
+import LightConfig from "../domain/LightConfig"
 import CircleIcon from "@mui/icons-material/Circle"
 import { PresetId, PRESETS, SYMBOLS, SymbolId } from "../domain/Preset"
 import { State } from "../domain/State"
@@ -8,12 +8,12 @@ import { State } from "../domain/State"
 export default function PresetMenu({
   lightConfig,
   selectedState,
-  onLightSettingsChange,
+  onLightConfigChange,
   setSelectedState,
 }: {
   lightConfig: LightConfig
   selectedState: State
-  onLightSettingsChange: (lightSettings: LightSettings) => void
+  onLightConfigChange: (lightConfig: LightConfig) => void
   setSelectedState: (state: State) => void
 }) {
   const generatePresetMenuItems = () => {
@@ -36,7 +36,7 @@ export default function PresetMenu({
     if (!supportedStates.includes(selectedState)) {
       setSelectedState(supportedStates[0])
     }
-    onLightSettingsChange(lightConfig.withPreset(presetId))
+    onLightConfigChange(lightConfig.withPreset(PRESETS[presetId]))
   }
 
   return (

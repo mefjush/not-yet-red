@@ -1,8 +1,8 @@
-import { DEFAULT_LIGHT_SETTINGS, TEST_LIGHT_SETTINGS } from "../../app/domain/LightConfig"
+import { DEFAULT_LIGHT_CONFIG, TEST_LIGHT_CONFIG } from "../../app/domain/LightConfig"
 import LightGroups from "../../app/domain/LightGroups"
 
-const light1 = TEST_LIGHT_SETTINGS
-const light2 = DEFAULT_LIGHT_SETTINGS
+const light1 = TEST_LIGHT_CONFIG
+const light2 = DEFAULT_LIGHT_CONFIG
 
 describe("LightGroups", () => {
   it("allow to lookup the light by lightIdx", () => {

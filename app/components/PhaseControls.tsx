@@ -13,7 +13,7 @@ import {
 import { useState, useRef, ReactNode } from "react"
 import { State, STATE_ATTRIBUTES, TrafficLightColors } from "../domain/State"
 import { useLongPress } from "use-long-press"
-import LightConfig, { LightSettings } from "../domain/LightConfig"
+import LightConfig from "../domain/LightConfig"
 
 interface ChangeEvent {
   target: {
@@ -205,11 +205,11 @@ export function StatePicker({
 
 export default function PhaseControls({
   lightConfig,
-  onLightSettingsChange,
+  onLightConfigChange,
   setSelectedState,
 }: {
   lightConfig: LightConfig
-  onLightSettingsChange: (lightSettings: LightSettings) => void
+  onLightConfigChange: (lightConfig: LightConfig) => void
   setSelectedState: (state: State) => void
 }) {
   const phaseControls = lightConfig.phases.map((phase) => {
@@ -221,7 +221,7 @@ export default function PhaseControls({
         value={phase.duration / 1000}
         onChange={(e) => {
           setSelectedState(phase.state)
-          onLightSettingsChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))
+          onLightConfigChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))
         }}
         color={phase.stateAttributes().color}
       />

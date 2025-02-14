@@ -1,12 +1,11 @@
 import { Dialog, Button, Typography, Stack } from "@mui/material"
 import Grid from "@mui/material/Grid2"
 import Timeline from "./Timeline"
-import LightConfig, { LightSettings } from "../domain/LightConfig"
+import LightConfig from "../domain/LightConfig"
 import LightHead from "./LightHead"
 import TrafficLight from "../domain/TrafficLight"
 import PhaseControls, { StatePicker } from "./PhaseControls"
 import PresetMenu from "./PresetMenu"
-import { useRouter } from "next/navigation"
 import BackButton from "./BackButton"
 import { State } from "../domain/State"
 import AppToolbar from "./AppToolbar"
@@ -18,7 +17,7 @@ export default function LightDetails({
   light,
   selectedState,
   onClose,
-  onLightSettingsChange,
+  onLightConfigChange,
   setSelectedState,
 }: {
   open: boolean
@@ -27,10 +26,9 @@ export default function LightDetails({
   light: TrafficLight
   selectedState: State
   onClose: () => void
-  onLightSettingsChange: (lightSettings: LightSettings) => void
+  onLightConfigChange: (lightConfig: LightConfig) => void
   setSelectedState: (state: State) => void
 }) {
-  const router = useRouter()
 
   const handleClose = () => {
     onClose()
@@ -68,7 +66,7 @@ export default function LightDetails({
             <PresetMenu
               lightConfig={lightConfig}
               selectedState={selectedState}
-              onLightSettingsChange={onLightSettingsChange}
+              onLightConfigChange={onLightConfigChange}
               setSelectedState={setSelectedState}
             />
           </Grid>
@@ -81,7 +79,7 @@ export default function LightDetails({
             <Timeline
               currentTimestamp={currentTimestamp}
               lightConfig={lightConfig}
-              onLightSettingsChange={onLightSettingsChange}
+              onLightConfigChange={onLightConfigChange}
               selectedState={selectedState}
               editable={true}
             />
@@ -99,7 +97,7 @@ export default function LightDetails({
             <Typography gutterBottom>Phases</Typography>
             <PhaseControls
               lightConfig={lightConfig}
-              onLightSettingsChange={onLightSettingsChange}
+              onLightConfigChange={onLightConfigChange}
               setSelectedState={setSelectedState}
             />
           </Grid>

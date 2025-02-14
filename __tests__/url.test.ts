@@ -1,21 +1,22 @@
-import { DEFAULT_INTERSECTION_SETTINGS } from "../app/domain/IntersectionSettings"
-import { DEFAULT_LIGHT_SETTINGS } from "../app/domain/LightConfig"
-import { IntersectionSettingsParser, LightSettingsParser } from "../app/url"
+import { DEFAULT_INTERSECTION_CONFIG } from "../app/domain/IntersectionConfig"
+import { DEFAULT_LIGHT_CONFIG as DEFAULT_LIGHT_CONFIG } from "../app/domain/LightConfig"
+import { IntersectionConfigParser, lightConfigParser } from "../app/url"
 
 describe("Url", () => {
-  it("serializes LightSettings back and forth", () => {
-    const serialized = LightSettingsParser.serialize([DEFAULT_LIGHT_SETTINGS])
+  it("serializes LightConfig back and forth", () => {
+    const parser = lightConfigParser(DEFAULT_INTERSECTION_CONFIG)
+    const serialized = parser.serialize([DEFAULT_LIGHT_CONFIG])
 
     console.log(serialized)
 
-    expect(LightSettingsParser.parse(serialized)).toEqual([DEFAULT_LIGHT_SETTINGS])
+    expect(parser.parse(serialized)).toEqual([DEFAULT_LIGHT_CONFIG])
   })
 
-  it("serializes IntersectionSettings back and forth", () => {
-    const serialized = IntersectionSettingsParser.serialize(DEFAULT_INTERSECTION_SETTINGS)
+  it("serializes IntersectionConfgi back and forth", () => {
+    const serialized = IntersectionConfigParser.serialize(DEFAULT_INTERSECTION_CONFIG)
 
     console.log(serialized)
 
-    expect(IntersectionSettingsParser.parse(serialized)).toEqual(DEFAULT_INTERSECTION_SETTINGS)
+    expect(IntersectionConfigParser.parse(serialized)).toEqual(DEFAULT_INTERSECTION_CONFIG)
   })
 })

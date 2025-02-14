@@ -1,6 +1,6 @@
 "use client"
 
-import LightConfig, { LightSettings, TimeRange } from "../domain/LightConfig"
+import LightConfig, { TimeRange } from "../domain/LightConfig"
 import { Box, Slider, SliderComponentsPropsOverrides } from "@mui/material"
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp"
 import { useEffect, useRef, useState } from "react"
@@ -14,13 +14,13 @@ export default function Timeline({
   lightConfig,
   selectedState,
   editable,
-  onLightSettingsChange,
+  onLightConfigChange,
 }: {
   currentTimestamp: number
   lightConfig: LightConfig
   selectedState?: State
   editable: boolean
-  onLightSettingsChange: (lightSettings: LightSettings) => void
+  onLightConfigChange: (lightConfig: LightConfig) => void
 }) {
   const [transitionStartTime, setTransitionStartTime] = useState(-1)
 
@@ -90,7 +90,7 @@ export default function Timeline({
       cycleLength,
     )
 
-    onLightSettingsChange(lightConfig.withStateTimeRange(state, newTimeRange))
+    onLightConfigChange(lightConfig.withStateTimeRange(state, newTimeRange))
   }
 
   const slideWithThumbOnly = {
@@ -112,7 +112,7 @@ export default function Timeline({
       step={1000}
       min={0}
       max={cycleLength}
-      onChange={(e, newValue) => onLightSettingsChange(lightConfig.withOffset(newValue as number))}
+      onChange={(e, newValue) => onLightConfigChange(lightConfig.withOffset(newValue as number))}
       aria-label="Offset"
       slots={{
         track: Tune,
@@ -120,7 +120,7 @@ export default function Timeline({
       slotProps={{
         track: {
           lightConfig: lightConfig,
-          onLightSettingsChange: onLightSettingsChange,
+          onLightConfigChange: onLightConfigChange,
         } as SliderComponentsPropsOverrides,
         rail: { style: { display: "none" } },
         mark: { style: { display: "none" } },

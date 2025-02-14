@@ -3,12 +3,12 @@
 import { useState, useEffect, ReactElement } from "react"
 import Clock from "../domain/Clock"
 import TrafficLight from "../domain/TrafficLight"
-import LightConfig, { LightSettings, DEFAULT_LIGHT_SETTINGS } from "../domain/LightConfig"
+import LightConfig, { DEFAULT_LIGHT_CONFIG } from "../domain/LightConfig"
 import Failure from "../domain/Failure"
 import { Box, Fab, Stack, useTheme } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
-import { LightSettingsParser, IntersectionSettingsParser } from "../url"
-import IntersectionSettings, { DEFAULT_INTERSECTION_SETTINGS } from "../domain/IntersectionSettings"
+import { lightConfigParser, IntersectionConfigParser } from "../url"
+import IntersectionConfig, { DEFAULT_INTERSECTION_CONFIG } from "../domain/IntersectionConfig"
 import Fullscreen from "./Fullscreen"
 import LightHead from "./LightHead"
 import React from "react"
@@ -16,7 +16,7 @@ import ShareDialog from "./ShareDialog"
 import timeSync from "../domain/timeSync"
 import LightDetails from "./LightDetails"
 import { createParser, Options, parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs"
-import IntersectionSettingsPanel from "./IntersectionSettingsPanel"
+import IntersectionConfigPanel from "./IntersectionConfigPanel"
 import LightCard from "./LightCard"
 import { State } from "../domain/State"
 import LightGroups from "../domain/LightGroups"
@@ -40,10 +40,6 @@ const historyPush: Options = { history: "push" }
 // footer description
 // android app
 
-const LightGroupsParser = parseAsArrayOf(
-  createParser(LightSettingsParser).withDefault([DEFAULT_LIGHT_SETTINGS]),
-).withDefault([[DEFAULT_LIGHT_SETTINGS]])
-
 export default function IntersectionComponent({
   uiMode,
   setUiMode,
@@ -51,12 +47,18 @@ export default function IntersectionComponent({
   uiMode: UiMode
   setUiMode: (uiMode: UiMode) => void
 }) {
-  const [intersectionSettings, setIntersectionSettings] = useQueryState(
+  const [intersectionConfig, setIntersectionConfig] = useQueryState(
     "intersection",
-    createParser(IntersectionSettingsParser).withDefault(DEFAULT_INTERSECTION_SETTINGS),
+    createParser(IntersectionConfigParser).withDefault(DEFAULT_INTERSECTION_CONFIG),
   )
 
-  const [lightGroups, setLightGroups] = useQueryState("lights", LightGroupsParser)
+  const THE_DEFAULT = [DEFAULT_LIGHT_CONFIG.withIntersectionConfig(intersectionConfig)]
+
+  const lightGroupsParser = parseAsArrayOf(
+    createParser(lightConfigParser(intersectionConfig)).withDefault(THE_DEFAULT),
+  ).withDefault([THE_DEFAULT])
+
+  const [lightGroups, setLightGroups] = useQueryState("lights", lightGroupsParser)
 
   const [expanded, setExpanded] = useQueryState("e", parseAsInteger.withOptions(historyPush))
 
@@ -64,11 +66,11 @@ export default function IntersectionComponent({
 
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
-  const theLightGroups = new LightGroups(lightGroups)
+  const fixedLightGroups = lightGroups.map(lg => lg.map(lc => lc.withIntersectionConfig(intersectionConfig)))
+  
+  const theLightGroups = new LightGroups(fixedLightGroups)
 
-  const lightConfigs = lightGroups
-    .flatMap((x) => x)
-    .map((lightSetting) => new LightConfig(intersectionSettings, lightSetting))
+  const lightConfigs = fixedLightGroups.flatMap((x) => x)
 
   const [selectedStates, setSelectedStates] = useState(
     lightConfigs.map((lightConfig) => lightConfig.phases[0].state),
@@ -77,8 +79,8 @@ export default function IntersectionComponent({
   const theme = useTheme()
 
   const failure = new Failure(
-    intersectionSettings.failure.duration,
-    intersectionSettings.failure.probability,
+    intersectionConfig.failure.duration,
+    intersectionConfig.failure.probability,
   )
 
   const hasFailed = failure.currentState(currentTimestamp)
@@ -87,8 +89,8 @@ export default function IntersectionComponent({
 
   const clock = new Clock(timeCorrection)
 
-  const updateLightSettings = (settings: LightSettings, index: number) => {
-    setLightGroups(theLightGroups.withLightReplaced(index, settings).raw())
+  const updateLightConfig = (lightConfig: LightConfig, index: number) => {
+    setLightGroups(theLightGroups.withLightReplaced(index, lightConfig).raw())
     setCurrentTimestamp(clock.now())
   }
 
@@ -100,8 +102,8 @@ export default function IntersectionComponent({
 
   const wrapListener = {
     nextStateTimestamp: (timestamp: number) =>
-      (Math.floor(timestamp / intersectionSettings.cycleLength) + 1) *
-      intersectionSettings.cycleLength,
+      (Math.floor(timestamp / intersectionConfig.cycleLength) + 1) *
+      intersectionConfig.cycleLength,
   }
 
   const exitUiMode = () => setUiMode("none")
@@ -111,8 +113,8 @@ export default function IntersectionComponent({
       .then((correction) => setTimeCorrection(correction))
       .catch((e) => setTimeCorrection(0))
 
-  const updateIntersectionSettings = (intersectionSettings: IntersectionSettings) => {
-    setIntersectionSettings(intersectionSettings)
+  const updateIntersectionConfig = (intersectionConfig: IntersectionConfig) => {
+    setIntersectionConfig(intersectionConfig)
     setCurrentTimestamp(clock.now())
   }
 
@@ -149,8 +151,8 @@ export default function IntersectionComponent({
   }
 
   const onAdd = () => {
-    setLightGroups(theLightGroups.withLightAdded(DEFAULT_LIGHT_SETTINGS).raw())
-    setSelectedStates([...selectedStates, DEFAULT_LIGHT_SETTINGS.phases[0].state])
+    setLightGroups(theLightGroups.withLightAdded(DEFAULT_LIGHT_CONFIG).raw())
+    setSelectedStates([...selectedStates, DEFAULT_LIGHT_CONFIG.phases[0].state])
     setExpanded(lightConfigs.length)
   }
 
@@ -162,7 +164,7 @@ export default function IntersectionComponent({
   }
 
   const getShareUrl = () => {
-    const search = `?intersection=${IntersectionSettingsParser.serialize(intersectionSettings)}&lights=${LightGroupsParser.serialize(theLightGroups.raw())}`
+    const search = `?intersection=${IntersectionConfigParser.serialize(intersectionConfig)}&lights=${lightGroupsParser.serialize(theLightGroups.raw())}`
 
     const baseUrl =
       typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
@@ -229,8 +231,8 @@ export default function IntersectionComponent({
           light={lights[lightIdx]}
           lightConfig={lightConfigs[lightIdx]}
           expanded={expanded == lightIdx}
-          onLightSettingsChange={(settings: LightSettings) =>
-            updateLightSettings(settings, lightIdx)
+          onLightConfigChange={(lightConfig: LightConfig) =>
+            updateLightConfig(lightConfig, lightIdx)
           }
           setExpanded={(expanded: boolean) => setExpanded(expanded ? lightIdx : null)}
         />
@@ -238,7 +240,7 @@ export default function IntersectionComponent({
     )
 
     const groupButton =
-      inGroupIdx < lightGroups[groupIdx].length - 1
+      inGroupIdx < fixedLightGroups[groupIdx].length - 1
         ? splitButton(groupIdx, inGroupIdx, lightIdx)
         : joinButton(groupIdx, lightIdx)
 
@@ -258,9 +260,9 @@ export default function IntersectionComponent({
 
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-      <IntersectionSettingsPanel
-        intersectionSettings={intersectionSettings}
-        updateIntersectionSettings={updateIntersectionSettings}
+      <IntersectionConfigPanel
+        intersectionConfig={intersectionConfig}
+        updateIntersectionConfig={updateIntersectionConfig}
         timeCorrection={timeCorrection}
         setTimeCorrection={setTimeCorrection}
         initTimeSync={initTimeSync}
@@ -286,8 +288,8 @@ export default function IntersectionComponent({
           lightConfig={lightConfigs[expanded]}
           selectedState={selectedStates[expanded]}
           onClose={() => setExpanded(null)}
-          onLightSettingsChange={(settings: LightSettings) =>
-            updateLightSettings(settings, expanded)
+          onLightConfigChange={(lightConfig: LightConfig) =>
+            updateLightConfig(lightConfig, expanded)
           }
           setSelectedState={(state: State) => updateSelectedState(state, expanded)}
         />

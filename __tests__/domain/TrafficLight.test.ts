@@ -1,8 +1,8 @@
 import { State } from "../../app/domain/State"
-import LightConfig, { TEST_LIGHT_SETTINGS } from "../../app/domain/LightConfig"
+import { TEST_LIGHT_CONFIG } from "../../app/domain/LightConfig"
 import TrafficLight from "../../app/domain/TrafficLight"
 
-const intersectionSettings = {
+const TEST_INTERSECTION_SETTINGS = {
   cycleLength: 60_000,
   failure: {
     probability: 0,
@@ -10,12 +10,13 @@ const intersectionSettings = {
   },
 }
 
-const lightSettings = TEST_LIGHT_SETTINGS
+const LIGHT_SETTINGS = TEST_LIGHT_CONFIG.withIntersectionConfig(TEST_INTERSECTION_SETTINGS)
+
 
 describe("TrafficLight", () => {
   it("calculates next transition when in the middle of first phase", () => {
     const trafficLight = new TrafficLight(
-      new LightConfig(intersectionSettings, lightSettings),
+      LIGHT_SETTINGS,
       false,
     )
 
@@ -27,7 +28,7 @@ describe("TrafficLight", () => {
 
   it("calculates next transition when at the very beginning of the first phase", () => {
     const trafficLight = new TrafficLight(
-      new LightConfig(intersectionSettings, lightSettings),
+      LIGHT_SETTINGS,
       false,
     )
 
@@ -39,7 +40,7 @@ describe("TrafficLight", () => {
 
   it("calculates next transition when in the middle of last phase", () => {
     const trafficLight = new TrafficLight(
-      new LightConfig(intersectionSettings, lightSettings),
+      LIGHT_SETTINGS,
       false,
     )
 
@@ -51,7 +52,7 @@ describe("TrafficLight", () => {
 
   it("calculates current phase when in the middle of the current phase", () => {
     const trafficLight = new TrafficLight(
-      new LightConfig(intersectionSettings, lightSettings),
+      LIGHT_SETTINGS,
       false,
     )
 
@@ -60,7 +61,7 @@ describe("TrafficLight", () => {
 
   it("calculates current phase when at the very beginning of the current phase", () => {
     const trafficLight = new TrafficLight(
-      new LightConfig(intersectionSettings, lightSettings),
+      LIGHT_SETTINGS,
       false,
     )
 

@@ -1,5 +1,5 @@
 import { State, STATE_ATTRIBUTES, StateAttributes } from "./State"
-import IntersectionSettings from "./IntersectionSettings"
+import IntersectionConfig, { DEFAULT_INTERSECTION_CONFIG } from "./IntersectionConfig"
 import { negativeSafeMod } from "../utils"
 import { PresetId } from "./Preset"
 import { Preset, PRESETS } from "./Preset"
@@ -40,58 +40,48 @@ export class Phase {
   }
 }
 
-export interface LightSettings {
-  offset: number
-  phases: Phase[]
-  presetId: PresetId
-}
-
 const sortByOrder = (a: Phase, b: Phase) => a.stateAttributes().order - b.stateAttributes().order
 const sortByPriority = (a: Phase, b: Phase) =>
   a.stateAttributes().priority - b.stateAttributes().priority
 
 export default class LightConfig {
-  intersectionSettings: IntersectionSettings
+
+  intersectionConfig: IntersectionConfig
   offset: number
   phases: Phase[]
   preset: Preset
 
-  constructor(intersectionSettings: IntersectionSettings, lightSettings: LightSettings) {
-    this.intersectionSettings = intersectionSettings
-    this.offset = lightSettings.offset
-    this.phases = this.rescale(intersectionSettings, lightSettings).phases
-    this.preset = PRESETS[lightSettings.presetId]
+  constructor(intersectionConfig: IntersectionConfig, offset: number, phases: Phase[], preset: Preset) {
+    this.intersectionConfig = intersectionConfig
+    this.offset = offset
+    this.preset = preset
+    this.phases = this.rescale(phases)
   }
 
-  withOffset(offset: number): LightSettings {
+  withIntersectionConfig(intersectionConfig: IntersectionConfig) {
+    return new LightConfig(intersectionConfig, this.offset, this.phases, this.preset)
+  }
+
+  withOffset(offset: number): LightConfig {
     const roundedOffset = Math.round(offset / 1000) * 1000
-    return {
-      offset: roundedOffset,
-      phases: this.phases,
-      presetId: this.preset.presetId,
-    }
+    return new LightConfig(this.intersectionConfig, roundedOffset, this.phases, this.preset)
   }
 
-  withPreset(presetId: PresetId): LightSettings {
-    const preset = PRESETS[presetId]
+  forceWithPhases(phases: Phase[]) {
+    return new LightConfig(this.intersectionConfig, this.offset, phases, this.preset)
+  }
+
+  withPreset(preset: Preset): LightConfig {
     const newPhases = preset.states.map(
       (state) =>
         this.phases.find((phase) => phase.state == state) ||
         new Phase(state, DEFAULT_NEW_PHASE_DURATION),
     )
-    return { offset: this.offset, phases: newPhases, presetId: presetId }
-  }
-
-  toLightSettings(): LightSettings {
-    return {
-      offset: this.offset,
-      phases: this.phases,
-      presetId: this.preset.presetId,
-    }
+    return new LightConfig(this.intersectionConfig, this.offset, newPhases, preset)
   }
 
   cycleLength() {
-    return this.intersectionSettings.cycleLength
+    return this.intersectionConfig.cycleLength
   }
 
   isFixable(phase: Phase): boolean {
@@ -102,19 +92,19 @@ export default class LightConfig {
     return Math.round(duration / 1000) * 1000
   }
 
-  rescale(intersectionSettings: IntersectionSettings, lightSettings: LightSettings): LightSettings {
-    const phasesLength = lightSettings.phases.reduce((acc, phase) => acc + phase.duration, 0)
-    const diff = intersectionSettings.cycleLength - phasesLength
+  rescale(phases: Phase[]): Phase[] {
+    const phasesLength = phases.reduce((acc, phase) => acc + phase.duration, 0)
+    const diff = this.intersectionConfig.cycleLength - phasesLength
 
     if (Math.abs(diff) == 0) {
-      return lightSettings
+      return phases
     }
 
-    const fixableCount = lightSettings.phases.filter(this.isFixable).length
+    const fixableCount = phases.filter(this.isFixable).length
     const diffPerPhase = this.roundSeconds(diff / fixableCount)
     let diffRemainder = diff
 
-    let fixedPhases = lightSettings.phases.toSorted((a, b) => b.duration - a.duration)
+    let fixedPhases = phases.toSorted((a, b) => b.duration - a.duration)
 
     const fixStrategies = [
       { precondition: this.isFixable, applicableDiff: () => diffPerPhase },
@@ -134,10 +124,10 @@ export default class LightConfig {
       })
     }
 
-    return { ...lightSettings, phases: fixedPhases.toSorted(sortByOrder) }
+    return fixedPhases.toSorted(sortByOrder)
   }
 
-  withStateDuration(state: State, newDuration: number): LightSettings {
+  withStateDuration(state: State, newDuration: number): LightConfig {
     const calculateStateOffset = (phases: Phase[]) => {
       const stateIndex = this.phases.findIndex((p) => p.state == state)
       return phases
@@ -173,11 +163,12 @@ export default class LightConfig {
 
     const offsetDiff = calculateStateOffset(this.phases) - calculateStateOffset(newPhases)
 
-    return {
-      offset: negativeSafeMod(this.offset + offsetDiff, this.cycleLength()),
-      phases: newPhases,
-      presetId: this.preset.presetId,
-    }
+    return new LightConfig(
+      this.intersectionConfig, 
+      negativeSafeMod(this.offset + offsetDiff, this.cycleLength()),
+      newPhases, 
+      this.preset
+    )
   }
 
   getTimeRange(state: State): TimeRange {
@@ -193,7 +184,7 @@ export default class LightConfig {
     return new TimeRange(start % cycleLength, end % cycleLength, cycleLength)
   }
 
-  withStateTimeRange(state: State, newTimeRange: TimeRange): LightSettings {
+  withStateTimeRange(state: State, newTimeRange: TimeRange): LightConfig {
     const currentTimeRange = this.getTimeRange(state)
 
     const selectedPhaseIndex = this.phases.findIndex((phase) => phase.state == state)
@@ -209,10 +200,8 @@ export default class LightConfig {
     const finalOffset = adjustToRangeStart
       ? newTimeRange.start - phaseStart
       : newTimeRange.end - (phaseStart + withNewDuration.phases[selectedPhaseIndex].duration)
-    return {
-      ...withNewDuration,
-      offset: negativeSafeMod(finalOffset, this.cycleLength()),
-    }
+
+    return withNewDuration.withOffset(negativeSafeMod(finalOffset, this.cycleLength()))
   }
 
   includesState(state: State): boolean {
@@ -220,40 +209,39 @@ export default class LightConfig {
   }
 }
 
-export const DEFAULT_LIGHT_SETTINGS: LightSettings = {
-  offset: 0,
-  phases: [
+export const DEFAULT_LIGHT_CONFIG = new LightConfig(
+  DEFAULT_INTERSECTION_CONFIG,
+  0,
+  [
     new Phase(State.RED, 16_000),
     new Phase(State.RED_YELLOW, 2_000),
     new Phase(State.GREEN, 10_000),
     new Phase(State.YELLOW, 2_000),
   ],
-  presetId: PresetId.FOUR_PHASE,
-}
+  PRESETS[PresetId.FOUR_PHASE]
+)
 
-export const TEST_LIGHT_SETTINGS: LightSettings = {
-  ...DEFAULT_LIGHT_SETTINGS,
-  phases: [
+export const TEST_LIGHT_CONFIG = DEFAULT_LIGHT_CONFIG.forceWithPhases(
+  [
     new Phase(State.RED, 30_000),
     new Phase(State.RED_YELLOW, 2_000),
     new Phase(State.GREEN, 26_000),
     new Phase(State.YELLOW, 2_000),
-  ],
-}
+  ]
+)
 
-export const MAXED_OUT_TEST_LIGHT_SETTINGS: LightSettings = {
-  ...DEFAULT_LIGHT_SETTINGS,
-  offset: 10_000,
-  phases: [
+export const MAXED_OUT_TEST_LIGHT_CONFIG = DEFAULT_LIGHT_CONFIG.withOffset(10_000).forceWithPhases(
+  [
     new Phase(State.RED, 56_000),
     new Phase(State.RED_YELLOW, 2_000),
     new Phase(State.GREEN, 0),
     new Phase(State.YELLOW, 2_000),
-  ],
-}
+  ]
+)
 
-export const CONDITIONAL_RIGHT_TEST_LIGHT_SETTINGS: LightSettings = {
-  offset: 0,
-  phases: [new Phase(State.GREEN, 10_000), new Phase(State.NONE, 50_000)],
-  presetId: PresetId.CONDITIONAL_RIGHT,
-}
+export const CONDITIONAL_RIGHT_TEST_LIGHT_CONFIG = new LightConfig(
+  DEFAULT_INTERSECTION_CONFIG,
+  0,
+  [new Phase(State.GREEN, 10_000), new Phase(State.NONE, 50_000)],
+  PRESETS[PresetId.CONDITIONAL_RIGHT]
+)

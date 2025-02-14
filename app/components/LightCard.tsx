@@ -1,7 +1,7 @@
 "use client"
 
 import TrafficLight from "../domain/TrafficLight"
-import LightConfig, { LightSettings } from "../domain/LightConfig"
+import LightConfig from "../domain/LightConfig"
 import {
   Card,
   CardActions,
@@ -35,7 +35,7 @@ export default function LightCard({
   light,
   lightConfig,
   expanded,
-  onLightSettingsChange,
+  onLightConfigChange,
   setExpanded,
 }: {
   currentTimestamp: number
@@ -46,7 +46,7 @@ export default function LightCard({
   light: TrafficLight
   lightConfig: LightConfig
   expanded: boolean
-  onLightSettingsChange: (lightSettings: LightSettings) => void
+  onLightConfigChange: (lightConfig: LightConfig) => void
   setExpanded: (expanded: boolean) => void
 }) {
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null)
@@ -75,7 +75,7 @@ export default function LightCard({
     <Timeline
       currentTimestamp={currentTimestamp}
       lightConfig={lightConfig}
-      onLightSettingsChange={onLightSettingsChange}
+      onLightConfigChange={onLightConfigChange}
       selectedState={selectedState}
       editable={true}
     />

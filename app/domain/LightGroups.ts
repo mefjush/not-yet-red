@@ -1,4 +1,4 @@
-import { LightSettings } from "./LightConfig"
+import LightConfig from "./LightConfig"
 
 export type LightId = {
   groupIdx: number
@@ -8,7 +8,7 @@ export type LightId = {
 export default class LightGroups {
   indexing: LightId[]
 
-  constructor(private lightGroups: LightSettings[][]) {
+  constructor(private lightGroups: LightConfig[][]) {
     const indexing: LightId[] = []
     let lightIdx = 0
     for (let lightGroupIdx = 0; lightGroupIdx < lightGroups.length; lightGroupIdx++) {
@@ -25,7 +25,7 @@ export default class LightGroups {
     this.indexing = indexing
   }
 
-  lookup(lightIdx: number): LightSettings {
+  lookup(lightIdx: number): LightConfig {
     const lightId = this.indexing[lightIdx]
     return this.lightGroups[lightId.groupIdx][lightId.inGroupIdx]
   }
@@ -38,15 +38,15 @@ export default class LightGroups {
     )
   }
 
-  withLightReplaced(lightIdx: number, lightSettings: LightSettings) {
+  withLightReplaced(lightIdx: number, lightConfig: LightConfig) {
     const lightId = this.indexing[lightIdx]
     const copy = this.copied()
-    copy[lightId.groupIdx][lightId.inGroupIdx] = lightSettings
+    copy[lightId.groupIdx][lightId.inGroupIdx] = lightConfig
     return new LightGroups(copy)
   }
 
-  withLightAdded(lightSettings: LightSettings): LightGroups {
-    return new LightGroups([...this.lightGroups.map((x) => [...x]), [lightSettings]])
+  withLightAdded(lightConfig: LightConfig): LightGroups {
+    return new LightGroups([...this.lightGroups.map((x) => [...x]), [lightConfig]])
   }
 
   ungrouped(groupIdx: number, splitIdx: number) {
@@ -59,7 +59,7 @@ export default class LightGroups {
   }
 
   groupedDown(groupIdx: number) {
-    const initAcc: LightSettings[][] = []
+    const initAcc: LightConfig[][] = []
     const newGrouping = this.lightGroups.reduce(
       (acc, group, idx) =>
         idx != groupIdx + 1
@@ -90,7 +90,7 @@ export default class LightGroups {
     return this.indexing.length
   }
 
-  raw(): LightSettings[][] {
+  raw(): LightConfig[][] {
     return this.lightGroups
   }
 }

@@ -1,12 +1,12 @@
 import { State } from "../../app/domain/State"
-import LightConfig, {
-  CONDITIONAL_RIGHT_TEST_LIGHT_SETTINGS,
-  MAXED_OUT_TEST_LIGHT_SETTINGS,
-  TEST_LIGHT_SETTINGS,
+import {
+  CONDITIONAL_RIGHT_TEST_LIGHT_CONFIG,
+  MAXED_OUT_TEST_LIGHT_CONFIG,
+  TEST_LIGHT_CONFIG,
   TimeRange,
 } from "../../app/domain/LightConfig"
 
-const intersectionSettings = {
+const intersectionConfig = {
   cycleLength: 60_000,
   failure: {
     probability: 0,
@@ -14,12 +14,10 @@ const intersectionSettings = {
   },
 }
 
-const lightSettings = TEST_LIGHT_SETTINGS
+const lightConfig = TEST_LIGHT_CONFIG.withIntersectionConfig(intersectionConfig)
 
 describe("LightConfig", () => {
   it("calculates phases", () => {
-    const lightConfig = new LightConfig(intersectionSettings, lightSettings)
-
     expect(lightConfig.phases).toEqual([
       { state: State.RED, duration: 30_000 },
       { state: State.RED_YELLOW, duration: 2_000 },
@@ -29,17 +27,10 @@ describe("LightConfig", () => {
   })
 
   it("rounds offset updates to the nearest second", () => {
-    const lightConfig = new LightConfig(intersectionSettings, lightSettings)
-
-    expect(lightConfig.withOffset(500)).toEqual({
-      ...lightSettings,
-      offset: 1_000,
-    })
+    expect(lightConfig.withOffset(500).offset).toEqual(1_000)
   })
 
   it("adjusts the green duration on red increase", () => {
-    const lightConfig = new LightConfig(intersectionSettings, lightSettings)
-
     const modified = lightConfig.withStateDuration(State.RED, 31_000)
 
     expect(modified.phases).toContainEqual({
@@ -53,8 +44,6 @@ describe("LightConfig", () => {
   })
 
   it("adjusts the green duration on red decrease", () => {
-    const lightConfig = new LightConfig(intersectionSettings, lightSettings)
-
     const modified = lightConfig.withStateDuration(State.RED, 29_000)
 
     expect(modified.phases).toContainEqual({
@@ -68,8 +57,6 @@ describe("LightConfig", () => {
   })
 
   it("adjusts the red duration up to the green limit", () => {
-    const lightConfig = new LightConfig(intersectionSettings, lightSettings)
-
     const modified = lightConfig.withStateDuration(State.RED, 60_000)
 
     expect(modified.phases).toContainEqual({
@@ -80,60 +67,54 @@ describe("LightConfig", () => {
   })
 
   it("adjusts the red and green duration on cycle length decrease", () => {
-    const lightConfig = new LightConfig(
-      { ...intersectionSettings, cycleLength: 50_000 },
-      lightSettings,
+    const modifiedLightConfig = lightConfig.withIntersectionConfig(
+      { ...intersectionConfig, cycleLength: 50_000 },
     )
 
-    expect(lightConfig.phases).toContainEqual({
+    expect(modifiedLightConfig.phases).toContainEqual({
       state: State.RED,
       duration: 25_000,
     })
-    expect(lightConfig.phases).toContainEqual({
+    expect(modifiedLightConfig.phases).toContainEqual({
       state: State.GREEN,
       duration: 21_000,
     })
-    expect(lightConfig.phases).toContainEqual({
+    expect(modifiedLightConfig.phases).toContainEqual({
       state: State.YELLOW,
       duration: 2_000,
     })
-    expect(lightConfig.phases).toContainEqual({
+    expect(modifiedLightConfig.phases).toContainEqual({
       state: State.RED_YELLOW,
       duration: 2_000,
     })
   })
 
   it("adjusts the red and green duration on cycle length increase", () => {
-    const lightConfig = new LightConfig(
-      { ...intersectionSettings, cycleLength: 71_000 },
-      lightSettings,
+    const modifiedLightConfig = lightConfig.withIntersectionConfig(
+      { ...intersectionConfig, cycleLength: 71_000 },
     )
 
-    expect(lightConfig.phases).toContainEqual({
+    expect(modifiedLightConfig.phases).toContainEqual({
       state: State.RED,
       duration: 35_000,
     })
-    expect(lightConfig.phases).toContainEqual({
+    expect(modifiedLightConfig.phases).toContainEqual({
       state: State.GREEN,
       duration: 32_000,
     })
-    expect(lightConfig.phases).toContainEqual({
+    expect(modifiedLightConfig.phases).toContainEqual({
       state: State.YELLOW,
       duration: 2_000,
     })
-    expect(lightConfig.phases).toContainEqual({
+    expect(modifiedLightConfig.phases).toContainEqual({
       state: State.RED_YELLOW,
       duration: 2_000,
     })
   })
 
   it("does not adjust green below zero on cycle length decrease", () => {
-    const lightConfig = new LightConfig(intersectionSettings, lightSettings)
-    const modified = lightConfig.withStateDuration(State.GREEN, 5_000)
-
-    const adjustedLightConfig = new LightConfig(
-      { ...intersectionSettings, cycleLength: 10_000 },
-      modified,
+    const adjustedLightConfig = lightConfig.withStateDuration(State.GREEN, 5_000).withIntersectionConfig(
+      { ...intersectionConfig, cycleLength: 10_000 }
     )
 
     expect(adjustedLightConfig.phases).toContainEqual({
@@ -155,19 +136,16 @@ describe("LightConfig", () => {
   })
 
   it("adjusts the offset so green start is kept at the same time frame after the duration change", () => {
-    const lightConfig = new LightConfig(intersectionSettings, lightSettings)
     const modified = lightConfig.withStateDuration(State.GREEN, 27_000)
 
-    const adjustedLightConfig = new LightConfig(
-      { ...intersectionSettings, cycleLength: 10_000 },
-      modified,
+    const adjustedLightConfig = lightConfig.withStateDuration(State.GREEN, 27_000).withIntersectionConfig(
+      { ...intersectionConfig, cycleLength: 10_000 },
     )
 
     expect(adjustedLightConfig.offset).toBe(1_000)
   })
 
   it("adjusts the red duration on time range increase right", () => {
-    const lightConfig = new LightConfig(intersectionSettings, lightSettings)
     const modified = lightConfig.withStateTimeRange(
       State.RED,
       new TimeRange(0, 32_000, lightConfig.cycleLength()),
@@ -181,7 +159,6 @@ describe("LightConfig", () => {
   })
 
   it("adjusts the green duration on time range increase right", () => {
-    const lightConfig = new LightConfig(intersectionSettings, lightSettings)
     const modified = lightConfig.withStateTimeRange(
       State.GREEN,
       new TimeRange(32_000, 60_000, lightConfig.cycleLength()),
@@ -195,11 +172,7 @@ describe("LightConfig", () => {
   })
 
   it("adjusts the green duration on time range increase right when green is wrapped", () => {
-    const lightConfig = new LightConfig(intersectionSettings, {
-      ...lightSettings,
-      offset: 10_000,
-    })
-    const modified = lightConfig.withStateTimeRange(
+    const modified = lightConfig.withOffset(10_000).withStateTimeRange(
       State.GREEN,
       new TimeRange(42_000, 10_000, lightConfig.cycleLength()),
     )
@@ -212,8 +185,7 @@ describe("LightConfig", () => {
   })
 
   it("dragging maxed out red right thumb results in offset change", () => {
-    const lightConfig = new LightConfig(intersectionSettings, MAXED_OUT_TEST_LIGHT_SETTINGS)
-    const modified = lightConfig.withStateTimeRange(
+    const modified = MAXED_OUT_TEST_LIGHT_CONFIG.withIntersectionConfig(intersectionConfig).withStateTimeRange(
       State.RED,
       new TimeRange(9_000, 6_000, lightConfig.cycleLength()),
     )
@@ -226,8 +198,7 @@ describe("LightConfig", () => {
   })
 
   it("dragging maxed out red left thumb results in offset change", () => {
-    const lightConfig = new LightConfig(intersectionSettings, MAXED_OUT_TEST_LIGHT_SETTINGS)
-    const modified = lightConfig.withStateTimeRange(
+    const modified = MAXED_OUT_TEST_LIGHT_CONFIG.withIntersectionConfig(intersectionConfig).withStateTimeRange(
       State.RED,
       new TimeRange(10_000, 7_000, lightConfig.cycleLength()),
     )
@@ -240,8 +211,7 @@ describe("LightConfig", () => {
   })
 
   it("conditional right phases can be altered", () => {
-    const lightConfig = new LightConfig(intersectionSettings, CONDITIONAL_RIGHT_TEST_LIGHT_SETTINGS)
-    const modified = lightConfig.withStateTimeRange(
+    const modified = CONDITIONAL_RIGHT_TEST_LIGHT_CONFIG.withIntersectionConfig(intersectionConfig).withStateTimeRange(
       State.GREEN,
       new TimeRange(0, 15_000, lightConfig.cycleLength()),
     )

@@ -3,19 +3,19 @@
 import { useState } from "react"
 import Input from "./Input"
 import { Card, CardContent, Collapse, Button, CardActions, CardActionArea } from "@mui/material"
-import IntersectionSettings from "../domain/IntersectionSettings"
+import IntersectionConfig from "../domain/IntersectionConfig"
 import React from "react"
 import SettingsIcon from "@mui/icons-material/Settings"
 
 export default function IntersectionSettingsPanel({
-  intersectionSettings,
-  updateIntersectionSettings,
+  intersectionConfig,
+  updateIntersectionConfig,
   timeCorrection,
   setTimeCorrection,
   initTimeSync,
 }: {
-  intersectionSettings: IntersectionSettings
-  updateIntersectionSettings: (intersectionSettings: IntersectionSettings) => void
+  intersectionConfig: IntersectionConfig
+  updateIntersectionConfig: (intersectionConfig: IntersectionConfig) => void
   timeCorrection: number
   setTimeCorrection: (timeCorrection: number) => void
   initTimeSync: () => void
@@ -46,10 +46,10 @@ export default function IntersectionSettingsPanel({
             id="cycle-length"
             min={10}
             max={180}
-            value={intersectionSettings.cycleLength / 1000}
+            value={intersectionConfig.cycleLength / 1000}
             onChange={(e) =>
-              updateIntersectionSettings({
-                ...intersectionSettings,
+              updateIntersectionConfig({
+                ...intersectionConfig,
                 cycleLength: Number(e.target.value) * 1000,
               })
             }
@@ -59,12 +59,12 @@ export default function IntersectionSettingsPanel({
             id="failure-duration"
             min={10}
             max={180}
-            value={intersectionSettings.failure.duration / 1000}
+            value={intersectionConfig.failure.duration / 1000}
             onChange={(e) =>
-              updateIntersectionSettings({
-                ...intersectionSettings,
+              updateIntersectionConfig({
+                ...intersectionConfig,
                 failure: {
-                  probability: intersectionSettings.failure.probability,
+                  probability: intersectionConfig.failure.probability,
                   duration: Number(e.target.value) * 1000,
                 },
               })
@@ -76,12 +76,12 @@ export default function IntersectionSettingsPanel({
             min={0}
             max={100}
             step={5}
-            value={Math.round(intersectionSettings.failure.probability * 100)}
+            value={Math.round(intersectionConfig.failure.probability * 100)}
             onChange={(e) =>
-              updateIntersectionSettings({
-                ...intersectionSettings,
+              updateIntersectionConfig({
+                ...intersectionConfig,
                 failure: {
-                  duration: intersectionSettings.failure.duration,
+                  duration: intersectionConfig.failure.duration,
                   probability: Number(e.target.value) / 100,
                 },
               })
