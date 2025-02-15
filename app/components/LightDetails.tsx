@@ -29,7 +29,6 @@ export default function LightDetails({
   onLightConfigChange: (lightConfig: LightConfig) => void
   setSelectedState: (state: State) => void
 }) {
-
   const handleClose = () => {
     onClose()
   }

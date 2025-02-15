@@ -40,7 +40,7 @@ export function lightConfigParser(intersectionConfig: IntersectionConfig) {
           PRESETS[lsSplit[2] as PresetId],
         )
       })
-    }
+    },
   }
 }
 

@@ -12,13 +12,9 @@ const TEST_INTERSECTION_SETTINGS = {
 
 const LIGHT_SETTINGS = TEST_LIGHT_CONFIG.withIntersectionConfig(TEST_INTERSECTION_SETTINGS)
 
-
 describe("TrafficLight", () => {
   it("calculates next transition when in the middle of first phase", () => {
-    const trafficLight = new TrafficLight(
-      LIGHT_SETTINGS,
-      false,
-    )
+    const trafficLight = new TrafficLight(LIGHT_SETTINGS, false)
 
     expect(trafficLight.nextTransition(10_000)).toEqual({
       phaseIdx: 1,
@@ -27,10 +23,7 @@ describe("TrafficLight", () => {
   })
 
   it("calculates next transition when at the very beginning of the first phase", () => {
-    const trafficLight = new TrafficLight(
-      LIGHT_SETTINGS,
-      false,
-    )
+    const trafficLight = new TrafficLight(LIGHT_SETTINGS, false)
 
     expect(trafficLight.nextTransition(60_000)).toEqual({
       phaseIdx: 1,
@@ -39,10 +32,7 @@ describe("TrafficLight", () => {
   })
 
   it("calculates next transition when in the middle of last phase", () => {
-    const trafficLight = new TrafficLight(
-      LIGHT_SETTINGS,
-      false,
-    )
+    const trafficLight = new TrafficLight(LIGHT_SETTINGS, false)
 
     expect(trafficLight.nextTransition(59_000)).toEqual({
       phaseIdx: 0,
@@ -51,19 +41,13 @@ describe("TrafficLight", () => {
   })
 
   it("calculates current phase when in the middle of the current phase", () => {
-    const trafficLight = new TrafficLight(
-      LIGHT_SETTINGS,
-      false,
-    )
+    const trafficLight = new TrafficLight(LIGHT_SETTINGS, false)
 
     expect(trafficLight.currentPhase(10_000).state).toBe(State.RED)
   })
 
   it("calculates current phase when at the very beginning of the current phase", () => {
-    const trafficLight = new TrafficLight(
-      LIGHT_SETTINGS,
-      false,
-    )
+    const trafficLight = new TrafficLight(LIGHT_SETTINGS, false)
 
     expect(trafficLight.currentPhase(60_000).state).toBe(State.RED)
   })

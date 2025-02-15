@@ -45,13 +45,17 @@ const sortByPriority = (a: Phase, b: Phase) =>
   a.stateAttributes().priority - b.stateAttributes().priority
 
 export default class LightConfig {
-
   intersectionConfig: IntersectionConfig
   offset: number
   phases: Phase[]
   preset: Preset
 
-  constructor(intersectionConfig: IntersectionConfig, offset: number, phases: Phase[], preset: Preset) {
+  constructor(
+    intersectionConfig: IntersectionConfig,
+    offset: number,
+    phases: Phase[],
+    preset: Preset,
+  ) {
     this.intersectionConfig = intersectionConfig
     this.offset = offset
     this.preset = preset
@@ -164,10 +168,10 @@ export default class LightConfig {
     const offsetDiff = calculateStateOffset(this.phases) - calculateStateOffset(newPhases)
 
     return new LightConfig(
-      this.intersectionConfig, 
+      this.intersectionConfig,
       negativeSafeMod(this.offset + offsetDiff, this.cycleLength()),
-      newPhases, 
-      this.preset
+      newPhases,
+      this.preset,
     )
   }
 
@@ -218,30 +222,26 @@ export const DEFAULT_LIGHT_CONFIG = new LightConfig(
     new Phase(State.GREEN, 10_000),
     new Phase(State.YELLOW, 2_000),
   ],
-  PRESETS[PresetId.FOUR_PHASE]
+  PRESETS[PresetId.FOUR_PHASE],
 )
 
-export const TEST_LIGHT_CONFIG = DEFAULT_LIGHT_CONFIG.forceWithPhases(
-  [
-    new Phase(State.RED, 30_000),
-    new Phase(State.RED_YELLOW, 2_000),
-    new Phase(State.GREEN, 26_000),
-    new Phase(State.YELLOW, 2_000),
-  ]
-)
+export const TEST_LIGHT_CONFIG = DEFAULT_LIGHT_CONFIG.forceWithPhases([
+  new Phase(State.RED, 30_000),
+  new Phase(State.RED_YELLOW, 2_000),
+  new Phase(State.GREEN, 26_000),
+  new Phase(State.YELLOW, 2_000),
+])
 
-export const MAXED_OUT_TEST_LIGHT_CONFIG = DEFAULT_LIGHT_CONFIG.withOffset(10_000).forceWithPhases(
-  [
-    new Phase(State.RED, 56_000),
-    new Phase(State.RED_YELLOW, 2_000),
-    new Phase(State.GREEN, 0),
-    new Phase(State.YELLOW, 2_000),
-  ]
-)
+export const MAXED_OUT_TEST_LIGHT_CONFIG = DEFAULT_LIGHT_CONFIG.withOffset(10_000).forceWithPhases([
+  new Phase(State.RED, 56_000),
+  new Phase(State.RED_YELLOW, 2_000),
+  new Phase(State.GREEN, 0),
+  new Phase(State.YELLOW, 2_000),
+])
 
 export const CONDITIONAL_RIGHT_TEST_LIGHT_CONFIG = new LightConfig(
   DEFAULT_INTERSECTION_CONFIG,
   0,
   [new Phase(State.GREEN, 10_000), new Phase(State.NONE, 50_000)],
-  PRESETS[PresetId.CONDITIONAL_RIGHT]
+  PRESETS[PresetId.CONDITIONAL_RIGHT],
 )

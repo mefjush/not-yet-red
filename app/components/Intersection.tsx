@@ -66,8 +66,10 @@ export default function IntersectionComponent({
 
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
-  const fixedLightGroups = lightGroups.map(lg => lg.map(lc => lc.withIntersectionConfig(intersectionConfig)))
-  
+  const fixedLightGroups = lightGroups.map((lg) =>
+    lg.map((lc) => lc.withIntersectionConfig(intersectionConfig)),
+  )
+
   const theLightGroups = new LightGroups(fixedLightGroups)
 
   const lightConfigs = fixedLightGroups.flatMap((x) => x)
@@ -102,8 +104,7 @@ export default function IntersectionComponent({
 
   const wrapListener = {
     nextStateTimestamp: (timestamp: number) =>
-      (Math.floor(timestamp / intersectionConfig.cycleLength) + 1) *
-      intersectionConfig.cycleLength,
+      (Math.floor(timestamp / intersectionConfig.cycleLength) + 1) * intersectionConfig.cycleLength,
   }
 
   const exitUiMode = () => setUiMode("none")
