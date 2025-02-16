@@ -11,14 +11,9 @@ const HALF_OFFSETTED = DEFAULT_LIGHT_CONFIG.withOffset(DEFAULT_INTERSECTION_CONF
 
 const STATIC_PRESET_BASE = PRESETS[PresetId.FOUR_PHASE]
 
-const alternating = [
-  [DEFAULT_LIGHT_CONFIG], [HALF_OFFSETTED]
-]
+const alternating = [[DEFAULT_LIGHT_CONFIG], [HALF_OFFSETTED]]
 
-const zebra = [
-  [DEFAULT_LIGHT_CONFIG], 
-  [HALF_OFFSETTED.withPreset(PRESETS[PresetId.PEDESTRIAN])]
-]
+const zebra = [[DEFAULT_LIGHT_CONFIG], [HALF_OFFSETTED.withPreset(PRESETS[PresetId.PEDESTRIAN])]]
 
 const tShaped = [
   [DEFAULT_LIGHT_CONFIG],
@@ -26,7 +21,7 @@ const tShaped = [
   [
     HALF_OFFSETTED.withPreset(PRESETS[PresetId.LEFT]),
     DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.RIGHT]),
-  ]
+  ],
 ]
 
 const staticLight = (state: State) => {
@@ -39,9 +34,12 @@ const staticLight = (state: State) => {
 const staticLights = STATIC_PRESET_BASE.states.map((state) => [staticLight(state)])
 
 const toUrl = (lightConfigs: LightConfig[][]) => {
-  return "/intersection?lights=" + lightConfigs
-    .map(lightConfig => lightConfigParser(DEFAULT_INTERSECTION_CONFIG).serialize(lightConfig))
-    .join(",")
+  return (
+    "/intersection?lights=" +
+    lightConfigs
+      .map((lightConfig) => lightConfigParser(DEFAULT_INTERSECTION_CONFIG).serialize(lightConfig))
+      .join(",")
+  )
 }
 
 export default function Ideas() {
