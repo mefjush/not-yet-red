@@ -27,7 +27,6 @@ export type UiMode = "none" | "share" | "fullscreen"
 const historyPush: Options = { history: "push" }
 
 // TODOs
-// cleanup light settings/config
 // better ideas page
 // back button a bit confusing in expand mode
 // light pattern img
