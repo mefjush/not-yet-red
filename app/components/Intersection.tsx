@@ -27,17 +27,18 @@ export type UiMode = "none" | "share" | "fullscreen"
 const historyPush: Options = { history: "push" }
 
 // TODOs
-// better ideas page
+// better ideas page (raname to examples)
+// phone app logo in red?
 // back button a bit confusing in expand mode
 // light pattern img
-// preview mode (show groups in rows)
 // Offline usage
 // Manual time correction in cookie / local storage
 // blink & beep
 // fix the timeline range slider on edge (when expanding)
 // breadcrumbs
-// footer description
 // android app
+// ui flicker on open home
+// make footer below the fold - so the plus button looks better
 
 export default function IntersectionComponent({
   uiMode,
@@ -247,17 +248,6 @@ export default function IntersectionComponent({
     return lightIdx < lightConfigs.length - 1 ? [card, groupButton] : [card]
   })
 
-  const fullscreenContents = lights.map((light, index) => (
-    <LightHead
-      key={`fullscreen-light-${index}`}
-      currentTimestamp={currentTimestamp}
-      light={light}
-      lightConfig={light.lightConfig}
-      maxHeight={100}
-      maxWidth={100}
-    />
-  ))
-
   return (
     <Stack spacing={2} sx={{ p: 1, m: 1 }}>
       <IntersectionConfigPanel
@@ -274,9 +264,9 @@ export default function IntersectionComponent({
         enabled={uiMode == "fullscreen"}
         onDisabled={exitUiMode}
         lightGroups={theLightGroups}
-      >
-        {fullscreenContents}
-      </Fullscreen>
+        lights={lights}
+        currentTimestamp={currentTimestamp}
+      />
 
       <ShareDialog url={getShareUrl()} open={uiMode == "share"} onClose={exitUiMode} />
 

@@ -1,30 +1,28 @@
 "use client"
 
-import { Box, Stack } from "@mui/material"
-import Grid from "@mui/material/Grid2"
-import React, { ReactElement, useEffect, useRef } from "react"
-import useWindowSize from "../hooks/useWindowSize"
-import { Swiper, SwiperSlide } from "swiper/react"
-import { Pagination } from "swiper/modules"
+import { Box } from "@mui/material"
+import React, { useEffect, useRef } from "react"
 import "swiper/css"
 import "swiper/css/pagination"
 import LightGroups from "../domain/LightGroups"
+import Screen from "./Screen"
+import TrafficLight from "../domain/TrafficLight"
 
 export default function Fullscreen({
   enabled,
-  children,
   onDisabled,
   lightGroups,
+  lights,
+  currentTimestamp,
 }: {
   enabled: boolean
-  children: ReactElement[]
   onDisabled: () => void
   lightGroups: LightGroups
+  lights: TrafficLight[]
+  currentTimestamp: number
 }) {
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
-
-  const [windowWidth, windowHeight] = useWindowSize()
 
   const fullscreenchange = () => {
     if (!document.fullscreenElement) {
@@ -71,48 +69,13 @@ export default function Fullscreen({
     }
   }
 
-  const groupToRender = (children: ReactElement[]) => {
-    const heightConstrainedSize = windowHeight
-    const widthConstrainedSize = windowWidth / children.length
-
-    return children.map((child) =>
-      React.cloneElement(child, {
-        maxWidth: widthConstrainedSize,
-        maxHeight: heightConstrainedSize,
-      }),
-    )
-  }
-
-  const slides = lightGroups.raw().map((group, idx) => {
-    const groupChildren = group
-      .map((_, inGroupIdx) => lightGroups.idLookup(idx, inGroupIdx))
-      .map((lightIdx) => children[lightIdx])
-    const render = groupToRender(groupChildren)
-    return (
-      <SwiperSlide key={idx}>
-        <Grid
-          container
-          justifyContent="center"
-          alignItems="center"
-          sx={{ height: "100%", width: "100%" }}
-        >
-          <Stack direction="row" alignItems="flex-end" spacing={0}>
-            {render}
-          </Stack>
-        </Grid>
-      </SwiperSlide>
-    )
-  })
-
   return (
     <Box ref={fullscreenRef} className="fullscreen" display={enabled ? "block" : "none"}>
-      <Swiper
-        style={{ height: "100%", width: "100%" }}
-        modules={[Pagination]}
-        pagination={{ clickable: true }}
-      >
-        {slides}
-      </Swiper>
+      <Screen 
+        lightGroups={lightGroups} 
+        lights={lights}
+        currentTimestamp={currentTimestamp}
+      />
     </Box>
   )
 }

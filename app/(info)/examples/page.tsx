@@ -6,6 +6,12 @@ import { DEFAULT_INTERSECTION_CONFIG } from "../../domain/IntersectionConfig"
 import { lightConfigParser } from "../../url"
 import { PresetId, PRESETS } from "../../domain/Preset"
 import { State } from "../../domain/State"
+import DemoScreen from "@/app/components/DemoScreen"
+import TrafficLight from "@/app/domain/TrafficLight"
+import Grid from "@mui/material/Grid2"
+import LightGroups from "@/app/domain/LightGroups"
+import { useEffect, useState } from "react"
+import Clock from "@/app/domain/Clock"
 
 const HALF_OFFSETTED = DEFAULT_LIGHT_CONFIG.withOffset(DEFAULT_INTERSECTION_CONFIG.cycleLength / 2)
 
@@ -42,25 +48,60 @@ const toUrl = (lightConfigs: LightConfig[][]) => {
   )
 }
 
-export default function Ideas() {
+export default function Examples() {
+
+  const configs = [
+    {config: alternating, name: "Alternating traffic"},
+    {config: zebra, name: "Zebra crossing"},
+    {config: tShaped, name: "T-shaped intersection"},
+    {config: staticLights, name: "Static"},
+  ]
+  
+  const lights = configs.map(config => config.config.map(group => group.map(lightConfig => new TrafficLight(lightConfig, false))))
+  
+  const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
+  
+  const clock = new Clock(0)
+  
+  // after each render
+  useEffect(() => {
+    clock.register(lights.flatMap(x => x).flatMap(y => y)).then(setCurrentTimestamp)
+    return () => {
+      clock.unregister()
+    }
+  })
+
+  const previewWidth = 200
+
+  const listItems = configs.map(({config, name}, configIdx) => (
+    <li>
+      <Button href={toUrl(config)}>{name}</Button>
+
+      <Grid container sx={{ mb: 5 }} justifyContent='flex-start'>
+        {
+          config.map((group, groupIdx) => (
+            <Grid size={{ xs: 3 }}>
+              <DemoScreen 
+                width={previewWidth}
+                lights={lights[configIdx].flatMap(x => x)}
+                lightGroups={new LightGroups(config)}
+                currentTimestamp={currentTimestamp}
+                fixed={groupIdx}
+              />
+            </Grid>
+          ))
+        }
+      </Grid>
+    </li>
+  ))
+
   return (
     <>
       <Typography variant="h5" sx={{ mt: 2 }}>
         Start with one of pre-made intersections
       </Typography>
       <ul>
-        <li>
-          <Button href={toUrl(alternating)}>Alternating traffic</Button>
-        </li>
-        <li>
-          <Button href={toUrl(zebra)}>Zebra crossing</Button>
-        </li>
-        <li>
-          <Button href={toUrl(tShaped)}>T-shaped intersection</Button>
-        </li>
-        <li>
-          <Button href={toUrl(staticLights)}>Static</Button>
-        </li>
+        {listItems}
       </ul>
 
       <Typography variant="h5" sx={{ mt: 2 }}>
