@@ -28,8 +28,8 @@ export default function Screen({
   const [windowWidth, windowHeight] = useWindowSize()
 
   const slides = lightGroups.raw().map((group, idx) => {
-    const heightConstrainedSize = width ?? windowHeight
-    const widthConstrainedSize = width ?? windowWidth / group.length
+    const heightConstrainedSize = width ? 2 * width : windowHeight
+    const widthConstrainedSize = (width ?? windowWidth) / group.length
 
     const groupChildren = group
       .map((_, inGroupIdx) => lightGroups.idLookup(idx, inGroupIdx))

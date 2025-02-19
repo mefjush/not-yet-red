@@ -1,10 +1,10 @@
 "use client"
 
-import { Typography } from "@mui/material"
+import { Paper, Typography } from "@mui/material"
 
 export default function About() {
   return (
-    <>
+    <Paper sx={{ p: 2, m: 2 }}>
       <Typography variant="h4" gutterBottom>
         The beginning
       </Typography>
@@ -65,6 +65,6 @@ export default function About() {
         following the lights or seeing how long they can dodge the dad-police before getting
         &quot;pulled over,&quot; there&apos;s always a way to play.
       </Typography>
-    </>
+    </Paper>
   )
 }

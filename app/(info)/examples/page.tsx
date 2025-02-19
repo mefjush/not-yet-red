@@ -1,6 +1,6 @@
 "use client"
 
-import { Typography, Button } from "@mui/material"
+import { Typography, Button, Card, CardContent, Stack, CardActions } from "@mui/material"
 import LightConfig, { DEFAULT_LIGHT_CONFIG, Phase } from "../../domain/LightConfig"
 import { DEFAULT_INTERSECTION_CONFIG } from "../../domain/IntersectionConfig"
 import { lightConfigParser } from "../../url"
@@ -16,6 +16,8 @@ import Clock from "@/app/domain/Clock"
 const HALF_OFFSETTED = DEFAULT_LIGHT_CONFIG.withOffset(DEFAULT_INTERSECTION_CONFIG.cycleLength / 2)
 
 const STATIC_PRESET_BASE = PRESETS[PresetId.FOUR_PHASE]
+
+const justOne = [[DEFAULT_LIGHT_CONFIG]]
 
 const alternating = [[DEFAULT_LIGHT_CONFIG], [HALF_OFFSETTED]]
 
@@ -50,10 +52,12 @@ const toUrl = (lightConfigs: LightConfig[][]) => {
 
 export default function Examples() {
   const configs = [
-    { config: alternating, name: "Alternating traffic" },
-    { config: zebra, name: "Zebra crossing" },
-    { config: tShaped, name: "T-shaped intersection" },
-    { config: staticLights, name: "Static" },
+    { config: justOne, name: "Just one light", scenarios: ["Make your toy cars follow the traffic light."] },
+    { config: alternating, name: "Alternating traffic", scenarios: ["Put a large box in a corridor, place the traffic lights on the opposite sides of the narrowing."] },
+    { config: zebra, name: "Zebra crossing", scenarios: ["Divide your household into 'pedestrians' and 'cars', make sure both groups obey the law."] },
+    { config: tShaped, name: "T-shaped intersection", scenarios: ["Find a t-shaped alleys in a park. Install the traffic lights. Make sure no bicycle runs the red light."] },
+    { config: staticLights, name: "Static", scenarios: ["Enter the fullscreen mode. Swipe left and right to 'control' the lights."] },
+    { config: [], name: "Empty", scenarios: ["Start from scratch!"] },
   ]
 
   const lights = configs.map((config) =>
@@ -74,41 +78,39 @@ export default function Examples() {
 
   const previewWidth = 200
 
-  const listItems = configs.map(({ config, name }, configIdx) => (
-    <li>
-      <Button href={toUrl(config)}>{name}</Button>
-
-      <Grid container sx={{ mb: 5 }} justifyContent="flex-start">
-        {config.map((group, groupIdx) => (
-          <Grid size={{ xs: 3 }}>
-            <DemoScreen
-              width={previewWidth}
-              lights={lights[configIdx].flatMap((x) => x)}
-              lightGroups={new LightGroups(config)}
-              currentTimestamp={currentTimestamp}
-              fixed={groupIdx}
-            />
-          </Grid>
-        ))}
-      </Grid>
-    </li>
+  const listItems = configs.map(({ config, name, scenarios }, configIdx) => (
+    <Card key={configIdx} >
+      <CardContent>
+        <Typography variant="h5" component="div">
+          {name}
+        </Typography>
+        <Typography variant="body2">
+          {scenarios}
+        </Typography>
+        
+        <Grid container justifyContent="flex-start">
+          {config.map((group, groupIdx) => (
+            <Grid size={{ xs: 6, md: 3, lg: 2 }} key={groupIdx}>
+              <DemoScreen
+                width={previewWidth}
+                lights={lights[configIdx].flatMap((x) => x)}
+                lightGroups={new LightGroups(config)}
+                currentTimestamp={currentTimestamp}
+                fixed={groupIdx}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      </CardContent>
+      <CardActions>
+        <Button size="small" href={toUrl(config)}>Select</Button>
+      </CardActions>
+    </Card>
   ))
 
   return (
-    <>
-      <Typography variant="h5" sx={{ mt: 2 }}>
-        Start with one of pre-made intersections
-      </Typography>
-      <ul>{listItems}</ul>
-
-      <Typography variant="h5" sx={{ mt: 2 }}>
-        Or...
-      </Typography>
-      <ul>
-        <li>
-          <Button href="/intersection">Start from scratch</Button>
-        </li>
-      </ul>
-    </>
+    <Stack spacing={2} sx={{ p: 1, m: 1 }}>
+      {listItems}
+    </Stack>
   )
 }

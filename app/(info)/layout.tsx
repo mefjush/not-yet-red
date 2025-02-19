@@ -22,7 +22,7 @@ export default function InfoLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <AppToolbar>{toolbarElements}</AppToolbar>
-      <Paper sx={{ p: 2, m: 2 }}>{children}</Paper>
+      {children}
     </>
   )
 }
