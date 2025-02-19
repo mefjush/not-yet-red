@@ -71,11 +71,7 @@ export default function Fullscreen({
 
   return (
     <Box ref={fullscreenRef} className="fullscreen" display={enabled ? "block" : "none"}>
-      <Screen 
-        lightGroups={lightGroups} 
-        lights={lights}
-        currentTimestamp={currentTimestamp}
-      />
+      <Screen lightGroups={lightGroups} lights={lights} currentTimestamp={currentTimestamp} />
     </Box>
   )
 }

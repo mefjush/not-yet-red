@@ -49,23 +49,24 @@ const toUrl = (lightConfigs: LightConfig[][]) => {
 }
 
 export default function Examples() {
-
   const configs = [
-    {config: alternating, name: "Alternating traffic"},
-    {config: zebra, name: "Zebra crossing"},
-    {config: tShaped, name: "T-shaped intersection"},
-    {config: staticLights, name: "Static"},
+    { config: alternating, name: "Alternating traffic" },
+    { config: zebra, name: "Zebra crossing" },
+    { config: tShaped, name: "T-shaped intersection" },
+    { config: staticLights, name: "Static" },
   ]
-  
-  const lights = configs.map(config => config.config.map(group => group.map(lightConfig => new TrafficLight(lightConfig, false))))
-  
+
+  const lights = configs.map((config) =>
+    config.config.map((group) => group.map((lightConfig) => new TrafficLight(lightConfig, false))),
+  )
+
   const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
-  
+
   const clock = new Clock(0)
-  
+
   // after each render
   useEffect(() => {
-    clock.register(lights.flatMap(x => x).flatMap(y => y)).then(setCurrentTimestamp)
+    clock.register(lights.flatMap((x) => x).flatMap((y) => y)).then(setCurrentTimestamp)
     return () => {
       clock.unregister()
     }
@@ -73,24 +74,22 @@ export default function Examples() {
 
   const previewWidth = 200
 
-  const listItems = configs.map(({config, name}, configIdx) => (
+  const listItems = configs.map(({ config, name }, configIdx) => (
     <li>
       <Button href={toUrl(config)}>{name}</Button>
 
-      <Grid container sx={{ mb: 5 }} justifyContent='flex-start'>
-        {
-          config.map((group, groupIdx) => (
-            <Grid size={{ xs: 3 }}>
-              <DemoScreen 
-                width={previewWidth}
-                lights={lights[configIdx].flatMap(x => x)}
-                lightGroups={new LightGroups(config)}
-                currentTimestamp={currentTimestamp}
-                fixed={groupIdx}
-              />
-            </Grid>
-          ))
-        }
+      <Grid container sx={{ mb: 5 }} justifyContent="flex-start">
+        {config.map((group, groupIdx) => (
+          <Grid size={{ xs: 3 }}>
+            <DemoScreen
+              width={previewWidth}
+              lights={lights[configIdx].flatMap((x) => x)}
+              lightGroups={new LightGroups(config)}
+              currentTimestamp={currentTimestamp}
+              fixed={groupIdx}
+            />
+          </Grid>
+        ))}
       </Grid>
     </li>
   ))
@@ -100,9 +99,7 @@ export default function Examples() {
       <Typography variant="h5" sx={{ mt: 2 }}>
         Start with one of pre-made intersections
       </Typography>
-      <ul>
-        {listItems}
-      </ul>
+      <ul>{listItems}</ul>
 
       <Typography variant="h5" sx={{ mt: 2 }}>
         Or...
