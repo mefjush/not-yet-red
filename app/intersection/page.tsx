@@ -78,17 +78,17 @@ function Content() {
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         {drawerList}
       </Drawer>
-      <IntersectionComponent uiMode={uiMode} setUiMode={setUiMode} />
+      <Suspense>
+        <IntersectionComponent uiMode={uiMode} setUiMode={setUiMode} />
+      </Suspense>
     </>
   )
 }
 
 export default function Home() {
   return (
-    <main>
-      <Suspense>
-        <Content />
-      </Suspense>
+    <main style={{ minHeight: "100vh" }}>
+      <Content />
     </main>
   )
 }

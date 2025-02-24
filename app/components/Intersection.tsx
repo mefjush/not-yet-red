@@ -28,6 +28,7 @@ const historyPush: Options = { history: "push" }
 // TODOs
 // better examples page
 // aria stuff
+// settings small arrow
 // phone app logo in red?
 // back button a bit confusing in expand mode
 // light pattern img
@@ -37,8 +38,6 @@ const historyPush: Options = { history: "push" }
 // fix the timeline range slider on edge (when expanding)
 // breadcrumbs
 // android app
-// ui flicker on open home
-// make footer below the fold - so the plus button looks better
 
 export default function IntersectionComponent({
   uiMode,
