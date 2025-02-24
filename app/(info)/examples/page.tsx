@@ -52,11 +52,37 @@ const toUrl = (lightConfigs: LightConfig[][]) => {
 
 export default function Examples() {
   const configs = [
-    { config: justOne, name: "Just one light", scenarios: ["Make your toy cars follow the traffic light."] },
-    { config: alternating, name: "Alternating traffic", scenarios: ["Put a large box in a corridor, place the traffic lights on the opposite sides of the narrowing."] },
-    { config: zebra, name: "Zebra crossing", scenarios: ["Divide your household into 'pedestrians' and 'cars', make sure both groups obey the law."] },
-    { config: tShaped, name: "T-shaped intersection", scenarios: ["Find a t-shaped alleys in a park. Install the traffic lights. Make sure no bicycle runs the red light."] },
-    { config: staticLights, name: "Static", scenarios: ["Enter the fullscreen mode. Swipe left and right to 'control' the lights."] },
+    {
+      config: justOne,
+      name: "Just one light",
+      scenarios: ["Make your toy cars follow the traffic light."],
+    },
+    {
+      config: alternating,
+      name: "Alternating traffic",
+      scenarios: [
+        "Put a large box in a corridor, place the traffic lights on the opposite sides of the narrowing.",
+      ],
+    },
+    {
+      config: zebra,
+      name: "Zebra crossing",
+      scenarios: [
+        "Divide your household into 'pedestrians' and 'cars', make sure both groups obey the law.",
+      ],
+    },
+    {
+      config: tShaped,
+      name: "T-shaped intersection",
+      scenarios: [
+        "Find a t-shaped alleys in a park. Install the traffic lights. Make sure no bicycle runs the red light.",
+      ],
+    },
+    {
+      config: staticLights,
+      name: "Static",
+      scenarios: ["Enter the fullscreen mode. Swipe left and right to 'control' the lights."],
+    },
     { config: [], name: "Empty", scenarios: ["Start from scratch!"] },
   ]
 
@@ -76,19 +102,17 @@ export default function Examples() {
     }
   })
 
-  const previewWidth = 200
+  const previewWidth = 90
 
   const listItems = configs.map(({ config, name, scenarios }, configIdx) => (
-    <Card key={configIdx} >
+    <Card key={configIdx}>
       <CardContent>
         <Typography variant="h5" component="div">
           {name}
         </Typography>
-        <Typography variant="body2">
-          {scenarios}
-        </Typography>
-        
-        <Grid container justifyContent="flex-start">
+        <Typography variant="body2">{scenarios}</Typography>
+
+        <Grid sx={{ m: 2 }} container justifyContent="flex-start">
           {config.map((group, groupIdx) => (
             <Grid size={{ xs: 6, md: 3, lg: 2 }} key={groupIdx}>
               <DemoScreen
@@ -103,7 +127,9 @@ export default function Examples() {
         </Grid>
       </CardContent>
       <CardActions>
-        <Button size="small" href={toUrl(config)}>Select</Button>
+        <Button size="small" href={toUrl(config)}>
+          Select
+        </Button>
       </CardActions>
     </Card>
   ))

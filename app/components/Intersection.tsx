@@ -10,7 +10,6 @@ import AddIcon from "@mui/icons-material/Add"
 import { lightConfigParser, IntersectionConfigParser } from "../url"
 import IntersectionConfig, { DEFAULT_INTERSECTION_CONFIG } from "../domain/IntersectionConfig"
 import Fullscreen from "./Fullscreen"
-import LightHead from "./LightHead"
 import React from "react"
 import ShareDialog from "./ShareDialog"
 import timeSync from "../domain/timeSync"
@@ -27,7 +26,8 @@ export type UiMode = "none" | "share" | "fullscreen"
 const historyPush: Options = { history: "push" }
 
 // TODOs
-// better ideas page (raname to examples)
+// better examples page
+// aria stuff
 // phone app logo in red?
 // back button a bit confusing in expand mode
 // light pattern img
