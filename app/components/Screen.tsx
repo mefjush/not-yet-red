@@ -66,7 +66,7 @@ export default function Screen({
       style={{ height: "100%", width: "100%" }}
       modules={[Pagination]}
       pagination={{ clickable: true }}
-      enabled={fixed == undefined}
+      enabled={fixed === undefined}
     >
       {slides}
     </Swiper>

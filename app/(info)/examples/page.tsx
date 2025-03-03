@@ -87,16 +87,18 @@ export default function Examples() {
   ]
 
   const lights = configs.map((config) =>
-    config.config.map((group) => group.map((lightConfig) => new TrafficLight(lightConfig, false))),
+    config.config.flatMap((group) => group.map((lightConfig) => new TrafficLight(lightConfig, false))),
   )
-
-  const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
 
   const clock = new Clock(0)
 
+  const [currentTimestamp, setCurrentTimestamp] = useState(clock.now())
+
+  console.log("currentTimestamp", currentTimestamp)
+
   // after each render
   useEffect(() => {
-    clock.register(lights.flatMap((x) => x).flatMap((y) => y)).then(setCurrentTimestamp)
+    clock.register(lights.flatMap((x) => x)).then(setCurrentTimestamp)
     return () => {
       clock.unregister()
     }
