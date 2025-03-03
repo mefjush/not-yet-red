@@ -94,8 +94,6 @@ export default function Examples() {
 
   const [currentTimestamp, setCurrentTimestamp] = useState(clock.now())
 
-  console.log("currentTimestamp", currentTimestamp)
-
   // after each render
   useEffect(() => {
     clock.register(lights.flatMap((x) => x)).then(setCurrentTimestamp)
