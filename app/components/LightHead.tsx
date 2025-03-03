@@ -33,14 +33,12 @@ export default function LightHead({
   lightConfig,
   maxHeight,
   maxWidth,
-  onClick,
 }: {
   currentTimestamp: number
   light: TrafficLight
   lightConfig: LightConfig
   maxHeight: number
   maxWidth: number
-  onClick?: () => void
 }) {
   const segments: SegmentColor[] = lightConfig.preset.colors
 
@@ -94,7 +92,6 @@ export default function LightHead({
         py: `${segmentSize * 0.05}${unit}`,
         m: `${segmentSize * 0.05}${unit}`,
       }}
-      onClick={onClick}
     >
       <Stack
         direction="column"
