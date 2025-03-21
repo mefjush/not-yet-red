@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "red.yet.not.twa",
+        "sha256_cert_fingerprints": ["08:8D:34:3D:38:A0:DF:46:D1:55:A9:25:5E:7C:E4:A9:F0:48:69:62:30:F9:2F:E1:19:92:1F:AC:E0:20:58:8E"]
+      }
+    }]
