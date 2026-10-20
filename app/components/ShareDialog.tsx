@@ -19,10 +19,12 @@ import IosShareIcon from "@mui/icons-material/IosShare"
 
 export default function ShareDialog({
   url,
+  code,
   open,
   onClose,
 }: {
   url: string
+  code: string
   open: boolean
   onClose: () => void
 }) {
@@ -55,6 +57,10 @@ export default function ShareDialog({
             style={{ width: "100%", height: "auto", maxWidth: 224 }}
           />
         </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: "center" }}>
+          Setup code <b>{code}</b>. Every phone shows it in fullscreen: if the codes match, the
+          phones match.
+        </Typography>
         <TextField
           margin="normal"
           label="Link"

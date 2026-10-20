@@ -14,6 +14,7 @@ export default function Fullscreen({
   lights,
   currentTimestamp,
   timeCorrection,
+  setupCode,
 }: {
   enabled: boolean
   onDisabled: () => void
@@ -21,6 +22,8 @@ export default function Fullscreen({
   lights: TrafficLight[]
   currentTimestamp: number
   timeCorrection: number
+  // shown small, so phones can be compared at a glance
+  setupCode: string
 }) {
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -83,6 +86,21 @@ export default function Fullscreen({
         timeCorrection={timeCorrection}
         active={enabled}
       />
+      <Box
+        aria-label={`Setup code ${setupCode}`}
+        sx={{
+          position: "absolute",
+          left: 16,
+          bottom: 16,
+          typography: "caption",
+          fontWeight: 700,
+          letterSpacing: 2,
+          color: "text.secondary",
+          opacity: 0.5,
+        }}
+      >
+        {setupCode}
+      </Box>
       <IconButton
         aria-label="Exit fullscreen"
         onClick={() => document.exitFullscreen()}

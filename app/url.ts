@@ -63,3 +63,21 @@ export const IntersectionConfigParser = {
     }
   },
 }
+
+// no 0/O or 1/I/L, so a code is easy to read off a phone across the room
+const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
+
+// a short code for a setup, so people can check that every phone runs the same one
+export function setupCode(setup: string, length = 4): string {
+  // FNV-1a: tiny and good enough to tell setups apart (31^4 ≈ 900k codes)
+  let hash = 0x811c9dc5
+  for (let i = 0; i < setup.length; i++) {
+    hash = Math.imul(hash ^ setup.charCodeAt(i), 0x01000193) >>> 0
+  }
+  let code = ""
+  for (let i = 0; i < length; i++) {
+    code += CODE_ALPHABET[hash % CODE_ALPHABET.length]
+    hash = Math.floor(hash / CODE_ALPHABET.length)
+  }
+  return code
+}

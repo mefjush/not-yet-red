@@ -1,7 +1,7 @@
 import { describe, expect, test, it } from "vitest"
 import { DEFAULT_INTERSECTION_CONFIG } from "../app/domain/IntersectionConfig"
 import { DEFAULT_LIGHT_CONFIG as DEFAULT_LIGHT_CONFIG } from "../app/domain/LightConfig"
-import { IntersectionConfigParser, lightConfigParser } from "../app/url"
+import { IntersectionConfigParser, lightConfigParser, setupCode } from "../app/url"
 import { SCENARIOS } from "../app/components/scenarios"
 import { PRESETS, PresetId } from "../app/domain/Preset"
 
@@ -48,5 +48,15 @@ describe("Url", () => {
     console.log(serialized)
 
     expect(IntersectionConfigParser.parse(serialized)).toEqual(DEFAULT_INTERSECTION_CONFIG)
+  })
+
+  it("gives a setup a short, readable code that changes when the setup does", () => {
+    const setup = "?intersection=30-30-0&lights=0--R16-RY2-G10-Y2--FOUR_PHASE"
+    const code = setupCode(setup)
+
+    expect(code).toMatch(/^[2-9A-HJKMNP-Z]{4}$/)
+    expect(setupCode(setup)).toBe(code)
+    expect(setupCode(setup.replace("R16", "R15"))).not.toBe(code)
+    expect(setupCode(setup.replace("30-30-0", "45-30-0"))).not.toBe(code)
   })
 })

@@ -5,9 +5,20 @@ import Clock from "../domain/Clock"
 import TrafficLight from "../domain/TrafficLight"
 import LightConfig, { DEFAULT_LIGHT_CONFIG } from "../domain/LightConfig"
 import Failure from "../domain/Failure"
-import { Button, Container, Fab, Paper, Snackbar, Stack, Typography } from "@mui/material"
+import {
+  Alert,
+  Button,
+  Container,
+  Fab,
+  IconButton,
+  Paper,
+  Snackbar,
+  Stack,
+  Typography,
+} from "@mui/material"
+import CloseIcon from "@mui/icons-material/Close"
 import AddIcon from "@mui/icons-material/Add"
-import { lightConfigParser, IntersectionConfigParser } from "../url"
+import { lightConfigParser, IntersectionConfigParser, setupCode } from "../url"
 import IntersectionConfig, { DEFAULT_INTERSECTION_CONFIG } from "../domain/IntersectionConfig"
 import Fullscreen from "./Fullscreen"
 import React from "react"
@@ -163,8 +174,21 @@ export default function IntersectionComponent({
     })
   }
 
+  // everything other phones need to run the same intersection
+  const setupQuery = `?intersection=${IntersectionConfigParser.serialize(intersectionConfig)}&lights=${lightGroupsParser.serialize(theLightGroups.raw())}`
+  const code = setupCode(setupQuery)
+
+  // the setup other phones are likely running: the one this phone opened from a link,
+  // or the one it last shared. null until then, so a brand-new setup doesn't nag.
+  const [syncedCode, setSyncedCode] = useState<string | null>(() =>
+    typeof window != "undefined" && new URLSearchParams(window.location.search).has("lights")
+      ? code
+      : null,
+  )
+  const outOfSync = syncedCode != null && syncedCode != code
+
   const getShareUrl = () => {
-    const search = `?intersection=${IntersectionConfigParser.serialize(intersectionConfig)}&lights=${lightGroupsParser.serialize(theLightGroups.raw())}`
+    const search = setupQuery
 
     const baseUrl =
       typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin
@@ -234,6 +258,29 @@ export default function IntersectionComponent({
   return (
     <Container maxWidth="md" sx={{ py: 2, pb: 12 }}>
       <Stack spacing={2}>
+        {outOfSync && (
+          <Alert
+            severity="warning"
+            action={
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                <Button color="inherit" size="small" onClick={() => setUiMode("share")}>
+                  Share again
+                </Button>
+                <IconButton
+                  color="inherit"
+                  size="small"
+                  aria-label="Dismiss"
+                  onClick={() => setSyncedCode(code)}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Stack>
+            }
+          >
+            Setup changed (now {code}). If other phones use this intersection, share it again so
+            they match.
+          </Alert>
+        )}
         <IntersectionConfigPanel
           intersectionConfig={intersectionConfig}
           updateIntersectionConfig={updateIntersectionConfig}
@@ -252,9 +299,19 @@ export default function IntersectionComponent({
         lights={lights}
         currentTimestamp={currentTimestamp}
         timeCorrection={timeCorrection}
+        setupCode={code}
       />
 
-      <ShareDialog url={getShareUrl()} open={uiMode == "share"} onClose={exitUiMode} />
+      <ShareDialog
+        url={getShareUrl()}
+        code={code}
+        open={uiMode == "share"}
+        onClose={() => {
+          // whoever scanned it now runs this setup
+          setSyncedCode(code)
+          exitUiMode()
+        }}
+      />
 
       {expanded != null && lights[expanded] && (
         <LightDetails
