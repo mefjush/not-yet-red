@@ -197,7 +197,7 @@ export default function LightHead({
             <Lamp
               key={idx}
               size={size}
-              color={theme.palette[segment]}
+              color={symbol.white ? theme.palette.tlWhite : theme.palette[segment]}
               on={attributes.segments.includes(segment)}
               flashing={attributes.flashing ?? false}
               halfBeat={(attributes.alternating ?? false) && idx % 2 == 1}

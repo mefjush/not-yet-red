@@ -4,6 +4,7 @@ export enum State {
   GREEN = "GREEN",
   GREEN_FLASHING = "GREEN_FLASHING",
   RED_ALTERNATING = "RED_ALTERNATING",
+  YELLOW_FLASHING = "YELLOW_FLASHING",
   YELLOW = "YELLOW",
   NONE = "NONE",
 }
@@ -71,6 +72,15 @@ export const STATE_ATTRIBUTES: { [id: string]: StateAttributes } = {
     segments: ["tlRed"],
     flashing: true,
     alternating: true,
+  },
+  // warning light: take care
+  YELLOW_FLASHING: {
+    name: "Flashing yellow",
+    color: "tlYellow",
+    priority: 3,
+    order: 6,
+    segments: ["tlYellow"],
+    flashing: true,
   },
   NONE: { name: "Off", color: "tlGrey", priority: 5, order: 0, segments: [] },
 }

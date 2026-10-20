@@ -7,6 +7,7 @@ import { useState, useRef } from "react"
 import { State, TrafficLightColors } from "../domain/State"
 import { useLongPress } from "use-long-press"
 import LightConfig, { Phase } from "../domain/LightConfig"
+import { Preset } from "../domain/Preset"
 
 const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
 
@@ -69,14 +70,17 @@ function DelayedTextField({
 function PhaseControl({
   max,
   phase,
+  preset,
   onChange,
 }: {
   max: number
   phase: Phase
+  preset: Preset
   onChange: (seconds: number) => void
 }) {
   const value = phase.duration / 1000
-  const { name, color } = phase.stateAttributes()
+  const { color } = phase.stateAttributes()
+  const name = preset.phaseName(phase.state)
   const longPressInterval = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const set = (val: number) => onChange(clamp(val, 0, max))
@@ -121,10 +125,12 @@ function PhaseControl({
 
 export function StatePicker({
   phases,
+  preset,
   selectedState,
   setSelectedState,
 }: {
   phases: Phase[]
+  preset: Preset
   selectedState?: State
   setSelectedState: (state: State) => void
 }) {
@@ -136,7 +142,8 @@ export function StatePicker({
       sx={{ flexWrap: "wrap", gap: 1 }}
     >
       {phases.map((phase) => {
-        const { name, color } = phase.stateAttributes()
+        const { color } = phase.stateAttributes()
+        const name = preset.phaseName(phase.state)
         const selected = phase.state == selectedState
         return (
           <Chip
@@ -171,6 +178,7 @@ export default function PhaseControls({
         <PhaseControl
           key={phase.state}
           phase={phase}
+          preset={lightConfig.preset}
           max={lightConfig.cycleLength() / 1000}
           onChange={(seconds) => {
             setSelectedState(phase.state)

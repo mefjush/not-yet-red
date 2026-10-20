@@ -3,6 +3,7 @@ import { DEFAULT_INTERSECTION_CONFIG } from "../app/domain/IntersectionConfig"
 import { DEFAULT_LIGHT_CONFIG as DEFAULT_LIGHT_CONFIG } from "../app/domain/LightConfig"
 import { IntersectionConfigParser, lightConfigParser } from "../app/url"
 import { SCENARIOS } from "../app/components/scenarios"
+import { PRESETS, PresetId } from "../app/domain/Preset"
 
 describe("Url", () => {
   it("serializes LightConfig back and forth", () => {
@@ -30,6 +31,15 @@ describe("Url", () => {
 
     expect(serialized).toBe("0--N20-RA10--RAILWAY")
     expect(parser.parse(serialized)).toEqual(railway)
+  })
+
+  it("serializes a flashing yellow warning light back and forth", () => {
+    const parser = lightConfigParser(DEFAULT_INTERSECTION_CONFIG)
+    const warning = [DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.FLASHING_YELLOW])]
+    const serialized = parser.serialize(warning)
+
+    expect(serialized).toBe("0--YF30--FLASHING_YELLOW")
+    expect(parser.parse(serialized)).toEqual(warning)
   })
 
   it("serializes IntersectionConfgi back and forth", () => {

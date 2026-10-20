@@ -114,6 +114,7 @@ export default function LightDetails({
           />
           <StatePicker
             phases={lightConfig.phases}
+            preset={lightConfig.preset}
             setSelectedState={setSelectedState}
             selectedState={selectedState}
           />

@@ -164,6 +164,7 @@ export default function LightCard({
         />
         <StatePicker
           phases={lightConfig.phases}
+          preset={lightConfig.preset}
           setSelectedState={setSelectedState}
           selectedState={selectedState}
         />

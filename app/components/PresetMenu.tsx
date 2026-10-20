@@ -2,7 +2,7 @@ import { Stack, Select, MenuItem, Box, Typography, useTheme } from "@mui/materia
 import { createElement } from "react"
 import LightConfig from "../domain/LightConfig"
 import { Preset, PresetId, PRESETS, SYMBOLS, SymbolId } from "../domain/Preset"
-import { State, STATE_ATTRIBUTES } from "../domain/State"
+import { State } from "../domain/State"
 
 const LAMP = 11
 
@@ -29,7 +29,7 @@ function PresetIcon({ preset }: { preset: Preset }) {
         sx={{ gap: "2px", p: "2px", borderRadius: "4px", bgcolor: "#161616" }}
       >
         {preset.colors.map((segment, idx) => {
-          const color = theme.palette[segment].main
+          const color = (symbol.white ? theme.palette.tlWhite : theme.palette[segment]).main
           const inverted = symbol.isInverted(segment)
           // symbols glow on a black lens, except arrows on red/yellow: black arrow on a lit lens
           const litLens = !hasSymbol || inverted
@@ -99,7 +99,7 @@ export default function PresetMenu({
               <div>{preset.name}</div>
               {/* the phase order tells apart lights that look the same, e.g. 4- and 3-phase */}
               <Typography variant="caption" color="text.secondary">
-                {preset.states.map((state) => STATE_ATTRIBUTES[state].name).join(" → ")}
+                {preset.states.map((state) => preset.phaseName(state)).join(" → ")}
               </Typography>
             </div>
           </Stack>

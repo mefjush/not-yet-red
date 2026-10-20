@@ -12,6 +12,7 @@ declare module "@mui/material/styles" {
     tlGreen: Palette["primary"]
     tlGrey: Palette["primary"]
     tlLightGreen: Palette["primary"]
+    tlWhite: Palette["primary"]
   }
   interface PaletteOptions {
     tlRed: Palette["primary"]
@@ -20,6 +21,7 @@ declare module "@mui/material/styles" {
     tlGreen: Palette["primary"]
     tlGrey: Palette["primary"]
     tlLightGreen: Palette["primary"]
+    tlWhite: Palette["primary"]
   }
 }
 
@@ -54,6 +56,8 @@ const trafficColors = {
   tlGreen: palette.augmentColor({ color: green }),
   tlGrey: palette.augmentColor({ color: grey }),
   tlLightGreen: palette.augmentColor({ color: lightGreen }),
+  // tram signal lamps
+  tlWhite: palette.augmentColor({ color: { main: "#f4f4f0" } }),
 }
 
 const theme = createTheme({

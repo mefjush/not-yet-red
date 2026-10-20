@@ -35,3 +35,36 @@ describe("railway crossing preset", () => {
     ])
   })
 })
+
+describe("bicycle, warning and tram presets", () => {
+  const switchTo = (presetId: PresetId) => DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[presetId])
+  const phasesOf = (presetId: PresetId) =>
+    switchTo(presetId).phases.map((p) => [p.state, p.duration])
+
+  it("runs a bicycle light like a car light", () => {
+    expect(phasesOf(PresetId.BICYCLE)).toEqual(phasesOf(PresetId.FOUR_PHASE))
+  })
+
+  it("flashes yellow for the whole cycle", () => {
+    expect(phasesOf(PresetId.FLASHING_YELLOW)).toEqual([[State.YELLOW_FLASHING, 30_000]])
+  })
+
+  it("shows a tram's bars as stop, go and stop soon, with a 4 s flashing go bar", () => {
+    const tram = PRESETS[PresetId.TRAM]
+
+    expect(tram.states.map((s) => tram.phaseName(s))).toEqual([
+      "Stop (—)",
+      "Go (|)",
+      "Stop soon (flashing |)",
+    ])
+    expect(phasesOf(PresetId.TRAM)).toEqual([
+      [State.RED, 16_000],
+      [State.GREEN, 10_000],
+      [State.GREEN_FLASHING, 4_000],
+    ])
+  })
+
+  it("keeps the usual phase names for other lights", () => {
+    expect(PRESETS[PresetId.BICYCLE].phaseName(State.RED_YELLOW)).toBe("Red-Yellow")
+  })
+})
