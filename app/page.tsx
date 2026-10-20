@@ -35,12 +35,21 @@ const STEPS = [
   },
 ]
 
+function cameFromThisSite() {
+  try {
+    return new URL(document.referrer).origin == window.location.origin
+  } catch {
+    return false // no referrer: the app was just launched
+  }
+}
+
 export default function Home() {
   const timestamp = useTimestamp(HERO_LIGHTS)
 
-  // the installed app goes straight to the tool
+  // the installed app opens straight into the tool, but links back here from inside the app
+  // (Home, Setups) must still work: only a launch arrives without a same-site referrer
   useEffect(() => {
-    if (window.matchMedia("(display-mode: standalone)").matches) {
+    if (window.matchMedia("(display-mode: standalone)").matches && !cameFromThisSite()) {
       window.location.replace("/intersection")
     }
   }, [])
