@@ -143,6 +143,26 @@ export default function Home() {
           Each sketch shows where to put the phones. Pick one and tweak it as you like.
         </Typography>
         <ScenarioList />
+
+        <Box
+          component="section"
+          aria-labelledby="story"
+          sx={{ mt: { xs: 6, sm: 8 }, mx: "auto", maxWidth: 600, textAlign: "center" }}
+        >
+          <Typography id="story" variant="h6" component="h2" sx={{ fontWeight: 700, mb: 1 }}>
+            Why &quot;Not Yet Red&quot;?
+          </Typography>
+          <Typography color="text.secondary">
+            It started with my five-year-old son, whose toy cars kept getting stuck in traffic jams.
+            I built him a traffic light, and soon the whole house was playing: hallway crossings,
+            backyard bike rides, and the big thrill of making it through <i>just</i> before the
+            light turns red. Push on or stop? That split second gave the app its name, usually right
+            before the dad-police chase begins.
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1, fontStyle: "italic" }}>
+            — mefju
+          </Typography>
+        </Box>
       </Container>
     </main>
   )
