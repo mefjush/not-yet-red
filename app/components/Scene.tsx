@@ -35,14 +35,41 @@ const horizontalRoad = (y: number, h: number, x = 0, w = W) => (
 )
 
 const LAYOUTS: Record<SceneLayout, { road: React.ReactNode; phones: Point[]; props: Prop[] }> = {
+  // a looped toy car track; the phone stands inside the loop at the stop line
   single: {
     road: [
-      horizontalRoad(95, 50),
-      <rect key="stop" x={250} y={120} width={4} height={25} fill={MARKING} />,
+      <rect
+        key="track"
+        x={40}
+        y={40}
+        width={320}
+        height={160}
+        rx={80}
+        fill="none"
+        stroke={ROAD}
+        strokeWidth={36}
+      />,
+      <rect
+        key="track-line"
+        x={40}
+        y={40}
+        width={320}
+        height={160}
+        rx={80}
+        fill="none"
+        stroke={MARKING}
+        strokeWidth={2}
+        strokeDasharray="10 8"
+      />,
+      <rect key="stop" x={250} y={182} width={4} height={36} fill={MARKING} />,
     ],
-    phones: [{ x: 290, y: 195 }],
-    props: [{ icon: DirectionsCarIcon, x: 150, y: 132 }],
+    phones: [{ x: 280, y: 135 }],
+    props: [
+      { icon: DirectionsCarIcon, x: 170, y: 200 },
+      { icon: DirectionsCarIcon, x: 120, y: 40 },
+    ],
   },
+  // right-hand traffic: each light stands on its drivers' right; the box blocks the top lane
   corridor: {
     road: [
       horizontalRoad(90, 80),
@@ -59,14 +86,15 @@ const LAYOUTS: Record<SceneLayout, { road: React.ReactNode; phones: Point[]; pro
       />,
     ],
     phones: [
-      { x: 60, y: 50 },
-      { x: 340, y: 205 },
+      { x: 60, y: 205 },
+      { x: 340, y: 50 },
     ],
     props: [
       { icon: DirectionsCarIcon, x: 90, y: 150 },
-      { icon: DirectionsCarIcon, x: 310, y: 150 },
+      { icon: DirectionsCarIcon, x: 310, y: 110 },
     ],
   },
+  // the car light on the drivers' right; the pedestrian light across the road from the walker
   zebra: {
     road: [
       horizontalRoad(80, 80),
@@ -75,8 +103,8 @@ const LAYOUTS: Record<SceneLayout, { road: React.ReactNode; phones: Point[]; pro
       )),
     ],
     phones: [
-      { x: 140, y: 45 },
-      { x: 260, y: 200 },
+      { x: 140, y: 200 },
+      { x: 260, y: 45 },
     ],
     props: [
       { icon: DirectionsCarIcon, x: 90, y: 140 },
