@@ -5,7 +5,7 @@ import PrivacyTipOutlinedIcon from "@mui/icons-material/PrivacyTipOutlined"
 
 export const MENU_ITEMS = [
   { name: "Home", icon: <TrafficOutlinedIcon />, href: "/" },
-  { name: "Examples", icon: <TipsAndUpdatesOutlinedIcon />, href: "/examples" },
+  { name: "Setups", icon: <TipsAndUpdatesOutlinedIcon />, href: "/#setups" },
   { name: "About", icon: <InfoOutlinedIcon />, href: "/about" },
   { name: "Privacy", icon: <PrivacyTipOutlinedIcon />, href: "/privacy" },
 ]

@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Not Yet Red",
     short_name: "Not Yet Red",
     description: "Build your own intersection using smartphones as traffic lights.",
-    start_url: "/",
+    start_url: "/intersection",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#000000",

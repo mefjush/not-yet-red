@@ -1,4 +1,4 @@
-interface ClockListener {
+export interface ClockListener {
   nextStateTimestamp(d: number): number
 }
 

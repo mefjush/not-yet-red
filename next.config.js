@@ -14,7 +14,11 @@ module.exports = async (phase) => {
     swSrc: "app/sw.ts",
     swDest: "public/sw.js",
     scope: "/",
-    additionalPrecacheEntries: ["/", "/index.txt"],
+    // a fresh revision per build so cached pages are refreshed after each deploy
+    additionalPrecacheEntries: ["/", "/index.txt", "/intersection"].map((url) => ({
+      url,
+      revision: Date.now().toString(),
+    })),
   })
   return withSerwist(nextConfig)
 }

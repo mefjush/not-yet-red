@@ -13,6 +13,8 @@
 .swipe > * {
   flex: 0 0 100%;
   scroll-snap-align: center;
+  /* one swipe moves exactly one phone, even on a fast flick */
+  scroll-snap-stop: always;
 }
 
 /* AnimatedLogo.tsx */
@@ -75,5 +77,20 @@
 @media (prefers-reduced-motion: reduce) {
   .logo span {
     animation: none;
+  }
+}
+
+/* Scene.tsx: phones are sized in px, so shrink them when the sketch is narrow */
+.scene {
+  container-type: inline-size;
+}
+@container (max-width: 440px) {
+  .scene-item {
+    scale: 0.75;
+  }
+}
+@container (max-width: 340px) {
+  .scene-item {
+    scale: 0.62;
   }
 }
