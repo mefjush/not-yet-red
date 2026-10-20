@@ -35,6 +35,8 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: ./out
+          # keep .well-known/assetlinks.json, which the Android app needs
+          include-hidden-files: true
 
   deploy:
     environment:
