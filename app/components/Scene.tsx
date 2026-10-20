@@ -3,6 +3,7 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar"
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk"
 import SwipeIcon from "@mui/icons-material/Swipe"
 import TrainIcon from "@mui/icons-material/Train"
+import TramIcon from "@mui/icons-material/Tram"
 import { SvgIconComponent } from "@mui/icons-material"
 import LightConfig from "../domain/LightConfig"
 import TrafficLight from "../domain/TrafficLight"
@@ -157,6 +158,50 @@ const LAYOUTS: Record<SceneLayout, { road: React.ReactNode; phones: Point[]; pro
       { icon: TrainIcon, x: 210, y: 210 },
     ],
   },
+  // tram rails set into the street, no sleepers; each light on its drivers' right
+  tram: {
+    road: [
+      horizontalRoad(95, 50),
+      <rect key="tram-bed" x={186} y={0} width={48} height={H} fill={ROAD} />,
+      ...[194, 202, 218, 226].map((x) => (
+        <rect key={`rail-${x}`} x={x} y={0} width={2} height={H} fill="#8d8d8d" />
+      )),
+    ],
+    phones: [
+      { x: 130, y: 195 },
+      { x: 270, y: 195 },
+      { x: 300, y: 48 },
+    ],
+    props: [
+      { icon: DirectionsCarIcon, x: 70, y: 132 },
+      { icon: DirectionsCarIcon, x: 345, y: 108 },
+      { icon: TramIcon, x: 210, y: 210 },
+    ],
+  },
+  // two lanes, both heading right into a tunnel; one phone over the entrance shows both lane signals
+  tunnel: {
+    road: [
+      <rect key="road" x={0} y={70} width={W} height={100} fill={ROAD} />,
+      <line
+        key="lane-line"
+        x1={0}
+        x2={W}
+        y1={120}
+        y2={120}
+        stroke={MARKING}
+        strokeWidth={2}
+        strokeDasharray="10 8"
+      />,
+      // the tunnel: a dark mouth with a concrete frame
+      <rect key="tunnel" x={280} y={55} width={W - 280} height={130} fill="#9e9e9e" />,
+      <rect key="mouth" x={290} y={70} width={W - 290} height={100} fill="#3a3a3a" />,
+    ],
+    phones: [{ x: 230, y: 120 }],
+    props: [
+      { icon: DirectionsCarIcon, x: 90, y: 95 },
+      { icon: DirectionsCarIcon, x: 140, y: 145 },
+    ],
+  },
   manual: {
     road: [
       horizontalRoad(95, 50),
@@ -206,7 +251,13 @@ function MiniPhone({
             light={light}
             lightConfig={light.lightConfig}
             maxHeight={56}
-            maxWidth={light.lightConfig.preset.horizontal ? 60 : 24}
+            maxWidth={
+              light.lightConfig.preset.horizontal
+                ? 60
+                : light.lightConfig.preset.singleLens
+                  ? 40
+                  : 24
+            }
           />
         ))}
       </Stack>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { DEFAULT_LIGHT_CONFIG } from "../../app/domain/LightConfig"
-import { PRESETS, PresetId } from "../../app/domain/Preset"
+import { PRESETS, PresetId, SYMBOLS } from "../../app/domain/Preset"
 import { State } from "../../app/domain/State"
 
 describe("3-phase pedestrian preset", () => {
@@ -66,5 +66,32 @@ describe("bicycle, warning and tram presets", () => {
 
   it("keeps the usual phase names for other lights", () => {
     expect(PRESETS[PresetId.BICYCLE].phaseName(State.RED_YELLOW)).toBe("Red-Yellow")
+  })
+})
+
+describe("lane control preset", () => {
+  const lane = PRESETS[PresetId.LANE_CONTROL]
+
+  it("closes, opens, then asks drivers to leave the lane for 4 s", () => {
+    const light = DEFAULT_LIGHT_CONFIG.withPreset(lane)
+
+    expect(light.phases.map((p) => [p.state, p.duration])).toEqual([
+      [State.RED, 16_000],
+      [State.GREEN, 10_000],
+      [State.YELLOW_FLASHING, 4_000],
+    ])
+    expect(lane.states.map((s) => lane.phaseName(s))).toEqual([
+      "Lane closed (✕)",
+      "Lane open (↓)",
+      "Leave the lane (↘)",
+    ])
+  })
+
+  it("shows one symbol per colour on a single display", () => {
+    const symbol = SYMBOLS[lane.symbolId]
+    const icons = lane.colors.map((c) => symbol.getIcon(c))
+
+    expect(lane.singleLens).toBe(true)
+    expect(new Set(icons).size).toBe(3)
   })
 })

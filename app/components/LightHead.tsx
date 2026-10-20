@@ -22,6 +22,7 @@ function Lamp({
   icon,
   litDisc,
   inverted,
+  screen,
 }: {
   size: number
   color: PaletteColor
@@ -33,10 +34,14 @@ function Lamp({
   // false: the lens stays black and only the symbol lights up (green arrows, pedestrians)
   litDisc: boolean
   inverted: boolean
+  // one square display shared with the light's other symbols: no visor, unlit symbols hidden
+  screen: boolean
 }) {
   const px = (fraction: number) => `${fraction * size}px`
   const blink = on && flashing ? "tl-flashing" : undefined
   const blinkDelay = blink && halfBeat ? { animationDelay: "-0.5s" } : undefined
+  const lensShape = screen ? "14%" : "50%"
+  const offOpacity = screen ? 0 : inverted ? 0.55 : 0.12
 
   // tinted glass when off, so a dark lamp still reads as red, yellow or green
   const offLens = `radial-gradient(circle at 50% 40%, ${alpha(color.main, 0.28)} 0%, ${alpha(color.dark, 0.22)} 45%, #070707 100%)`
@@ -49,15 +54,24 @@ function Lamp({
       : ""
 
   return (
-    <Box sx={{ position: "relative", width: px(1), height: px(1), flexShrink: 0 }}>
+    <Box
+      sx={{
+        position: screen ? "absolute" : "relative",
+        inset: screen ? 0 : undefined,
+        width: px(1),
+        height: px(1),
+        flexShrink: 0,
+      }}
+    >
       {/* lens */}
       <Box
         sx={{
           position: "absolute",
           inset: 0,
-          borderRadius: "50%",
+          borderRadius: lensShape,
           border: `${px(0.04)} solid #050505`,
-          background: litDisc ? offLens : "#070707",
+          // stacked symbols share one lens, so only the bottom one paints it
+          background: litDisc ? offLens : screen ? "transparent" : "#070707",
           overflow: "hidden",
         }}
       >
@@ -79,7 +93,7 @@ function Lamp({
           createElement(icon, {
             className: blink,
             style: {
-              "--tl-off-opacity": inverted ? 0.55 : 0.12,
+              "--tl-off-opacity": offOpacity,
               ...blinkDelay,
             } as React.CSSProperties,
             sx: {
@@ -88,20 +102,22 @@ function Lamp({
               width: "70%",
               height: "70%",
               color: inverted ? "#050505" : color.main,
-              opacity: on ? 1 : inverted ? 0.55 : 0.12,
+              opacity: on ? 1 : offOpacity,
               filter: on && !inverted ? `drop-shadow(0 0 ${px(0.08)} ${color.main})` : "none",
               transition: TRANSITION,
             },
           })}
         {/* shadow cast by the visor on the top of the lens */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            borderRadius: "50%",
-            background: `linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 32%), ${HIGHLIGHT}`,
-          }}
-        />
+        {!screen && (
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "50%",
+              background: `linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 32%), ${HIGHLIGHT}`,
+            }}
+          />
+        )}
       </Box>
 
       {/* glow spilling past the lens */}
@@ -122,16 +138,18 @@ function Lamp({
       )}
 
       {/* visor: the hood above the lamp, seen from the front as an arc */}
-      <Box
-        sx={{
-          position: "absolute",
-          inset: px(-0.1),
-          borderRadius: "50%",
-          border: `${px(0.1)} solid transparent`,
-          borderTopColor: "#2b2b2b",
-          pointerEvents: "none",
-        }}
-      />
+      {!screen && (
+        <Box
+          sx={{
+            position: "absolute",
+            inset: px(-0.1),
+            borderRadius: "50%",
+            border: `${px(0.1)} solid transparent`,
+            borderTopColor: "#2b2b2b",
+            pointerEvents: "none",
+          }}
+        />
+      )}
     </Box>
   )
 }
@@ -154,8 +172,13 @@ export default function LightHead({
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const { horizontal, presetId } = lightConfig.preset
-  const size = 0.6 * Math.round(Math.min(maxHeight / 2.5, horizontal ? maxWidth / 2.5 : maxWidth))
+  const { horizontal, presetId, singleLens } = lightConfig.preset
+  // a single display is one lamp tall, so it can be bigger
+  const size =
+    0.6 *
+    Math.round(
+      Math.min(maxHeight / (singleLens ? 1.6 : 2.5), horizontal ? maxWidth / 2.5 : maxWidth),
+    )
   const px = (fraction: number) => `${fraction * size}px`
 
   const isImg = lightConfig.preset.symbolId != SymbolId.NONE
@@ -190,23 +213,39 @@ export default function LightHead({
           alignItems: "center",
         }}
       >
-        {segments.map((segment, idx) => {
-          const inverted = symbol.isInverted(segment)
-          const attributes = currentPhase.stateAttributes()
-          return (
-            <Lamp
-              key={idx}
-              size={size}
-              color={symbol.white ? theme.palette.tlWhite : theme.palette[segment]}
-              on={attributes.segments.includes(segment)}
-              flashing={attributes.flashing ?? false}
-              halfBeat={(attributes.alternating ?? false) && idx % 2 == 1}
-              icon={isImg ? symbol.getIcon(segment) : undefined}
-              litDisc={!isImg || inverted}
-              inverted={inverted}
-            />
-          )
-        })}
+        {/* a single display stacks every symbol in one spot */}
+        <Box
+          sx={
+            singleLens
+              ? {
+                  position: "relative",
+                  width: px(1),
+                  height: px(1),
+                  bgcolor: "#070707",
+                  borderRadius: "14%",
+                }
+              : { display: "contents" }
+          }
+        >
+          {segments.map((segment, idx) => {
+            const inverted = symbol.isInverted(segment)
+            const attributes = currentPhase.stateAttributes()
+            return (
+              <Lamp
+                key={idx}
+                size={size}
+                color={symbol.white ? theme.palette.tlWhite : theme.palette[segment]}
+                on={attributes.segments.includes(segment)}
+                flashing={attributes.flashing ?? false}
+                halfBeat={(attributes.alternating ?? false) && idx % 2 == 1}
+                icon={isImg ? symbol.getIcon(segment) : undefined}
+                litDisc={!isImg || inverted}
+                inverted={inverted}
+                screen={singleLens}
+              />
+            )
+          })}
+        </Box>
       </Stack>
     </Box>
   )

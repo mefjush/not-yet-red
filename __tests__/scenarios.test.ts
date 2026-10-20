@@ -7,6 +7,14 @@ import { State } from "../app/domain/State"
 const CONFLICTS: [SceneLayout, number[][]][] = [
   // 0 cars, 1 pedestrians
   ["zebra", [[0, 1]]],
+  // 0 cars from the left, 1 tram, 2 cars from the right
+  [
+    "tram",
+    [
+      [0, 1],
+      [2, 1],
+    ],
+  ],
   // 0 west road, 1 east road, 2 side road left arrow, 3 side road right arrow;
   // west+east may go together (east's left-turners give way, like at any junction without
   // arrows), as may east+right arrow and the two arrows
@@ -47,5 +55,32 @@ describe.each(CONFLICTS)("%s scenario", (layout, conflicts) => {
         )
       }
     }
+  })
+})
+
+describe("tunnel scenario", () => {
+  const scenario = SCENARIOS.find((s) => s.layout == "tunnel")!
+  // both lane signals sit on one phone, left lane first
+  const [left, right] = scenario.config.flat().map((config) => new TrafficLight(config, false))
+  const cycle = left.cycleLength
+  const states = (t: number) => [left, right].map((light) => light.currentPhase(t).state)
+
+  it("always keeps a lane open", () => {
+    for (let t = 0; t < cycle; t += 500) {
+      expect(states(t), `at ${t / 1000}s`).toContain(State.GREEN)
+    }
+  })
+
+  it("asks drivers to leave the left lane before it closes", () => {
+    let closings = 0
+    for (let t = 500; t < cycle + 500; t += 500) {
+      const [before] = states(t - 500)
+      const [now] = states(t)
+      if (now == State.RED && before != State.RED) {
+        closings++
+        expect(before, `closing at ${t / 1000}s`).toBe(State.YELLOW_FLASHING)
+      }
+    }
+    expect(closings).toBeGreaterThan(0)
   })
 })

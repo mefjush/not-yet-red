@@ -28,31 +28,34 @@ function PresetIcon({ preset }: { preset: Preset }) {
         aria-hidden
         sx={{ gap: "2px", p: "2px", borderRadius: "4px", bgcolor: "#161616" }}
       >
-        {preset.colors.map((segment, idx) => {
-          const color = (symbol.white ? theme.palette.tlWhite : theme.palette[segment]).main
-          const inverted = symbol.isInverted(segment)
-          // symbols glow on a black lens, except arrows on red/yellow: black arrow on a lit lens
-          const litLens = !hasSymbol || inverted
-          return (
-            <Box
-              key={idx}
-              sx={{
-                width: LAMP,
-                height: LAMP,
-                borderRadius: "50%",
-                bgcolor: litLens ? color : "#050505",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {hasSymbol &&
-                createElement(symbol.getIcon(segment), {
-                  sx: { fontSize: LAMP - 1, color: inverted ? "#050505" : color },
-                })}
-            </Box>
-          )
-        })}
+        {/* a single display shows its "open" symbol */}
+        {(preset.singleLens ? preset.colors.filter((c) => c == "tlGreen") : preset.colors).map(
+          (segment, idx) => {
+            const color = (symbol.white ? theme.palette.tlWhite : theme.palette[segment]).main
+            const inverted = symbol.isInverted(segment)
+            // symbols glow on a black lens, except arrows on red/yellow: black arrow on a lit lens
+            const litLens = !hasSymbol || inverted
+            return (
+              <Box
+                key={idx}
+                sx={{
+                  width: LAMP,
+                  height: LAMP,
+                  borderRadius: preset.singleLens ? "2px" : "50%",
+                  bgcolor: litLens ? color : "#050505",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {hasSymbol &&
+                  createElement(symbol.getIcon(segment), {
+                    sx: { fontSize: LAMP - 1, color: inverted ? "#050505" : color },
+                  })}
+              </Box>
+            )
+          },
+        )}
       </Stack>
     </Box>
   )

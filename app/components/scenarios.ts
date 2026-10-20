@@ -4,7 +4,8 @@ import { lightConfigParser } from "../url"
 import { PresetId, PRESETS } from "../domain/Preset"
 import { State } from "../domain/State"
 
-export type SceneLayout = "single" | "corridor" | "zebra" | "tJunction" | "railway" | "manual"
+export type SceneLayout =
+  "single" | "corridor" | "zebra" | "tJunction" | "railway" | "tram" | "tunnel" | "manual"
 
 export interface Scenario {
   name: string
@@ -97,6 +98,52 @@ export const SCENARIOS: Scenario[] = [
     config: [
       [DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.RAILWAY])],
       [DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.RAILWAY])],
+    ],
+  },
+  {
+    name: "Tram crossing",
+    description:
+      "Trams have their own white signals: a vertical bar means go, a horizontal bar means stop.",
+    setup:
+      "Lay a toy tram line across a road. Put a car light on each side of the road and the tram signal by the tracks.",
+    layout: "tram",
+    // cars red 0-16 s, green 18-28 s; tram go 2-10 s, stop soon 10-14 s, stop the rest
+    config: [
+      [DEFAULT_LIGHT_CONFIG],
+      [
+        DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.TRAM])
+          .forceWithPhases([
+            new Phase(State.RED, 18_000),
+            new Phase(State.GREEN, 8_000),
+            new Phase(State.GREEN_FLASHING, 4_000),
+          ])
+          .withOffset(14_000),
+      ],
+      [DEFAULT_LIGHT_CONFIG],
+    ],
+  },
+  {
+    name: "Tunnel",
+    description:
+      "Now and then the left lane closes: the arrow tells drivers to move over, then the ✕ closes it.",
+    setup:
+      "Make a two-lane tunnel from a cardboard box. Prop one phone above the entrance: it shows a signal for each lane.",
+    layout: "tunnel",
+    // one phone over the entrance, a signal per lane like on a tunnel gantry:
+    // left lane closed 0-10 s, open 10-26 s, leave the lane 26-30 s; right lane always open
+    config: [
+      [
+        DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.LANE_CONTROL]).forceWithPhases([
+          new Phase(State.RED, 10_000),
+          new Phase(State.GREEN, 16_000),
+          new Phase(State.YELLOW_FLASHING, 4_000),
+        ]),
+        DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.LANE_CONTROL]).forceWithPhases([
+          new Phase(State.RED, 0),
+          new Phase(State.GREEN, 30_000),
+          new Phase(State.YELLOW_FLASHING, 0),
+        ]),
+      ],
     ],
   },
   {

@@ -11,6 +11,8 @@ const NEW_PHASE_DURATIONS: Partial<Record<State, number>> = {
   // railway crossing: quiet for 20 s, then a train passes for 10 s
   [State.NONE]: 20_000,
   [State.RED_ALTERNATING]: 10_000,
+  // lane control: drivers get a few seconds to leave a lane before it closes
+  [State.YELLOW_FLASHING]: 4_000,
 }
 
 export class TimeRange {

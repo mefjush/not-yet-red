@@ -9,6 +9,9 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"
 import UTurnLeftIcon from "@mui/icons-material/UTurnLeft"
 import DirectionsBikeIcon from "@mui/icons-material/DirectionsBike"
+import CloseIcon from "@mui/icons-material/Close"
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
+import SouthEastIcon from "@mui/icons-material/SouthEast"
 import { createSvgIcon } from "@mui/material/utils"
 import { createElement } from "react"
 
@@ -28,6 +31,7 @@ const TWO_STATE = [State.RED, State.GREEN]
 const PEDESTRIAN_THREE_STATE = [State.RED, State.GREEN, State.GREEN_FLASHING]
 const RAILWAY_STATE = [State.NONE, State.RED_ALTERNATING]
 const WARNING_STATE = [State.YELLOW_FLASHING]
+const LANE_STATE = [State.RED, State.GREEN, State.YELLOW_FLASHING]
 
 const THREE_COLOR: SegmentColor[] = ["tlRed", "tlYellow", "tlGreen"]
 const TWO_COLOR: SegmentColor[] = ["tlRed", "tlGreen"]
@@ -41,6 +45,7 @@ export enum SymbolId {
   UTURN = "UTURN",
   BICYCLE = "BICYCLE",
   TRAM = "TRAM",
+  LANE = "LANE",
 }
 
 export class Symbol {
@@ -50,6 +55,8 @@ export class Symbol {
   iconGreen?: SvgIconComponent
   // every lamp shows its symbol in white, whatever it means (tram signals)
   white: boolean
+  // a different symbol per lamp colour (lane control: red ✕, green ↓, yellow ↘)
+  segmentIcons: Partial<Record<SegmentColor, SvgIconComponent>>
 
   constructor(
     symbolId: SymbolId,
@@ -57,16 +64,21 @@ export class Symbol {
     icon: SvgIconComponent,
     iconGreen?: SvgIconComponent,
     white = false,
+    segmentIcons: Partial<Record<SegmentColor, SvgIconComponent>> = {},
   ) {
     this.symbolId = symbolId
     this.icon = icon
     this.iconGreen = iconGreen
     this.invertable = invertable
     this.white = white
+    this.segmentIcons = segmentIcons
   }
 
   getIcon(segmentColor: SegmentColor): SvgIconComponent {
-    return segmentColor == "tlGreen" && this.iconGreen ? this.iconGreen : this.icon
+    return (
+      this.segmentIcons[segmentColor] ??
+      (segmentColor == "tlGreen" && this.iconGreen ? this.iconGreen : this.icon)
+    )
   }
 
   isInverted(segmentColor: SegmentColor): boolean {
@@ -85,6 +97,11 @@ export const SYMBOLS = Object.fromEntries(
     new Symbol(SymbolId.BICYCLE, false, DirectionsBikeIcon),
     // the "red" lamp is the stop bar, the "green" lamp the go bar
     new Symbol(SymbolId.TRAM, false, HorizontalBarIcon, VerticalBarIcon, true),
+    new Symbol(SymbolId.LANE, false, CloseIcon, undefined, false, {
+      tlRed: CloseIcon,
+      tlGreen: ArrowDownwardIcon,
+      tlYellow: SouthEastIcon,
+    }),
   ].map((symbol) => [symbol.symbolId, symbol]),
 )
 
@@ -98,6 +115,8 @@ export class Preset {
   horizontal: boolean
   // what this light calls a phase, where it differs from the usual name (e.g. a tram's bars)
   stateNames: Partial<Record<State, string>>
+  // one square display showing one symbol at a time, instead of a lamp per symbol
+  singleLens: boolean
 
   constructor(
     preset: PresetId,
@@ -105,7 +124,11 @@ export class Preset {
     symbol: SymbolId,
     colors: SegmentColor[],
     states: State[],
-    options: { horizontal?: boolean; stateNames?: Partial<Record<State, string>> } = {},
+    options: {
+      horizontal?: boolean
+      stateNames?: Partial<Record<State, string>>
+      singleLens?: boolean
+    } = {},
   ) {
     this.presetId = preset
     this.name = name
@@ -114,6 +137,7 @@ export class Preset {
     this.states = states
     this.horizontal = options.horizontal ?? false
     this.stateNames = options.stateNames ?? {}
+    this.singleLens = options.singleLens ?? false
   }
 
   phaseName(state: State): string {
@@ -135,6 +159,7 @@ export enum PresetId {
   BICYCLE = "BICYCLE",
   FLASHING_YELLOW = "FLASHING_YELLOW",
   TRAM = "TRAM",
+  LANE_CONTROL = "LANE_CONTROL",
 }
 
 export const PRESETS = Object.fromEntries(
@@ -192,5 +217,21 @@ export const PRESETS = Object.fromEntries(
         [State.GREEN_FLASHING]: "Stop soon (flashing |)",
       },
     }),
+    // Polish S-4 / S-7 lane signals, as in tunnels: closed, open, then leave the lane before it closes
+    new Preset(
+      PresetId.LANE_CONTROL,
+      "Lane control",
+      SymbolId.LANE,
+      ["tlRed", "tlGreen", "tlYellow"],
+      LANE_STATE,
+      {
+        singleLens: true,
+        stateNames: {
+          [State.RED]: "Lane closed (✕)",
+          [State.GREEN]: "Lane open (↓)",
+          [State.YELLOW_FLASHING]: "Leave the lane (↘)",
+        },
+      },
+    ),
   ].map((preset) => [preset.presetId, preset]),
 )
