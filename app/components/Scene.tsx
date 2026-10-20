@@ -2,6 +2,7 @@ import { Box, Stack } from "@mui/material"
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar"
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk"
 import SwipeIcon from "@mui/icons-material/Swipe"
+import TrainIcon from "@mui/icons-material/Train"
 import { SvgIconComponent } from "@mui/icons-material"
 import LightConfig from "../domain/LightConfig"
 import TrafficLight from "../domain/TrafficLight"
@@ -108,6 +109,26 @@ const LAYOUTS: Record<SceneLayout, { road: React.ReactNode; phones: Point[]; pro
       { icon: DirectionsCarIcon, x: 215, y: 215 },
     ],
   },
+  railway: {
+    road: [
+      horizontalRoad(95, 50),
+      // sleepers, then the two rails running across the road
+      ...Array.from({ length: 16 }, (_, i) => (
+        <rect key={`s${i}`} x={186} y={i * 15 + 2} width={48} height={6} fill="#a1887f" />
+      )),
+      <rect key="rail-a" x={198} y={0} width={4} height={H} fill="#757575" />,
+      <rect key="rail-b" x={218} y={0} width={4} height={H} fill="#757575" />,
+    ],
+    phones: [
+      { x: 140, y: 195 },
+      { x: 280, y: 48 },
+    ],
+    props: [
+      { icon: DirectionsCarIcon, x: 80, y: 132 },
+      { icon: DirectionsCarIcon, x: 340, y: 108 },
+      { icon: TrainIcon, x: 210, y: 210 },
+    ],
+  },
   manual: {
     road: [
       horizontalRoad(95, 50),
@@ -157,7 +178,7 @@ function MiniPhone({
             light={light}
             lightConfig={light.lightConfig}
             maxHeight={56}
-            maxWidth={24}
+            maxWidth={light.lightConfig.preset.horizontal ? 60 : 24}
           />
         ))}
       </Stack>

@@ -6,7 +6,12 @@ import { Preset, PRESETS } from "./Preset"
 
 const DEFAULT_NEW_PHASE_DURATION = 2_000
 // Polish signal rules (warunki techniczne, pkt 8.2 b): flashing green for pedestrians lasts 4 s
-const NEW_PHASE_DURATIONS: Partial<Record<State, number>> = { [State.GREEN_FLASHING]: 4_000 }
+const NEW_PHASE_DURATIONS: Partial<Record<State, number>> = {
+  [State.GREEN_FLASHING]: 4_000,
+  // railway crossing: quiet for 20 s, then a train passes for 10 s
+  [State.NONE]: 20_000,
+  [State.RED_ALTERNATING]: 10_000,
+}
 
 export class TimeRange {
   constructor(

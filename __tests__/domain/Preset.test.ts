@@ -24,3 +24,14 @@ describe("3-phase pedestrian preset", () => {
     }
   })
 })
+
+describe("railway crossing preset", () => {
+  it("is quiet for 20 s, then flashes red for 10 s", () => {
+    const light = DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.RAILWAY])
+
+    expect(light.phases.map((p) => [p.state, p.duration])).toEqual([
+      [State.NONE, 20_000],
+      [State.RED_ALTERNATING, 10_000],
+    ])
+  })
+})

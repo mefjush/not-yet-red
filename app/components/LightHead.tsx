@@ -6,7 +6,7 @@ import { alpha, useTheme, PaletteColor } from "@mui/material/styles"
 import { SegmentColor } from "../domain/State"
 import LightConfig from "../domain/LightConfig"
 import { createElement } from "react"
-import { SymbolId, SYMBOLS } from "../domain/Preset"
+import { PresetId, SymbolId, SYMBOLS } from "../domain/Preset"
 
 const TRANSITION = "opacity 250ms ease-out, filter 250ms ease-out"
 
@@ -18,6 +18,7 @@ function Lamp({
   color,
   on,
   flashing,
+  halfBeat,
   icon,
   litDisc,
   inverted,
@@ -26,6 +27,8 @@ function Lamp({
   color: PaletteColor
   on: boolean
   flashing: boolean
+  // flash half a beat later than the neighbour, for alternating lamps
+  halfBeat: boolean
   icon?: React.ElementType
   // false: the lens stays black and only the symbol lights up (green arrows, pedestrians)
   litDisc: boolean
@@ -33,6 +36,7 @@ function Lamp({
 }) {
   const px = (fraction: number) => `${fraction * size}px`
   const blink = on && flashing ? "tl-flashing" : undefined
+  const blinkDelay = blink && halfBeat ? { animationDelay: "-0.5s" } : undefined
 
   // tinted glass when off, so a dark lamp still reads as red, yellow or green
   const offLens = `radial-gradient(circle at 50% 40%, ${alpha(color.main, 0.28)} 0%, ${alpha(color.dark, 0.22)} 45%, #070707 100%)`
@@ -60,6 +64,7 @@ function Lamp({
         {litDisc && (
           <Box
             className={blink}
+            style={blinkDelay}
             sx={{
               position: "absolute",
               inset: 0,
@@ -73,7 +78,10 @@ function Lamp({
         {icon &&
           createElement(icon, {
             className: blink,
-            style: { "--tl-off-opacity": inverted ? 0.55 : 0.12 } as React.CSSProperties,
+            style: {
+              "--tl-off-opacity": inverted ? 0.55 : 0.12,
+              ...blinkDelay,
+            } as React.CSSProperties,
             sx: {
               position: "absolute",
               inset: "15%",
@@ -100,6 +108,7 @@ function Lamp({
       {litDisc && (
         <Box
           className={blink}
+          style={blinkDelay}
           sx={{
             position: "absolute",
             inset: 0,
@@ -145,16 +154,28 @@ export default function LightHead({
 
   const currentPhase = light.currentPhase(currentTimestamp)
 
-  const size = 0.6 * Math.round(Math.min(maxHeight / 2.5, maxWidth))
+  const { horizontal, presetId } = lightConfig.preset
+  const size = 0.6 * Math.round(Math.min(maxHeight / 2.5, horizontal ? maxWidth / 2.5 : maxWidth))
   const px = (fraction: number) => `${fraction * size}px`
 
   const isImg = lightConfig.preset.symbolId != SymbolId.NONE
   const symbol = SYMBOLS[lightConfig.preset.symbolId]
 
   return (
-    <Box sx={{ py: px(0.05), m: px(0.05) }}>
+    <Box
+      sx={{
+        py: px(0.05),
+        m: px(0.05),
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      {/* the cross sits above the lights on the post */}
+      {/* a bit wider than the housing (about 2.6 lamps), like on a real post */}
+      {presetId == PresetId.RAILWAY && <RailwayCross width={size * 3.9} />}
       <Stack
-        direction="column"
+        direction={horizontal ? "row" : "column"}
         sx={{
           gap: px(0.16),
           px: px(0.2),
@@ -169,16 +190,17 @@ export default function LightHead({
           alignItems: "center",
         }}
       >
-        {segments.map((segment) => {
+        {segments.map((segment, idx) => {
           const inverted = symbol.isInverted(segment)
           const attributes = currentPhase.stateAttributes()
           return (
             <Lamp
-              key={segment}
+              key={idx}
               size={size}
               color={theme.palette[segment]}
               on={attributes.segments.includes(segment)}
               flashing={attributes.flashing ?? false}
+              halfBeat={(attributes.alternating ?? false) && idx % 2 == 1}
               icon={isImg ? symbol.getIcon(segment) : undefined}
               litDisc={!isImg || inverted}
               inverted={inverted}
@@ -187,5 +209,36 @@ export default function LightHead({
         })}
       </Stack>
     </Box>
+  )
+}
+
+// St Andrew's cross: the red and white X above a railway crossing signal
+function RailwayCross({ width }: { width: number }) {
+  const board = (angle: number) => (
+    <g transform={`rotate(${angle} 50 30)`}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <rect
+          key={i}
+          x={4 + i * 18.4}
+          y={25}
+          width={18.4}
+          height={10}
+          fill={i % 2 ? "#ffffff" : "#d32f2f"}
+        />
+      ))}
+      <rect x={4} y={25} width={92} height={10} fill="none" stroke="#7a1010" strokeWidth={1} />
+    </g>
+  )
+  return (
+    <svg
+      viewBox="0 0 100 60"
+      width={width}
+      height={width * 0.6}
+      aria-hidden
+      style={{ marginBottom: width * 0.06 }}
+    >
+      {board(31)}
+      {board(-31)}
+    </svg>
   )
 }

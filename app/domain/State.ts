@@ -3,6 +3,7 @@ export enum State {
   RED_YELLOW = "RED_YELLOW",
   GREEN = "GREEN",
   GREEN_FLASHING = "GREEN_FLASHING",
+  RED_ALTERNATING = "RED_ALTERNATING",
   YELLOW = "YELLOW",
   NONE = "NONE",
 }
@@ -19,6 +20,8 @@ export interface StateAttributes {
   segments: SegmentColor[]
   // the lit segments blink, e.g. a pedestrian light's last seconds of green
   flashing?: boolean
+  // neighbouring lamps take turns, like the two red lights at a railway crossing
+  alternating?: boolean
 }
 
 export const STATE_ATTRIBUTES: { [id: string]: StateAttributes } = {
@@ -59,5 +62,15 @@ export const STATE_ATTRIBUTES: { [id: string]: StateAttributes } = {
     order: 4,
     segments: ["tlYellow"],
   },
-  NONE: { name: "None", color: "tlGrey", priority: 5, order: 0, segments: [] },
+  // railway crossing: both red lamps flash in turn, about once a second each
+  RED_ALTERNATING: {
+    name: "Flashing red",
+    color: "tlRed",
+    priority: 3,
+    order: 5,
+    segments: ["tlRed"],
+    flashing: true,
+    alternating: true,
+  },
+  NONE: { name: "Off", color: "tlGrey", priority: 5, order: 0, segments: [] },
 }

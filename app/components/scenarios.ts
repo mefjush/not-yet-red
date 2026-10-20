@@ -4,7 +4,7 @@ import { lightConfigParser } from "../url"
 import { PresetId, PRESETS } from "../domain/Preset"
 import { State } from "../domain/State"
 
-export type SceneLayout = "single" | "corridor" | "zebra" | "tJunction" | "manual"
+export type SceneLayout = "single" | "corridor" | "zebra" | "tJunction" | "railway" | "manual"
 
 export interface Scenario {
   name: string
@@ -85,6 +85,18 @@ export const SCENARIOS: Scenario[] = [
       [timedLight(14, [16, 2, 10, 2])],
       [timedLight(20, [10, 2, 16, 2])],
       [timedLight(0, [20, 2, 6, 2], PresetId.LEFT), timedLight(0, [14, 2, 12, 2], PresetId.RIGHT)],
+    ],
+  },
+  {
+    name: "Railway crossing",
+    description: "A train is coming! The red lights flash and the bell rings, so cars stop.",
+    setup:
+      "Lay a toy train track across a road and put a phone on each side. In fullscreen, tap the speaker for the bell.",
+    layout: "railway",
+    // quiet for 20 s, then a train passes for 10 s; both sides flash together
+    config: [
+      [DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.RAILWAY])],
+      [DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.RAILWAY])],
     ],
   },
   {

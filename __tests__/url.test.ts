@@ -23,6 +23,15 @@ describe("Url", () => {
     expect(parser.parse(serialized)).toEqual(pedestrian)
   })
 
+  it("serializes a railway crossing light back and forth", () => {
+    const parser = lightConfigParser(DEFAULT_INTERSECTION_CONFIG)
+    const railway = SCENARIOS.find((s) => s.layout == "railway")!.config[0]
+    const serialized = parser.serialize(railway)
+
+    expect(serialized).toBe("0--N20-RA10--RAILWAY")
+    expect(parser.parse(serialized)).toEqual(railway)
+  })
+
   it("serializes IntersectionConfgi back and forth", () => {
     const serialized = IntersectionConfigParser.serialize(DEFAULT_INTERSECTION_CONFIG)
 

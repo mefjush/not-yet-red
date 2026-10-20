@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest"
-import { beepInterval, beepStep } from "../app/hooks/usePedestrianSound"
+import { beepStep, soundInterval } from "../app/hooks/useCrossingSound"
 import { State } from "../app/domain/State"
 import TrafficLight from "../app/domain/TrafficLight"
 import { SCENARIOS } from "../app/components/scenarios"
 
 const pedestrian = new TrafficLight(SCENARIOS.find((s) => s.layout == "zebra")!.config[1][0], false)
+const railway = new TrafficLight(SCENARIOS.find((s) => s.layout == "railway")!.config[0][0], false)
 
 // every slot from the first phase change on: phase start, then every interval until the phase ends
 function expectedBeeps(light: TrafficLight, from: number, to: number) {
   const beeps: number[] = []
   for (let start = light.nextStateTimestamp(from); start < to;) {
     const end = light.nextStateTimestamp(start)
-    const every = beepInterval(light.currentPhase(start).state)
+    const every = soundInterval(light.currentPhase(start).state)
     for (let slot = start; every != null && slot < end && slot < to; slot += every) beeps.push(slot)
     start = end
   }
@@ -35,23 +36,32 @@ function simulate(light: TrafficLight, from: number, to: number) {
 
 describe("pedestrian crossing sound", () => {
   it("beeps for stop, go and hurry up", () => {
-    expect(beepInterval(State.RED)).toBe(1000)
-    expect(beepInterval(State.GREEN)).toBe(200)
-    expect(beepInterval(State.GREEN_FLASHING)).toBe(100)
+    expect(soundInterval(State.RED)).toBe(1000)
+    expect(soundInterval(State.GREEN)).toBe(200)
+    expect(soundInterval(State.GREEN_FLASHING)).toBe(100)
+  })
+
+  it("rings the bell while a railway crossing flashes", () => {
+    expect(soundInterval(State.RED_ALTERNATING)).toBe(500)
+    expect(soundInterval(State.NONE)).toBeNull()
   })
 
   it("stays quiet when the light is broken down", () => {
-    expect(beepInterval(State.YELLOW)).toBeNull()
-    expect(beepInterval(State.NONE)).toBeNull()
+    expect(soundInterval(State.YELLOW)).toBeNull()
+    expect(soundInterval(State.NONE)).toBeNull()
   })
 
-  it("keeps a steady rhythm through whole cycles, with no beep missing or doubled", () => {
+  it.each([
+    ["pedestrian crossing", pedestrian],
+    ["railway crossing", railway],
+  ])("keeps a steady rhythm at a %s, with no sound missing or doubled", (_, light) => {
     const from = 1_000
     const to = 61_000
-    const firstChange = pedestrian.nextStateTimestamp(from)
-    const beeps = simulate(pedestrian, from, to).filter((t) => t >= firstChange)
+    const firstChange = light.nextStateTimestamp(from)
+    const beeps = simulate(light, from, to).filter((t) => t >= firstChange)
 
-    expect(beeps).toEqual(expectedBeeps(pedestrian, from, to))
+    expect(beeps.length).toBeGreaterThan(0)
+    expect(beeps).toEqual(expectedBeeps(light, from, to))
   })
 
   it("skips a beep the phone woke up too late for instead of playing it late", () => {

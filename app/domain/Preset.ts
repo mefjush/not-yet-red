@@ -13,6 +13,7 @@ const FOUR_STATE = [State.RED, State.RED_YELLOW, State.GREEN, State.YELLOW]
 const THREE_STATE = [State.RED, State.GREEN, State.YELLOW]
 const TWO_STATE = [State.RED, State.GREEN]
 const PEDESTRIAN_THREE_STATE = [State.RED, State.GREEN, State.GREEN_FLASHING]
+const RAILWAY_STATE = [State.NONE, State.RED_ALTERNATING]
 
 const THREE_COLOR: SegmentColor[] = ["tlRed", "tlYellow", "tlGreen"]
 const TWO_COLOR: SegmentColor[] = ["tlRed", "tlGreen"]
@@ -70,6 +71,8 @@ export class Preset {
   symbolId: SymbolId
   colors: SegmentColor[]
   states: State[]
+  // lamps side by side instead of stacked
+  horizontal: boolean
 
   constructor(
     preset: PresetId,
@@ -77,12 +80,14 @@ export class Preset {
     symbol: SymbolId,
     colors: SegmentColor[],
     states: State[],
+    horizontal = false,
   ) {
     this.presetId = preset
     this.name = name
     this.symbolId = symbol
     this.colors = colors
     this.states = states
+    this.horizontal = horizontal
   }
 }
 
@@ -96,6 +101,7 @@ export enum PresetId {
   CONDITIONAL_RIGHT = "CONDITIONAL_RIGHT",
   STRAIGHT = "STRAIGHT",
   UTURN = "UTURN",
+  RAILWAY = "RAILWAY",
 }
 
 export const PRESETS = Object.fromEntries(
@@ -126,6 +132,14 @@ export const PRESETS = Object.fromEntries(
       SymbolId.RIGHT,
       ["tlGreen"],
       [State.GREEN, State.NONE],
+    ),
+    new Preset(
+      PresetId.RAILWAY,
+      "Railway crossing",
+      SymbolId.NONE,
+      ["tlRed", "tlRed"],
+      RAILWAY_STATE,
+      true,
     ),
   ].map((preset) => [preset.presetId, preset]),
 )

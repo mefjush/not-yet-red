@@ -9,8 +9,7 @@ import LightGroups from "../domain/LightGroups"
 import TrafficLight from "../domain/TrafficLight"
 import LightHead from "./LightHead"
 import { negativeSafeMod } from "../utils"
-import { SymbolId } from "../domain/Preset"
-import usePedestrianSound, { unlockAudio } from "../hooks/usePedestrianSound"
+import useCrossingSound, { hasCrossingSound, unlockAudio } from "../hooks/useCrossingSound"
 
 // per phone, so you can choose which phone beeps
 const SOUND_KEY = "pedestrianSound"
@@ -87,15 +86,15 @@ export default function Screen({
     [],
   )
 
-  // the pedestrian light on the phone being shown, if any
+  // the pedestrian or railway light on the phone being shown, if any
   const shownGroup = groups[page] ?? []
-  const pedestrianInGroupIdx = shownGroup.findIndex(
-    (lightConfig) => lightConfig.preset.symbolId == SymbolId.PEDESTRIAN,
+  const soundInGroupIdx = shownGroup.findIndex((lightConfig) =>
+    hasCrossingSound(lightConfig.preset),
   )
-  const pedestrianLight =
-    pedestrianInGroupIdx >= 0 ? lights[lightGroups.idLookup(page, pedestrianInGroupIdx)] : undefined
+  const soundLight =
+    soundInGroupIdx >= 0 ? lights[lightGroups.idLookup(page, soundInGroupIdx)] : undefined
 
-  usePedestrianSound(active && soundOn ? pedestrianLight : undefined, timeCorrection)
+  useCrossingSound(active && soundOn ? soundLight : undefined, timeCorrection)
 
   const toggleSound = () => {
     const on = !soundOn
@@ -139,7 +138,7 @@ export default function Screen({
       <div ref={swipeRef} className="swipe" onScroll={(e) => onScroll(e.currentTarget)}>
         {slides}
       </div>
-      {active && pedestrianLight && (
+      {active && soundLight && (
         <Tooltip title={soundOn ? "Mute crossing sounds" : "Play crossing sounds"}>
           <IconButton
             aria-label={soundOn ? "Mute crossing sounds" : "Play crossing sounds"}
