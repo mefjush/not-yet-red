@@ -1,3 +1,4 @@
+import { describe, expect, test, it } from "vitest"
 import { DEFAULT_INTERSECTION_CONFIG } from "../app/domain/IntersectionConfig"
 import { DEFAULT_LIGHT_CONFIG as DEFAULT_LIGHT_CONFIG } from "../app/domain/LightConfig"
 import { IntersectionConfigParser, lightConfigParser } from "../app/url"

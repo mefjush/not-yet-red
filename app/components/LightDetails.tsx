@@ -1,5 +1,14 @@
-import { Dialog, Button, Typography, Stack } from "@mui/material"
-import Grid from "@mui/material/Grid2"
+import {
+  Dialog,
+  Typography,
+  Stack,
+  Grid,
+  Box,
+  Paper,
+  useMediaQuery,
+  useTheme,
+  Button,
+} from "@mui/material"
 import Timeline from "./Timeline"
 import LightConfig from "../domain/LightConfig"
 import LightHead from "./LightHead"
@@ -12,6 +21,7 @@ import AppToolbar from "./AppToolbar"
 
 export default function LightDetails({
   open,
+  index,
   lightConfig,
   currentTimestamp,
   light,
@@ -21,6 +31,7 @@ export default function LightDetails({
   setSelectedState,
 }: {
   open: boolean
+  index: number
   lightConfig: LightConfig
   currentTimestamp: number
   light: TrafficLight
@@ -29,79 +40,85 @@ export default function LightDetails({
   onLightConfigChange: (lightConfig: LightConfig) => void
   setSelectedState: (state: State) => void
 }) {
-  const handleClose = () => {
-    onClose()
-  }
-
-  const lightHead = (
-    <LightHead
-      currentTimestamp={currentTimestamp}
-      light={light}
-      lightConfig={lightConfig}
-      maxHeight={open ? 200 : 100}
-      maxWidth={1000}
-    />
-  )
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"))
 
   return (
-    <Dialog fullScreen open={open} onClose={handleClose}>
+    <Dialog fullScreen={fullScreen} fullWidth maxWidth="md" open={open} onClose={onClose}>
       <AppToolbar>
-        <Stack direction="row" sx={{ flex: 1 }}>
-          <BackButton />
-          <Typography sx={{ display: "flex", alignItems: "center" }} variant="h6" color="inherit">
-            Traffic Light
-          </Typography>
-        </Stack>
-
-        <Button color="inherit" onClick={handleClose} style={{ marginRight: "-15px" }}>
-          Ok
+        <BackButton />
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          Light {index + 1}
+        </Typography>
+        <Button variant="contained" onClick={onClose}>
+          Done
         </Button>
       </AppToolbar>
 
-      <Stack spacing={2} sx={{ p: 3 }}>
-        <Grid container sx={{ justifyContent: "space-between", alignItems: "center" }} spacing={2}>
-          <Grid size={{ xs: 12, md: 4, lg: 3 }}>
-            <Typography gutterBottom>Preset</Typography>
-            <PresetMenu
-              lightConfig={lightConfig}
-              selectedState={selectedState}
-              onLightConfigChange={onLightConfigChange}
-              setSelectedState={setSelectedState}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12 }} display="flex" justifyContent="center" alignItems="flex-start">
-            {lightHead}
-          </Grid>
-
-          <Grid size={{ xs: 12 }}>
-            <Timeline
+      <Grid container spacing={3} sx={{ p: { xs: 2, sm: 3 } }}>
+        <Grid size={{ xs: 12, md: 5 }}>
+          <Paper
+            variant="outlined"
+            sx={{ display: "flex", justifyContent: "center", py: 2, bgcolor: "background.default" }}
+          >
+            <LightHead
               currentTimestamp={currentTimestamp}
+              light={light}
               lightConfig={lightConfig}
-              onLightConfigChange={onLightConfigChange}
-              selectedState={selectedState}
-              editable={true}
+              maxHeight={220}
+              maxWidth={1000}
             />
-          </Grid>
-
-          <Grid size={{ xs: 12 }}>
-            <StatePicker
-              states={lightConfig.phases.map((phase) => phase.state)}
-              setSelectedState={setSelectedState}
-              selectedState={selectedState}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4, lg: 3 }}>
-            <Typography gutterBottom>Phases</Typography>
-            <PhaseControls
-              lightConfig={lightConfig}
-              onLightConfigChange={onLightConfigChange}
-              setSelectedState={setSelectedState}
-            />
-          </Grid>
+          </Paper>
         </Grid>
-      </Stack>
+
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Stack spacing={3}>
+            <Box>
+              <Typography variant="overline" color="text.secondary">
+                Type
+              </Typography>
+              <PresetMenu
+                lightConfig={lightConfig}
+                selectedState={selectedState}
+                onLightConfigChange={onLightConfigChange}
+                setSelectedState={setSelectedState}
+              />
+            </Box>
+
+            <Box>
+              <Typography variant="overline" color="text.secondary">
+                Phase durations
+              </Typography>
+              <PhaseControls
+                lightConfig={lightConfig}
+                onLightConfigChange={onLightConfigChange}
+                setSelectedState={setSelectedState}
+              />
+            </Box>
+          </Stack>
+        </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <Typography variant="overline" color="text.secondary">
+            Timeline
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Pick a phase, then drag its edges. Drag the bar to shift the whole cycle.
+          </Typography>
+          <Timeline
+            currentTimestamp={currentTimestamp}
+            lightConfig={lightConfig}
+            onLightConfigChange={onLightConfigChange}
+            selectedState={selectedState}
+            editable={true}
+          />
+          <StatePicker
+            phases={lightConfig.phases}
+            setSelectedState={setSelectedState}
+            selectedState={selectedState}
+          />
+        </Grid>
+      </Grid>
     </Dialog>
   )
 }

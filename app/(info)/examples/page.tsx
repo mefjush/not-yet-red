@@ -1,6 +1,15 @@
 "use client"
 
-import { Typography, Button, Card, CardContent, Stack, CardActions } from "@mui/material"
+import {
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Stack,
+  CardActions,
+  Grid,
+} from "@mui/material"
 import LightConfig, { DEFAULT_LIGHT_CONFIG, Phase } from "../../domain/LightConfig"
 import { DEFAULT_INTERSECTION_CONFIG } from "../../domain/IntersectionConfig"
 import { lightConfigParser } from "../../url"
@@ -8,10 +17,10 @@ import { PresetId, PRESETS } from "../../domain/Preset"
 import { State } from "../../domain/State"
 import DemoScreen from "@/app/components/DemoScreen"
 import TrafficLight from "@/app/domain/TrafficLight"
-import Grid from "@mui/material/Grid2"
 import LightGroups from "@/app/domain/LightGroups"
 import { useEffect, useState } from "react"
 import Clock from "@/app/domain/Clock"
+import useHydrated from "@/app/hooks/useHydrated"
 
 const HALF_OFFSETTED = DEFAULT_LIGHT_CONFIG.withOffset(DEFAULT_INTERSECTION_CONFIG.cycleLength / 2)
 
@@ -87,12 +96,15 @@ export default function Examples() {
   ]
 
   const lights = configs.map((config) =>
-    config.config.flatMap((group) => group.map((lightConfig) => new TrafficLight(lightConfig, false))),
+    config.config.flatMap((group) =>
+      group.map((lightConfig) => new TrafficLight(lightConfig, false)),
+    ),
   )
 
   const clock = new Clock(0)
 
-  const [currentTimestamp, setCurrentTimestamp] = useState(clock.now())
+  const [timestamp, setCurrentTimestamp] = useState(() => clock.now())
+  const currentTimestamp = useHydrated() ? timestamp : 0
 
   // after each render
   useEffect(() => {
@@ -107,12 +119,14 @@ export default function Examples() {
   const listItems = configs.map(({ config, name, scenarios }, configIdx) => (
     <Card key={configIdx}>
       <CardContent>
-        <Typography variant="h5" component="div">
+        <Typography variant="h6" component="h2">
           {name}
         </Typography>
-        <Typography variant="body2">{scenarios}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {scenarios}
+        </Typography>
 
-        <Grid sx={{ m: 2 }} container justifyContent="flex-start">
+        <Grid sx={{ mt: 2 }} container spacing={1}>
           {config.map((group, groupIdx) => (
             <Grid size={{ xs: 6, md: 3, lg: 2 }} key={groupIdx}>
               <DemoScreen
@@ -126,17 +140,17 @@ export default function Examples() {
           ))}
         </Grid>
       </CardContent>
-      <CardActions>
-        <Button size="small" href={toUrl(config)}>
-          Select
+      <CardActions sx={{ px: 2, pb: 2 }}>
+        <Button variant="contained" href={toUrl(config)}>
+          Use this setup
         </Button>
       </CardActions>
     </Card>
   ))
 
   return (
-    <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-      {listItems}
-    </Stack>
+    <Container maxWidth="md" sx={{ py: 2 }}>
+      <Stack spacing={2}>{listItems}</Stack>
+    </Container>
   )
 }

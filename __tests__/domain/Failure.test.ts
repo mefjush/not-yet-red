@@ -1,3 +1,4 @@
+import { describe, expect, test, it } from "vitest"
 import Failure from "../../app/domain/Failure"
 
 describe("Failure", () => {

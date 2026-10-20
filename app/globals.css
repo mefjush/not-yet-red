@@ -1,9 +1,79 @@
-body {
-  margin: 0;
-  background-color: #f3f6f9;
-  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+.fullscreen::backdrop {
+  background-color: var(--mui-palette-background-default);
 }
 
-.fullscreen::backdrop {
-  background-color: #f3f6f9;
+/* Screen.tsx: one light group per page, swipe between them */
+.swipe {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.swipe > * {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+}
+
+/* AnimatedLogo.tsx */
+@keyframes logo-green {
+  0%,
+  5%,
+  100% {
+    color: #4caf50;
+  }
+  6%,
+  99% {
+    color: inherit;
+  }
+}
+@keyframes logo-yellow {
+  6%,
+  11% {
+    color: #ffeb3b;
+  }
+  0%,
+  5%,
+  12%,
+  100% {
+    color: inherit;
+  }
+}
+@keyframes logo-red {
+  12%,
+  99% {
+    color: #f44336;
+  }
+  0%,
+  11%,
+  100% {
+    color: inherit;
+  }
+}
+.logo-green {
+  animation: 25s logo-green infinite linear;
+}
+.logo-yellow {
+  animation: 25s logo-yellow infinite linear;
+}
+.logo-red {
+  animation: 25s logo-red infinite linear;
+}
+.logo:hover span {
+  animation: none;
+}
+.logo:hover .logo-green {
+  color: #4caf50;
+}
+.logo:hover .logo-yellow {
+  color: #fbc02d;
+}
+.logo:hover .logo-red {
+  color: #f44336;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo span {
+    animation: none;
+  }
 }

@@ -103,9 +103,9 @@ export default function LightHead({
           transitionDuration: TRANSITION_DURATION,
           backgroundColor: "#131313",
           boxShadow: 3,
+          justifyContent: "center",
+          alignItems: "center",
         }}
-        justifyContent="center"
-        alignItems="center"
       >
         {segmentStates}
       </Stack>

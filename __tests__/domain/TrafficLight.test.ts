@@ -1,3 +1,4 @@
+import { describe, expect, test, it } from "vitest"
 import { State } from "../../app/domain/State"
 import { TEST_LIGHT_CONFIG } from "../../app/domain/LightConfig"
 import TrafficLight from "../../app/domain/TrafficLight"

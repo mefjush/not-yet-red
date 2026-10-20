@@ -1,3 +1,4 @@
+import { describe, expect, test, it } from "vitest"
 import Clock from "../../app/domain/Clock"
 
 const testListener = (fixedTimestamp: number) => ({

@@ -1,3 +1,4 @@
+import { describe, expect, test, it } from "vitest"
 import { State } from "../../app/domain/State"
 import {
   CONDITIONAL_RIGHT_TEST_LIGHT_CONFIG,

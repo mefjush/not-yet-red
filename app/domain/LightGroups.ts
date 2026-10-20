@@ -5,10 +5,10 @@ export type LightId = {
   inGroupIdx: number
 }
 
-export default class LightGroups {
+export default class LightGroups<T = LightConfig> {
   indexing: LightId[]
 
-  constructor(private lightGroups: LightConfig[][]) {
+  constructor(private lightGroups: T[][]) {
     const indexing: LightId[] = []
     let lightIdx = 0
     for (let lightGroupIdx = 0; lightGroupIdx < lightGroups.length; lightGroupIdx++) {
@@ -25,7 +25,7 @@ export default class LightGroups {
     this.indexing = indexing
   }
 
-  lookup(lightIdx: number): LightConfig {
+  lookup(lightIdx: number): T {
     const lightId = this.indexing[lightIdx]
     return this.lightGroups[lightId.groupIdx][lightId.inGroupIdx]
   }
@@ -38,36 +38,35 @@ export default class LightGroups {
     )
   }
 
-  withLightReplaced(lightIdx: number, lightConfig: LightConfig) {
+  withLightReplaced(lightIdx: number, lightConfig: T) {
     const lightId = this.indexing[lightIdx]
     const copy = this.copied()
     copy[lightId.groupIdx][lightId.inGroupIdx] = lightConfig
     return new LightGroups(copy)
   }
 
-  withLightAdded(lightConfig: LightConfig): LightGroups {
-    return new LightGroups([...this.lightGroups.map((x) => [...x]), [lightConfig]])
+  // groupIdx omitted (or == number of groups) adds the light to a new group at the end
+  withLightAdded(lightConfig: T, groupIdx = this.lightGroups.length): LightGroups<T> {
+    const copy = this.copied()
+    if (groupIdx == copy.length) {
+      copy.push([lightConfig])
+    } else {
+      copy[groupIdx].push(lightConfig)
+    }
+    return new LightGroups(copy)
   }
 
-  ungrouped(groupIdx: number, splitIdx: number) {
-    const groupLeft = this.lightGroups[groupIdx].filter((x, idx) => idx <= splitIdx)
-    const groupRight = this.lightGroups[groupIdx].filter((x, idx) => idx > splitIdx)
-    const newGrouping = this.lightGroups.flatMap((group, idx) =>
-      idx == groupIdx ? [groupLeft, groupRight] : [group],
-    )
-    return new LightGroups(newGrouping)
-  }
-
-  groupedDown(groupIdx: number) {
-    const initAcc: LightConfig[][] = []
-    const newGrouping = this.lightGroups.reduce(
-      (acc, group, idx) =>
-        idx != groupIdx + 1
-          ? [...acc, group]
-          : [...acc.slice(0, -1), [...acc[acc.length - 1], ...group]],
-      initAcc,
-    )
-    return new LightGroups(newGrouping)
+  // toGroupIdx == number of groups moves the light to a new group at the end
+  withLightMoved(lightIdx: number, toGroupIdx: number): LightGroups<T> {
+    const { groupIdx, inGroupIdx } = this.indexing[lightIdx]
+    const copy = this.copied()
+    const [light] = copy[groupIdx].splice(inGroupIdx, 1)
+    if (toGroupIdx == copy.length) {
+      copy.push([light])
+    } else {
+      copy[toGroupIdx].push(light)
+    }
+    return new LightGroups(copy.filter((g) => g.length > 0))
   }
 
   withLightDeleted(lightIdx: number) {
@@ -90,7 +89,7 @@ export default class LightGroups {
     return this.indexing.length
   }
 
-  raw(): LightConfig[][] {
+  raw(): T[][] {
     return this.lightGroups
   }
 }

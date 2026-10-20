@@ -4,7 +4,7 @@ import { Paper, Typography } from "@mui/material"
 
 export default function About() {
   return (
-    <Paper sx={{ p: 2, m: 2 }}>
+    <Paper variant="outlined" sx={{ p: { xs: 2, sm: 4 }, m: 2, mx: { md: "auto" }, maxWidth: 800 }}>
       <Typography variant="h4" gutterBottom>
         The beginning
       </Typography>

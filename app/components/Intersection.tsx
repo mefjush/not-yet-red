@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect, ReactElement } from "react"
+import { useState, useEffect } from "react"
 import Clock from "../domain/Clock"
 import TrafficLight from "../domain/TrafficLight"
 import LightConfig, { DEFAULT_LIGHT_CONFIG } from "../domain/LightConfig"
 import Failure from "../domain/Failure"
-import { Box, Fab, Stack, useTheme } from "@mui/material"
+import { Button, Container, Fab, Paper, Snackbar, Stack, Typography } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import { lightConfigParser, IntersectionConfigParser } from "../url"
 import IntersectionConfig, { DEFAULT_INTERSECTION_CONFIG } from "../domain/IntersectionConfig"
@@ -19,25 +19,12 @@ import IntersectionConfigPanel from "./IntersectionConfigPanel"
 import LightCard from "./LightCard"
 import { State } from "../domain/State"
 import LightGroups from "../domain/LightGroups"
-import GroupButton from "./GroupButton"
+import PhoneSection from "./PhoneSection"
+import useHydrated from "../hooks/useHydrated"
 
 export type UiMode = "none" | "share" | "fullscreen"
 
 const historyPush: Options = { history: "push" }
-
-// TODOs
-// better examples page
-// aria stuff
-// settings small arrow
-// phone app logo in red?
-// back button a bit confusing in expand mode
-// light pattern img
-// Offline usage
-// Manual time correction in cookie / local storage
-// blink & beep
-// fix the timeline range slider on edge (when expanding)
-// breadcrumbs
-// android app
 
 export default function IntersectionComponent({
   uiMode,
@@ -63,7 +50,8 @@ export default function IntersectionComponent({
 
   const [timeCorrection, setTimeCorrection] = useState(0)
 
-  const [currentTimestamp, setCurrentTimestamp] = useState(Date.now())
+  const [timestamp, setCurrentTimestamp] = useState(() => Date.now())
+  const currentTimestamp = useHydrated() ? timestamp : 0
 
   const fixedLightGroups = lightGroups.map((lg) =>
     lg.map((lc) => lc.withIntersectionConfig(intersectionConfig)),
@@ -77,7 +65,7 @@ export default function IntersectionComponent({
     lightConfigs.map((lightConfig) => lightConfig.phases[0].state),
   )
 
-  const theme = useTheme()
+  const [undo, setUndo] = useState<null | (() => void)>(null)
 
   const failure = new Failure(
     intersectionConfig.failure.duration,
@@ -118,12 +106,15 @@ export default function IntersectionComponent({
     setCurrentTimestamp(clock.now())
   }
 
-  const onSplit = (groupIdx: number, splitIdx: number) => {
-    setLightGroups(theLightGroups.ungrouped(groupIdx, splitIdx).raw())
-  }
-
-  const onGroupDown = (groupIdx: number) => {
-    setLightGroups(theLightGroups.groupedDown(groupIdx).raw())
+  const onMoveToPhone = (lightIdx: number, groupIdx: number) => {
+    // regroup the selected states the same way so they stay aligned with their lights
+    const stateGroups = new LightGroups(
+      fixedLightGroups.map((group, gi) =>
+        group.map((_, ii) => selectedStates[theLightGroups.idLookup(gi, ii)]),
+      ),
+    )
+    setLightGroups(theLightGroups.withLightMoved(lightIdx, groupIdx).raw())
+    setSelectedStates(stateGroups.withLightMoved(lightIdx, groupIdx).raw().flat())
   }
 
   const onMove = (lightIdx: number, amount: number) => {
@@ -150,17 +141,26 @@ export default function IntersectionComponent({
     )
   }
 
-  const onAdd = () => {
-    setLightGroups(theLightGroups.withLightAdded(DEFAULT_LIGHT_CONFIG).raw())
-    setSelectedStates([...selectedStates, DEFAULT_LIGHT_CONFIG.phases[0].state])
-    setExpanded(lightConfigs.length)
+  // defaults to adding a new phone
+  const onAdd = (groupIdx = fixedLightGroups.length) => {
+    const updated = theLightGroups.withLightAdded(DEFAULT_LIGHT_CONFIG, groupIdx)
+    const newIdx = updated.idLookup(groupIdx, updated.raw()[groupIdx].length - 1)
+    setLightGroups(updated.raw())
+    setSelectedStates(selectedStates.toSpliced(newIdx, 0, DEFAULT_LIGHT_CONFIG.phases[0].state))
+    setExpanded(newIdx)
   }
 
   const onDeleteOne = (lightIdx: number) => {
+    const previousGroups = theLightGroups.raw()
+    const previousStates = selectedStates
     setLightGroups(theLightGroups.withLightDeleted(lightIdx).raw())
     setSelectedStates([...selectedStates].filter((ls, i) => i != lightIdx))
     setUiMode("none")
     setExpanded(null)
+    setUndo(() => () => {
+      setLightGroups(previousGroups)
+      setSelectedStates(previousStates)
+    })
   }
 
   const getShareUrl = () => {
@@ -185,79 +185,65 @@ export default function IntersectionComponent({
     }
   })
 
-  const groupBoxStyle = {
-    borderLeftStyle: "solid",
-    borderWidth: theme.spacing(1),
-    ml: -2,
-    pl: 1,
-    py: 1,
-  }
+  const phones = fixedLightGroups.map((group, groupIdx) => (
+    <PhoneSection key={groupIdx} index={groupIdx} onAddLight={() => onAdd(groupIdx)}>
+      {group.map((_, inGroupIdx) => {
+        const lightIdx = theLightGroups.idLookup(groupIdx, inGroupIdx)
+        return (
+          <LightCard
+            key={`light-${lightIdx}`}
+            index={lightIdx}
+            phoneIdx={groupIdx}
+            phoneCount={fixedLightGroups.length}
+            aloneOnPhone={group.length == 1}
+            canMoveUp={inGroupIdx > 0}
+            canMoveDown={inGroupIdx < group.length - 1}
+            currentTimestamp={currentTimestamp}
+            selectedState={selectedStates[lightIdx]}
+            setSelectedState={(state: State) => updateSelectedState(state, lightIdx)}
+            onDelete={() => onDeleteOne(lightIdx)}
+            onMove={(amount) => onMove(lightIdx, amount)}
+            onMoveToPhone={(toGroupIdx) => onMoveToPhone(lightIdx, toGroupIdx)}
+            light={lights[lightIdx]}
+            lightConfig={lightConfigs[lightIdx]}
+            expanded={expanded == lightIdx}
+            onLightConfigChange={(lightConfig: LightConfig) =>
+              updateLightConfig(lightConfig, lightIdx)
+            }
+            setExpanded={(expanded: boolean) => setExpanded(expanded ? lightIdx : null)}
+          />
+        )
+      })}
+    </PhoneSection>
+  ))
 
-  const joinButton = (groupIdx: number, lightIdx: number): ReactElement => (
-    <GroupButton
-      grouped={false}
-      key={`group-button-${lightIdx}`}
-      onClick={() => onGroupDown(groupIdx)}
-      sx={{ ...groupBoxStyle, borderColor: "transparent" }}
-    />
+  const emptyState = (
+    <Paper variant="outlined" sx={{ p: 4, textAlign: "center" }}>
+      <Typography variant="h6" gutterBottom>
+        No traffic lights yet
+      </Typography>
+      <Typography color="text.secondary" sx={{ mb: 2 }}>
+        Add a light, then open this page on another phone to build an intersection.
+      </Typography>
+      <Button variant="contained" startIcon={<AddIcon />} onClick={() => onAdd()}>
+        Add a traffic light
+      </Button>
+    </Paper>
   )
-
-  const splitButton = (groupIdx: number, splitIdx: number, lightIdx: number): ReactElement => (
-    <GroupButton
-      grouped={true}
-      key={`group-button-${lightIdx}`}
-      onClick={() => onSplit(groupIdx, splitIdx)}
-      sx={{ ...groupBoxStyle, borderColor: "primary.main" }}
-    />
-  )
-
-  const intersectionGroups = lightConfigs.map((_, lightIdx) => {
-    const { groupIdx, inGroupIdx } = theLightGroups.indexing[lightIdx]
-
-    const card = (
-      <Box
-        key={`light-${lightIdx}`}
-        sx={{
-          ...groupBoxStyle,
-          borderColor: lightGroups[groupIdx].length > 1 ? "primary.main" : "transparent",
-        }}
-      >
-        <LightCard
-          currentTimestamp={currentTimestamp}
-          selectedState={selectedStates[lightIdx]}
-          setSelectedState={(state: State) => updateSelectedState(state, lightIdx)}
-          onDelete={() => onDeleteOne(lightIdx)}
-          onMove={(amount) => onMove(lightIdx, amount)}
-          light={lights[lightIdx]}
-          lightConfig={lightConfigs[lightIdx]}
-          expanded={expanded == lightIdx}
-          onLightConfigChange={(lightConfig: LightConfig) =>
-            updateLightConfig(lightConfig, lightIdx)
-          }
-          setExpanded={(expanded: boolean) => setExpanded(expanded ? lightIdx : null)}
-        />
-      </Box>
-    )
-
-    const groupButton =
-      inGroupIdx < fixedLightGroups[groupIdx].length - 1
-        ? splitButton(groupIdx, inGroupIdx, lightIdx)
-        : joinButton(groupIdx, lightIdx)
-
-    return lightIdx < lightConfigs.length - 1 ? [card, groupButton] : [card]
-  })
 
   return (
-    <Stack spacing={2} sx={{ p: 1, m: 1 }}>
-      <IntersectionConfigPanel
-        intersectionConfig={intersectionConfig}
-        updateIntersectionConfig={updateIntersectionConfig}
-        timeCorrection={timeCorrection}
-        setTimeCorrection={setTimeCorrection}
-        initTimeSync={initTimeSync}
-      />
+    <Container maxWidth="md" sx={{ py: 2, pb: 12 }}>
+      <Stack spacing={2}>
+        <IntersectionConfigPanel
+          intersectionConfig={intersectionConfig}
+          updateIntersectionConfig={updateIntersectionConfig}
+          timeCorrection={timeCorrection}
+          setTimeCorrection={setTimeCorrection}
+          initTimeSync={initTimeSync}
+        />
 
-      <Stack spacing={0}>{intersectionGroups}</Stack>
+        {lightConfigs.length == 0 ? emptyState : phones}
+      </Stack>
 
       <Fullscreen
         enabled={uiMode == "fullscreen"}
@@ -269,9 +255,10 @@ export default function IntersectionComponent({
 
       <ShareDialog url={getShareUrl()} open={uiMode == "share"} onClose={exitUiMode} />
 
-      {expanded != null && (
+      {expanded != null && lights[expanded] && (
         <LightDetails
           open={expanded != null}
+          index={expanded}
           currentTimestamp={currentTimestamp}
           light={lights[expanded]}
           lightConfig={lightConfigs[expanded]}
@@ -284,21 +271,38 @@ export default function IntersectionComponent({
         />
       )}
 
+      <Snackbar
+        open={undo != null}
+        autoHideDuration={8000}
+        onClose={() => setUndo(null)}
+        message="Light deleted"
+        action={
+          <Button
+            color="inherit"
+            size="small"
+            onClick={() => {
+              undo?.()
+              setUndo(null)
+            }}
+          >
+            Undo
+          </Button>
+        }
+      />
+
       <Fab
+        variant="extended"
         color="primary"
-        aria-label="add"
-        onClick={onAdd}
-        style={{
-          margin: 0,
-          top: "auto",
-          right: 20,
-          bottom: 20,
-          left: "auto",
+        onClick={() => onAdd()}
+        sx={{
           position: "fixed",
+          right: "max(20px, env(safe-area-inset-right))",
+          bottom: "max(20px, env(safe-area-inset-bottom))",
         }}
       >
-        <AddIcon />
+        <AddIcon sx={{ mr: 1 }} />
+        Add phone
       </Fab>
-    </Stack>
+    </Container>
   )
 }

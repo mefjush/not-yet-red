@@ -1,9 +1,11 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
-import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates"
-import TrafficIcon from "@mui/icons-material/Traffic"
+import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined"
+import TrafficOutlinedIcon from "@mui/icons-material/TrafficOutlined"
+import PrivacyTipOutlinedIcon from "@mui/icons-material/PrivacyTipOutlined"
 
 export const MENU_ITEMS = [
+  { name: "Home", icon: <TrafficOutlinedIcon />, href: "/" },
+  { name: "Examples", icon: <TipsAndUpdatesOutlinedIcon />, href: "/examples" },
   { name: "About", icon: <InfoOutlinedIcon />, href: "/about" },
-  { name: "Examples", icon: <TipsAndUpdatesIcon />, href: "/examples" },
-  { name: "Home", icon: <TrafficIcon />, href: "/" },
+  { name: "Privacy", icon: <PrivacyTipOutlinedIcon />, href: "/privacy" },
 ]

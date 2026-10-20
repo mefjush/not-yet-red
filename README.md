@@ -11,14 +11,16 @@
 
 Whether you're following the rules or making a last-second dash before the red, _Not Yet Red_ brings traffic fun to life!
 
-## Running it
+## Stack
 
-`npm run dev`
+Next.js 16 (static export), React 19, MUI 9, nuqs for URL state, Serwist for offline support.
 
-## Building it
+## Development
 
-`npm run build`
-
-## Running tests
-
-`npm test`
+```sh
+npm install
+npm run dev     # dev server (Turbopack, no service worker)
+npm test        # unit tests (Vitest)
+npm run lint
+npm run build   # static site in ./out, with service worker
+```

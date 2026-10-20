@@ -1,7 +1,8 @@
 "use client"
+/* eslint-disable react-hooks/refs -- slider drag state lives in refs on purpose; refactor before enabling React Compiler */
 
 import LightConfig, { TimeRange } from "../domain/LightConfig"
-import { Box, Slider, SliderComponentsPropsOverrides } from "@mui/material"
+import { Box, Slider } from "@mui/material"
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp"
 import { useEffect, useRef, useState } from "react"
 import Tune from "./Tune"
@@ -93,13 +94,16 @@ export default function Timeline({
     onLightConfigChange(lightConfig.withStateTimeRange(state, newTimeRange))
   }
 
+  // both sliders draw the same config, so neither may animate or one lags behind the other
   const slideWithThumbOnly = {
     pointerEvents: "none !important",
     "& .MuiSlider-thumb": {
       pointerEvents: "all !important",
+      transition: "none",
     },
     "& .MuiSlider-track": {
       pointerEvents: "none !important",
+      transition: "none",
     },
   }
 
@@ -121,7 +125,7 @@ export default function Timeline({
         track: {
           lightConfig: lightConfig,
           onLightConfigChange: onLightConfigChange,
-        } as SliderComponentsPropsOverrides,
+        } as object,
         rail: { style: { display: "none" } },
         mark: { style: { display: "none" } },
         markLabel: {

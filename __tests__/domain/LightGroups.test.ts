@@ -1,3 +1,4 @@
+import { describe, expect, test, it } from "vitest"
 import { DEFAULT_LIGHT_CONFIG, TEST_LIGHT_CONFIG } from "../../app/domain/LightConfig"
 import LightGroups from "../../app/domain/LightGroups"
 
@@ -17,20 +18,28 @@ describe("LightGroups", () => {
     expect(lightGroups.size()).toEqual(2)
   })
 
-  it("groups 2 lights together", () => {
+  it("moves a light to another group", () => {
     const lightGroups = new LightGroups([[light1], [light2]])
 
-    const updated = lightGroups.groupedDown(0)
-
-    expect(updated.raw()).toEqual([[light1, light2]])
+    expect(lightGroups.withLightMoved(0, 1).raw()).toEqual([[light2, light1]])
   })
 
-  it("ungroups 2 lights", () => {
+  it("moves a light to a new group", () => {
     const lightGroups = new LightGroups([[light1, light2]])
 
-    const updated = lightGroups.ungrouped(0, 0)
+    expect(lightGroups.withLightMoved(0, 1).raw()).toEqual([[light2], [light1]])
+  })
 
-    expect(updated.raw()).toEqual([[light1], [light2]])
+  it("moves a light out of the first group into a later one", () => {
+    const lightGroups = new LightGroups(["a", "b", "c"].map((x) => [x]))
+
+    expect(lightGroups.withLightMoved(0, 2).raw()).toEqual([["b"], ["c", "a"]])
+  })
+
+  it("adds a light to an existing group", () => {
+    const lightGroups = new LightGroups([[light1], [light2]])
+
+    expect(lightGroups.withLightAdded(light1, 0).raw()).toEqual([[light1, light1], [light2]])
   })
 
   it("allows to add one light", () => {

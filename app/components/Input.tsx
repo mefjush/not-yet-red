@@ -34,14 +34,14 @@ export default function Input({
 
   const fix = (inVal: number) => {
     let outVal: number = inVal
-    if (max) {
-      outVal = Math.min(inVal, max)
+    if (max != undefined) {
+      outVal = Math.min(outVal, max)
     }
-    if (min || min == 0) {
-      outVal = Math.max(inVal, min)
+    if (min != undefined) {
+      outVal = Math.max(outVal, min)
     }
     if (step && step < 1) {
-      outVal = Math.round(inVal * 100) / 100
+      outVal = Math.round(outVal * 100) / 100
     }
     return toEvent(outVal)
   }
@@ -56,8 +56,10 @@ export default function Input({
 
   return (
     <Box>
-      <Typography gutterBottom>{label}</Typography>
-      <Stack direction="row" spacing={2}>
+      <Typography id={id} variant="body2" gutterBottom>
+        {label}
+      </Typography>
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
         <Slider
           value={typeof value === "number" ? value : 0}
           step={step || 1}
@@ -70,12 +72,14 @@ export default function Input({
           value={value}
           size="small"
           onChange={handleInputChange}
-          inputProps={{
-            step: step || 1,
-            min: min,
-            max: max,
-            type: "number",
-            "aria-labelledby": id,
+          slotProps={{
+            input: {
+              step: step || 1,
+              min: min,
+              max: max,
+              type: "number",
+              "aria-labelledby": id,
+            },
           }}
         />
       </Stack>

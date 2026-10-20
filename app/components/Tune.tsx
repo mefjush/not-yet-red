@@ -15,8 +15,8 @@ export default function Tune({ lightConfig }: { lightConfig: LightConfig }) {
     return (
       <Box
         key={idx}
-        bgcolor={`${phase.stateAttributes().color}.main`}
         sx={{
+          bgcolor: `${phase.stateAttributes().color}.main`,
           width: `${(100 * duration) / cycleLength}%`,
           height: "6px",
           borderRadius: radious,

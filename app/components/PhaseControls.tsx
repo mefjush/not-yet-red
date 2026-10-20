@@ -1,49 +1,44 @@
 "use client"
 
-import {
-  ButtonGroup,
-  Button,
-  TextField,
-  FormControl,
-  RadioGroup,
-  Stack,
-  FormControlLabel,
-  Radio,
-} from "@mui/material"
-import { useState, useRef, ReactNode } from "react"
-import { State, STATE_ATTRIBUTES, TrafficLightColors } from "../domain/State"
+import { Box, Chip, IconButton, InputAdornment, Stack, TextField, Typography } from "@mui/material"
+import AddIcon from "@mui/icons-material/Add"
+import RemoveIcon from "@mui/icons-material/Remove"
+import { useState, useRef } from "react"
+import { State, TrafficLightColors } from "../domain/State"
 import { useLongPress } from "use-long-press"
-import LightConfig from "../domain/LightConfig"
+import LightConfig, { Phase } from "../domain/LightConfig"
 
-interface ChangeEvent {
-  target: {
-    value: number
-  }
+const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
+
+function ColorDot({ color }: { color: TrafficLightColors }) {
+  return (
+    <Box
+      sx={{
+        width: 12,
+        height: 12,
+        borderRadius: "50%",
+        bgcolor: `${color}.main`,
+        flexShrink: 0,
+      }}
+    />
+  )
 }
 
-const toEvent = (val: any) => ({ target: { value: Number(val) } })
-
-const fix = (inVal: number, min?: number, max?: number, step?: number) => {
-  let outVal: number = inVal
-  if (max) {
-    outVal = Math.min(inVal, max)
-  }
-  if (min || min == 0) {
-    outVal = Math.max(inVal, min)
-  }
-  if (step && step < 1) {
-    outVal = Math.round(inVal * 100) / 100
-  }
-  return toEvent(outVal)
-}
-
-function DelayedTextField({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  const lastLegalValue = useRef(value)
+function DelayedTextField({
+  value,
+  label,
+  onChange,
+}: {
+  value: number
+  label: string
+  onChange: (v: number) => void
+}) {
+  const [lastLegalValue, setLastLegalValue] = useState(value)
   const [uiValue, setUiValue] = useState(value + "")
 
-  if (lastLegalValue.current != value) {
+  if (lastLegalValue != value) {
     setUiValue(value + "")
-    lastLegalValue.current = value
+    setLastLegalValue(value)
   }
 
   return (
@@ -56,150 +51,108 @@ function DelayedTextField({ value, onChange }: { value: number; onChange: (v: nu
           onChange(val)
         }
       }}
-      variant="outlined"
       size="small"
       type="number"
       slotProps={{
-        input: {
-          style: {
-            borderRadius: 0,
-          },
-        },
+        htmlInput: { "aria-label": `${label} duration in seconds`, inputMode: "numeric" },
+        input: { endAdornment: <InputAdornment position="end">s</InputAdornment> },
       }}
       sx={{
-        "& input": {
-          textAlign: "center",
-          MozAppearance: "textfield",
-        },
-        "& input::-webkit-inner-spin-button": {
-          WebkitAppearance: "none",
-        },
+        width: 84,
+        "& input": { textAlign: "right", MozAppearance: "textfield" },
+        "& input::-webkit-inner-spin-button": { WebkitAppearance: "none" },
       }}
     />
   )
 }
 
 function PhaseControl({
-  min,
   max,
-  step,
-  value,
-  color,
-  style,
+  phase,
   onChange,
 }: {
-  min?: number
-  max?: number
-  step?: number
-  value: number
-  color: TrafficLightColors
-  style?: React.CSSProperties
-  onChange: (e: ChangeEvent) => void
+  max: number
+  phase: Phase
+  onChange: (seconds: number) => void
 }) {
-  const [longPressInterval, setLongPressInterval] = useState<NodeJS.Timeout | null>(null)
+  const value = phase.duration / 1000
+  const { name, color } = phase.stateAttributes()
+  const longPressInterval = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const clearLongPressInterval = () => {
-    if (longPressInterval) {
-      clearInterval(longPressInterval)
+  const set = (val: number) => onChange(clamp(val, 0, max))
+
+  const stopRepeat = () => {
+    if (longPressInterval.current) {
+      clearInterval(longPressInterval.current)
+      longPressInterval.current = null
     }
   }
 
-  const useLongPressDiff = (diff: number) => {
-    return useLongPress(
-      (e) => {
-        let i = 0
-        setLongPressInterval(
-          setInterval(() => {
-            i += diff
-            onChange(fix(value + i, min, max, step))
-          }, 50),
-        )
-      },
-      {
-        onFinish: clearLongPressInterval,
-      },
-    )
-  }
-
-  const bindInc = useLongPressDiff(1)
-
-  const bindDec = useLongPressDiff(-1)
+  // hold the button to keep changing the value
+  const bindInc = useLongPress(
+    () => {
+      let i = 0
+      longPressInterval.current = setInterval(() => set(value + ++i), 50)
+    },
+    { onFinish: stopRepeat },
+  )
+  const bindDec = useLongPress(
+    () => {
+      let i = 0
+      longPressInterval.current = setInterval(() => set(value - ++i), 50)
+    },
+    { onFinish: stopRepeat },
+  )
 
   return (
-    <>
-      <ButtonGroup
-        fullWidth
-        variant="outlined"
-        size="small"
-        aria-label="Basic button group"
-        style={style}
-      >
-        <Button
-          {...bindDec()}
-          color={color}
-          variant="contained"
-          onClick={(e) => onChange(fix(value - 1, min, max, step))}
-        >
-          -
-        </Button>
-        <DelayedTextField value={value} onChange={(val) => onChange(fix(val, min, max, step))} />
-        <Button
-          {...bindInc()}
-          color={color}
-          variant="contained"
-          onClick={(e) => onChange(fix(value + 1, min, max, step))}
-        >
-          +
-        </Button>
-      </ButtonGroup>
-    </>
+    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+      <ColorDot color={color} />
+      <Typography sx={{ flexGrow: 1 }}>{name}</Typography>
+      <IconButton {...bindDec()} aria-label={`Shorter ${name}`} onClick={() => set(value - 1)}>
+        <RemoveIcon />
+      </IconButton>
+      <DelayedTextField value={value} label={name} onChange={set} />
+      <IconButton {...bindInc()} aria-label={`Longer ${name}`} onClick={() => set(value + 1)}>
+        <AddIcon />
+      </IconButton>
+    </Stack>
   )
 }
 
 export function StatePicker({
-  states,
+  phases,
   selectedState,
-  children,
   setSelectedState,
 }: {
-  states: State[]
+  phases: Phase[]
   selectedState?: State
-  children?: ReactNode[]
   setSelectedState: (state: State) => void
 }) {
-  const theChildren = children || []
-
-  const expanded = theChildren.length != 0
-
-  const entries = states.map((state, idx) => {
-    const color = STATE_ATTRIBUTES[state].color
-
-    const radio = <Radio size="small" color={`${color}`} sx={{ color: `${color}.main` }} />
-
-    return (
-      <Stack direction="row" key={state}>
-        <FormControlLabel value={state} control={radio} label="" />
-        {theChildren[idx]}
-      </Stack>
-    )
-  })
-
   return (
-    <FormControl fullWidth>
-      <RadioGroup
-        row={!expanded}
-        aria-labelledby="demo-radio-buttons-group-label"
-        name="radio-buttons-group"
-        value={selectedState}
-        onChange={(event) =>
-          setSelectedState(State[(event.target as HTMLInputElement).value as keyof typeof State])
-        }
-      >
-        <Stack direction={expanded ? "column" : "row"} spacing={expanded ? 1 : 0}>
-          {entries}
-        </Stack>
-      </RadioGroup>
-    </FormControl>
+    <Stack
+      direction="row"
+      role="radiogroup"
+      aria-label="Phase to adjust on the timeline"
+      sx={{ flexWrap: "wrap", gap: 1 }}
+    >
+      {phases.map((phase) => {
+        const { name, color } = phase.stateAttributes()
+        const selected = phase.state == selectedState
+        return (
+          <Chip
+            key={phase.state}
+            role="radio"
+            aria-checked={selected}
+            label={`${name} ${phase.duration / 1000} s`}
+            icon={<ColorDot color={color} />}
+            color={selected ? color : "default"}
+            variant={selected ? "filled" : "outlined"}
+            onClick={() => setSelectedState(phase.state)}
+            sx={{ pl: 0.5, fontWeight: selected ? 600 : 400 }}
+          />
+        )
+      })}
+    </Stack>
   )
 }
 
@@ -212,25 +165,19 @@ export default function PhaseControls({
   onLightConfigChange: (lightConfig: LightConfig) => void
   setSelectedState: (state: State) => void
 }) {
-  const phaseControls = lightConfig.phases.map((phase) => {
-    return (
-      <PhaseControl
-        key={phase.state}
-        min={0}
-        max={lightConfig.cycleLength() / 1000}
-        value={phase.duration / 1000}
-        onChange={(e) => {
-          setSelectedState(phase.state)
-          onLightConfigChange(lightConfig.withStateDuration(phase.state, e.target.value * 1000))
-        }}
-        color={phase.stateAttributes().color}
-      />
-    )
-  })
-
   return (
     <Stack direction="column" spacing={1}>
-      {phaseControls}
+      {lightConfig.phases.map((phase) => (
+        <PhaseControl
+          key={phase.state}
+          phase={phase}
+          max={lightConfig.cycleLength() / 1000}
+          onChange={(seconds) => {
+            setSelectedState(phase.state)
+            onLightConfigChange(lightConfig.withStateDuration(phase.state, seconds * 1000))
+          }}
+        />
+      ))}
     </Stack>
   )
 }

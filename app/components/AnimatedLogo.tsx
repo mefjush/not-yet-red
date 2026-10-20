@@ -1,63 +1,16 @@
-import { IconButton, Link, Stack, Typography } from "@mui/material"
+import { Link, Stack, Typography } from "@mui/material"
 import TrafficIcon from "@mui/icons-material/Traffic"
-import styled, { keyframes } from "styled-components"
-import { green, yellow, red } from "@mui/material/colors"
-
-const colorFadeSpan = (phase: number) => {
-  const colors = keyframes`
-    ${0}%   { color: ${phase == 0 ? green[500] : "inherit"}; }
-    ${5}%   { color: ${phase == 0 ? green[500] : "inherit"}; }
-    ${6}%   { color: ${phase == 1 ? yellow[500] : "inherit"}; }
-    ${11}%  { color: ${phase == 1 ? yellow[500] : "inherit"}; }
-    ${12}%  { color: ${phase == 2 ? red[500] : "inherit"}; }
-    ${99}%  { color: ${phase == 2 ? red[500] : "inherit"}; }
-    ${100}% { color: ${phase == 0 ? green[500] : "inherit"}; }
-  `
-
-  return styled.span`
-    animation: 25s ${colors} infinite linear;
-  `
-}
-
-const FadeGreen = colorFadeSpan(0)
-const FadeYellow = colorFadeSpan(1)
-const FadeRed = colorFadeSpan(2)
-
-const HoverContainer = styled.div`
-  &:hover {
-    ${FadeGreen} {
-      color: ${green[500]};
-      animation: none;
-    }
-    ${FadeYellow} {
-      color: ${yellow[500]};
-      animation: none;
-    }
-    ${FadeRed} {
-      color: ${red[500]};
-      animation: none;
-    }
-  }
-`
 
 export default function AnimatedLogo() {
   return (
-    <Stack direction="row" display={"flex"} sx={{ alignItems: "center" }}>
-      <IconButton size="large" edge="start" color="inherit" href="/">
+    <Link href="/" color="inherit" underline="none" className="logo" aria-label="Not Yet Red home">
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
         <TrafficIcon />
-      </IconButton>
-      <HoverContainer>
-        <Typography
-          variant="h6"
-          noWrap
-          component={Link}
-          href="/"
-          color="inherit"
-          sx={{ textDecoration: "none" }}
-        >
-          <FadeGreen>Not</FadeGreen>.<FadeYellow>Yet</FadeYellow>.<FadeRed>Red</FadeRed>
+        <Typography variant="h6" noWrap sx={{ fontWeight: 700 }}>
+          <span className="logo-green">Not</span>.<span className="logo-yellow">Yet</span>.
+          <span className="logo-red">Red</span>
         </Typography>
-      </HoverContainer>
-    </Stack>
+      </Stack>
+    </Link>
   )
 }

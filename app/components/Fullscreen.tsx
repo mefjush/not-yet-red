@@ -1,9 +1,8 @@
 "use client"
 
-import { Box } from "@mui/material"
+import { Box, IconButton } from "@mui/material"
+import CloseIcon from "@mui/icons-material/Close"
 import React, { useEffect, useRef } from "react"
-import "swiper/css"
-import "swiper/css/pagination"
 import LightGroups from "../domain/LightGroups"
 import Screen from "./Screen"
 import TrafficLight from "../domain/TrafficLight"
@@ -23,6 +22,28 @@ export default function Fullscreen({
 }) {
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
+
+  const requestWakeLock = async () => {
+    try {
+      if (navigator && navigator.wakeLock) {
+        wakeLockRef.current = await navigator.wakeLock.request()
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const releaseWakeLock = () => {
+    if (wakeLockRef.current) {
+      try {
+        wakeLockRef.current.release().then(() => {
+          wakeLockRef.current = null
+        })
+      } catch (err) {
+        console.error(err)
+      }
+    }
+  }
 
   const fullscreenchange = () => {
     if (!document.fullscreenElement) {
@@ -47,31 +68,20 @@ export default function Fullscreen({
     }
   }, [enabled])
 
-  const requestWakeLock = async () => {
-    try {
-      if (navigator && navigator.wakeLock) {
-        wakeLockRef.current = await navigator.wakeLock.request()
-      }
-    } catch (err: any) {
-      console.error(`${err.name}, ${err.message}`)
-    }
-  }
-
-  const releaseWakeLock = () => {
-    if (wakeLockRef.current) {
-      try {
-        wakeLockRef.current.release().then(() => {
-          wakeLockRef.current = null
-        })
-      } catch (err: any) {
-        console.error(`${err.name}, ${err.message}`)
-      }
-    }
-  }
-
   return (
-    <Box ref={fullscreenRef} className="fullscreen" display={enabled ? "block" : "none"}>
+    <Box
+      ref={fullscreenRef}
+      className="fullscreen"
+      sx={{ display: enabled ? "block" : "none", bgcolor: "background.default" }}
+    >
       <Screen lightGroups={lightGroups} lights={lights} currentTimestamp={currentTimestamp} />
+      <IconButton
+        aria-label="Exit fullscreen"
+        onClick={() => document.exitFullscreen()}
+        sx={{ position: "absolute", top: 16, right: 16, opacity: 0.4, "&:hover": { opacity: 1 } }}
+      >
+        <CloseIcon />
+      </IconButton>
     </Box>
   )
 }
