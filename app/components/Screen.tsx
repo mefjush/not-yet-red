@@ -1,27 +1,48 @@
 "use client"
 
-import { Box, Stack } from "@mui/material"
+import { Box, IconButton, Stack, Tooltip } from "@mui/material"
+import VolumeUpIcon from "@mui/icons-material/VolumeUp"
+import VolumeOffIcon from "@mui/icons-material/VolumeOff"
 import React, { useEffect, useRef, useState } from "react"
 import useWindowSize from "../hooks/useWindowSize"
 import LightGroups from "../domain/LightGroups"
 import TrafficLight from "../domain/TrafficLight"
 import LightHead from "./LightHead"
 import { negativeSafeMod } from "../utils"
+import { SymbolId } from "../domain/Preset"
+import usePedestrianSound, { unlockAudio } from "../hooks/usePedestrianSound"
+
+// per phone, so you can choose which phone beeps
+const SOUND_KEY = "pedestrianSound"
+const readSoundSetting = () => {
+  try {
+    return localStorage.getItem(SOUND_KEY) == "on"
+  } catch {
+    return false
+  }
+}
 
 export default function Screen({
   lightGroups,
   lights,
   currentTimestamp,
+  timeCorrection,
+  active,
 }: {
   lightGroups: LightGroups
   lights: TrafficLight[]
   currentTimestamp: number
+  // how far this device's clock is off the synced time
+  timeCorrection: number
+  // shown fullscreen right now
+  active: boolean
 }) {
   const [windowWidth, windowHeight] = useWindowSize()
   const [page, setPage] = useState(0)
   const pageRef = useRef(0)
   const swipeRef = useRef<HTMLDivElement>(null)
   const settleTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [soundOn, setSoundOn] = useState(() => typeof window != "undefined" && readSoundSetting())
 
   const groups = lightGroups.raw()
   const count = groups.length
@@ -66,6 +87,25 @@ export default function Screen({
     [],
   )
 
+  // the pedestrian light on the phone being shown, if any
+  const shownGroup = groups[page] ?? []
+  const pedestrianInGroupIdx = shownGroup.findIndex(
+    (lightConfig) => lightConfig.preset.symbolId == SymbolId.PEDESTRIAN,
+  )
+  const pedestrianLight =
+    pedestrianInGroupIdx >= 0 ? lights[lightGroups.idLookup(page, pedestrianInGroupIdx)] : undefined
+
+  usePedestrianSound(active && soundOn ? pedestrianLight : undefined, timeCorrection)
+
+  const toggleSound = () => {
+    const on = !soundOn
+    if (on) unlockAudio()
+    setSoundOn(on)
+    try {
+      localStorage.setItem(SOUND_KEY, on ? "on" : "off")
+    } catch {}
+  }
+
   const slides = order.map((idx, position) => {
     const group = groups[idx]
     const widthConstrainedSize = windowWidth / group.length
@@ -91,10 +131,26 @@ export default function Screen({
   })
 
   return (
-    <Box sx={{ position: "relative", height: "100%", width: "100%" }}>
+    <Box
+      sx={{ position: "relative", height: "100%", width: "100%" }}
+      // a sound setting saved earlier still needs a tap before the browser plays anything
+      onPointerDown={soundOn ? unlockAudio : undefined}
+    >
       <div ref={swipeRef} className="swipe" onScroll={(e) => onScroll(e.currentTarget)}>
         {slides}
       </div>
+      {active && pedestrianLight && (
+        <Tooltip title={soundOn ? "Mute crossing sounds" : "Play crossing sounds"}>
+          <IconButton
+            aria-label={soundOn ? "Mute crossing sounds" : "Play crossing sounds"}
+            aria-pressed={soundOn}
+            onClick={toggleSound}
+            sx={{ position: "absolute", top: 16, left: 16, opacity: soundOn ? 0.9 : 0.4 }}
+          >
+            {soundOn ? <VolumeUpIcon /> : <VolumeOffIcon />}
+          </IconButton>
+        </Tooltip>
+      )}
       {loop && (
         <Stack
           direction="row"

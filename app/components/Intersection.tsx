@@ -251,6 +251,7 @@ export default function IntersectionComponent({
         lightGroups={theLightGroups}
         lights={lights}
         currentTimestamp={currentTimestamp}
+        timeCorrection={timeCorrection}
       />
 
       <ShareDialog url={getShareUrl()} open={uiMode == "share"} onClose={exitUiMode} />

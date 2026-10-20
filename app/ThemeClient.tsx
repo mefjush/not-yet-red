@@ -1,7 +1,7 @@
 "use client"
 
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material"
-import { orange, green, yellow, red, grey } from "@mui/material/colors"
+import { orange, green, yellow, red, grey, lightGreen } from "@mui/material/colors"
 
 //https://mui.com/material-ui/customization/palette/
 declare module "@mui/material/styles" {
@@ -11,6 +11,7 @@ declare module "@mui/material/styles" {
     tlOrange: Palette["primary"]
     tlGreen: Palette["primary"]
     tlGrey: Palette["primary"]
+    tlLightGreen: Palette["primary"]
   }
   interface PaletteOptions {
     tlRed: Palette["primary"]
@@ -18,10 +19,18 @@ declare module "@mui/material/styles" {
     tlOrange: Palette["primary"]
     tlGreen: Palette["primary"]
     tlGrey: Palette["primary"]
+    tlLightGreen: Palette["primary"]
   }
 }
 
-type TlColors = { tlRed: true; tlYellow: true; tlOrange: true; tlGreen: true; tlGrey: true }
+type TlColors = {
+  tlRed: true
+  tlYellow: true
+  tlOrange: true
+  tlGreen: true
+  tlGrey: true
+  tlLightGreen: true
+}
 
 declare module "@mui/material/Button" {
   interface ButtonPropsColorOverrides extends TlColors {}
@@ -44,6 +53,7 @@ const trafficColors = {
   tlOrange: palette.augmentColor({ color: orange }),
   tlGreen: palette.augmentColor({ color: green }),
   tlGrey: palette.augmentColor({ color: grey }),
+  tlLightGreen: palette.augmentColor({ color: lightGreen }),
 }
 
 const theme = createTheme({

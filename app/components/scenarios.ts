@@ -57,9 +57,22 @@ export const SCENARIOS: Scenario[] = [
   {
     name: "Zebra crossing",
     description: "Cars and pedestrians share the road. Who will wait?",
-    setup: "One phone faces the 'cars', the other faces the 'pedestrians'.",
+    setup:
+      "One phone faces the 'cars', the other the 'pedestrians'. In fullscreen, tap the speaker for crossing sounds.",
     layout: "zebra",
-    config: [[DEFAULT_LIGHT_CONFIG], [HALF_OFFSETTED.withPreset(PRESETS[PresetId.PEDESTRIAN])]],
+    // pedestrians walk 2-11 s, hurry 11-15 s; cars are red 0-16 s
+    config: [
+      [DEFAULT_LIGHT_CONFIG],
+      [
+        DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.PEDESTRIAN_FLASHING])
+          .forceWithPhases([
+            new Phase(State.RED, 17_000),
+            new Phase(State.GREEN, 9_000),
+            new Phase(State.GREEN_FLASHING, 4_000),
+          ])
+          .withOffset(15_000),
+      ],
+    ],
   },
   {
     name: "T-junction",

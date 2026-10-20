@@ -2,6 +2,7 @@ import { describe, expect, test, it } from "vitest"
 import { DEFAULT_INTERSECTION_CONFIG } from "../app/domain/IntersectionConfig"
 import { DEFAULT_LIGHT_CONFIG as DEFAULT_LIGHT_CONFIG } from "../app/domain/LightConfig"
 import { IntersectionConfigParser, lightConfigParser } from "../app/url"
+import { SCENARIOS } from "../app/components/scenarios"
 
 describe("Url", () => {
   it("serializes LightConfig back and forth", () => {
@@ -11,6 +12,15 @@ describe("Url", () => {
     console.log(serialized)
 
     expect(parser.parse(serialized)).toEqual([DEFAULT_LIGHT_CONFIG])
+  })
+
+  it("serializes a 3-phase pedestrian light back and forth", () => {
+    const parser = lightConfigParser(DEFAULT_INTERSECTION_CONFIG)
+    const pedestrian = SCENARIOS.find((s) => s.layout == "zebra")!.config[1]
+    const serialized = parser.serialize(pedestrian)
+
+    expect(serialized).toContain("GF4")
+    expect(parser.parse(serialized)).toEqual(pedestrian)
   })
 
   it("serializes IntersectionConfgi back and forth", () => {

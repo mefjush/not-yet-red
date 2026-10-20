@@ -5,6 +5,8 @@ import { PresetId } from "./Preset"
 import { Preset, PRESETS } from "./Preset"
 
 const DEFAULT_NEW_PHASE_DURATION = 2_000
+// Polish signal rules (warunki techniczne, pkt 8.2 b): flashing green for pedestrians lasts 4 s
+const NEW_PHASE_DURATIONS: Partial<Record<State, number>> = { [State.GREEN_FLASHING]: 4_000 }
 
 export class TimeRange {
   constructor(
@@ -79,7 +81,7 @@ export default class LightConfig {
     const newPhases = preset.states.map(
       (state) =>
         this.phases.find((phase) => phase.state == state) ||
-        new Phase(state, DEFAULT_NEW_PHASE_DURATION),
+        new Phase(state, NEW_PHASE_DURATIONS[state] ?? DEFAULT_NEW_PHASE_DURATION),
     )
     return new LightConfig(this.intersectionConfig, this.offset, newPhases, preset)
   }

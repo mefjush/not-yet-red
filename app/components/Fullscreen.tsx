@@ -13,12 +13,14 @@ export default function Fullscreen({
   lightGroups,
   lights,
   currentTimestamp,
+  timeCorrection,
 }: {
   enabled: boolean
   onDisabled: () => void
   lightGroups: LightGroups
   lights: TrafficLight[]
   currentTimestamp: number
+  timeCorrection: number
 }) {
   const fullscreenRef = useRef<HTMLDivElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -74,7 +76,13 @@ export default function Fullscreen({
       className="fullscreen"
       sx={{ display: enabled ? "block" : "none", bgcolor: "background.default" }}
     >
-      <Screen lightGroups={lightGroups} lights={lights} currentTimestamp={currentTimestamp} />
+      <Screen
+        lightGroups={lightGroups}
+        lights={lights}
+        currentTimestamp={currentTimestamp}
+        timeCorrection={timeCorrection}
+        active={enabled}
+      />
       <IconButton
         aria-label="Exit fullscreen"
         onClick={() => document.exitFullscreen()}

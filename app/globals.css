@@ -94,3 +94,14 @@
     scale: 0.62;
   }
 }
+
+/* LightHead.tsx: flashing green, 1 s on/off; starts when the phase starts, so phones blink together */
+/* on for the first half second (the element's own opacity), off for the second */
+@keyframes tl-flash {
+  50% {
+    opacity: var(--tl-off-opacity, 0);
+  }
+}
+.tl-flashing {
+  animation: tl-flash 1s step-end infinite;
+}

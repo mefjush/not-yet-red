@@ -12,6 +12,7 @@ import UTurnLeftIcon from "@mui/icons-material/UTurnLeft"
 const FOUR_STATE = [State.RED, State.RED_YELLOW, State.GREEN, State.YELLOW]
 const THREE_STATE = [State.RED, State.GREEN, State.YELLOW]
 const TWO_STATE = [State.RED, State.GREEN]
+const PEDESTRIAN_THREE_STATE = [State.RED, State.GREEN, State.GREEN_FLASHING]
 
 const THREE_COLOR: SegmentColor[] = ["tlRed", "tlYellow", "tlGreen"]
 const TWO_COLOR: SegmentColor[] = ["tlRed", "tlGreen"]
@@ -89,6 +90,7 @@ export enum PresetId {
   FOUR_PHASE = "FOUR_PHASE",
   THREE_PHASE = "THREE_PHASE",
   PEDESTRIAN = "PEDESTRIAN",
+  PEDESTRIAN_FLASHING = "PEDESTRIAN_FLASHING",
   LEFT = "LEFT",
   RIGHT = "RIGHT",
   CONDITIONAL_RIGHT = "CONDITIONAL_RIGHT",
@@ -100,7 +102,20 @@ export const PRESETS = Object.fromEntries(
   [
     new Preset(PresetId.FOUR_PHASE, "4-Phase", SymbolId.NONE, THREE_COLOR, FOUR_STATE),
     new Preset(PresetId.THREE_PHASE, "3-Phase", SymbolId.NONE, THREE_COLOR, THREE_STATE),
-    new Preset(PresetId.PEDESTRIAN, "Pedestrian", SymbolId.PEDESTRIAN, TWO_COLOR, TWO_STATE),
+    new Preset(
+      PresetId.PEDESTRIAN,
+      "Pedestrian (2-phase)",
+      SymbolId.PEDESTRIAN,
+      TWO_COLOR,
+      TWO_STATE,
+    ),
+    new Preset(
+      PresetId.PEDESTRIAN_FLASHING,
+      "Pedestrian (3-phase)",
+      SymbolId.PEDESTRIAN,
+      TWO_COLOR,
+      PEDESTRIAN_THREE_STATE,
+    ),
     new Preset(PresetId.LEFT, "Left", SymbolId.LEFT, THREE_COLOR, FOUR_STATE),
     new Preset(PresetId.RIGHT, "Right", SymbolId.RIGHT, THREE_COLOR, FOUR_STATE),
     new Preset(PresetId.STRAIGHT, "Straight", SymbolId.STRAIGHT, THREE_COLOR, FOUR_STATE),

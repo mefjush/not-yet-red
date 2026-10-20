@@ -17,6 +17,7 @@ function Lamp({
   size,
   color,
   on,
+  flashing,
   icon,
   litDisc,
   inverted,
@@ -24,12 +25,14 @@ function Lamp({
   size: number
   color: PaletteColor
   on: boolean
+  flashing: boolean
   icon?: React.ElementType
   // false: the lens stays black and only the symbol lights up (green arrows, pedestrians)
   litDisc: boolean
   inverted: boolean
 }) {
   const px = (fraction: number) => `${fraction * size}px`
+  const blink = on && flashing ? "tl-flashing" : undefined
 
   // tinted glass when off, so a dark lamp still reads as red, yellow or green
   const offLens = `radial-gradient(circle at 50% 40%, ${alpha(color.main, 0.28)} 0%, ${alpha(color.dark, 0.22)} 45%, #070707 100%)`
@@ -56,6 +59,7 @@ function Lamp({
       >
         {litDisc && (
           <Box
+            className={blink}
             sx={{
               position: "absolute",
               inset: 0,
@@ -68,6 +72,8 @@ function Lamp({
         )}
         {icon &&
           createElement(icon, {
+            className: blink,
+            style: { "--tl-off-opacity": inverted ? 0.55 : 0.12 } as React.CSSProperties,
             sx: {
               position: "absolute",
               inset: "15%",
@@ -93,6 +99,7 @@ function Lamp({
       {/* glow spilling past the lens */}
       {litDisc && (
         <Box
+          className={blink}
           sx={{
             position: "absolute",
             inset: 0,
@@ -164,12 +171,14 @@ export default function LightHead({
       >
         {segments.map((segment) => {
           const inverted = symbol.isInverted(segment)
+          const attributes = currentPhase.stateAttributes()
           return (
             <Lamp
               key={segment}
               size={size}
               color={theme.palette[segment]}
-              on={currentPhase.stateAttributes().segments.includes(segment)}
+              on={attributes.segments.includes(segment)}
+              flashing={attributes.flashing ?? false}
               icon={isImg ? symbol.getIcon(segment) : undefined}
               litDisc={!isImg || inverted}
               inverted={inverted}
