@@ -4,29 +4,78 @@
 import LightConfig, { TimeRange } from "../domain/LightConfig"
 import { Box, Slider } from "@mui/material"
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp"
-import { useEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef } from "react"
 import Tune from "./Tune"
 import React from "react"
 import { State, STATE_ATTRIBUTES } from "../domain/State"
 import { negativeSafeMod } from "../utils"
 
+// the "now" arrow under the timeline: one linear sweep per cycle, positioned from the synced
+// clock as soon as it appears, so it is right from the first frame (no catching up)
+function NowMarker({
+  cycleLength,
+  timeCorrection,
+  currentTimestamp,
+}: {
+  cycleLength: number
+  timeCorrection: number
+  // re-aligns on every light change, in case the device clock was adjusted
+  currentTimestamp: number
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  // layout effect: placed before the browser paints, so it never shows at 0 first
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el || typeof el.animate != "function") return
+    const sweep = el.animate([{ transform: "translateX(-100%)" }, { transform: "translateX(0)" }], {
+      duration: cycleLength,
+      iterations: Infinity,
+      easing: "linear",
+    })
+    sweep.currentTime = negativeSafeMod(Date.now() - timeCorrection, cycleLength)
+    el.style.visibility = "visible"
+    return () => sweep.cancel()
+  }, [cycleLength, timeCorrection, currentTimestamp])
+
+  return (
+    <Box
+      aria-hidden
+      sx={{ position: "absolute", left: 0, right: 0, top: 22, pointerEvents: "none" }}
+    >
+      {/* the arrow sits at the right edge of a full-width strip that slides in from the left */}
+      <Box
+        ref={ref}
+        // hidden until placed, e.g. in server-rendered HTML
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          transform: "translateX(-100%)",
+          visibility: "hidden",
+        }}
+      >
+        <ArrowDropUpIcon sx={{ mr: "-12px" }} />
+      </Box>
+    </Box>
+  )
+}
+
 export default function Timeline({
   currentTimestamp,
+  timeCorrection,
   lightConfig,
   selectedState,
   editable,
   onLightConfigChange,
 }: {
   currentTimestamp: number
+  // how far this device's clock is off the synced time
+  timeCorrection: number
   lightConfig: LightConfig
   selectedState?: State
   editable: boolean
   onLightConfigChange: (lightConfig: LightConfig) => void
 }) {
-  const [transitionStartTime, setTransitionStartTime] = useState(-1)
-
-  const hasPageBeenRendered = useRef(false)
-
   const uiOffset = useRef(0)
 
   const cycleLength = lightConfig.cycleLength()
@@ -44,23 +93,7 @@ export default function Timeline({
 
   const uiRange = useRef(toUiFirendlyTimeRange(timeRange))
 
-  const markPosition = currentTimestamp % cycleLength
-
-  const needsTransition = hasPageBeenRendered && transitionStartTime == markPosition
-
-  const transitionDuration = needsTransition ? cycleLength - markPosition : 0
-  const markPositionToSet = needsTransition ? cycleLength : markPosition
-
   const modCycle = (val: number) => negativeSafeMod(val, cycleLength)
-
-  useEffect(() => {
-    if (hasPageBeenRendered.current) {
-      setTransitionStartTime(markPosition)
-    } else {
-      hasPageBeenRendered.current = true
-      setTransitionStartTime(-2)
-    }
-  }, [markPosition, hasPageBeenRendered, transitionStartTime])
 
   const timeRangeChanged = !(
     timeRange.start == modCycle(uiRange.current.start) &&
@@ -127,16 +160,8 @@ export default function Timeline({
           onLightConfigChange: onLightConfigChange,
         } as object,
         rail: { style: { display: "none" } },
-        mark: { style: { display: "none" } },
-        markLabel: {
-          style: {
-            transitionDuration: `${transitionDuration}ms`,
-            transitionTimingFunction: "linear",
-          },
-        },
         thumb: { style: thumbStyle },
       }}
-      marks={[{ value: markPositionToSet, label: <ArrowDropUpIcon /> }]} // TODO client-server conflict
       sx={slideWithThumbOnly}
     />
   )
@@ -194,7 +219,15 @@ export default function Timeline({
   return (
     <Box sx={{ my: 2 }}>
       {rangeSlider}
-      {offsetSlider}
+      {/* room below the bar for the "now" arrow */}
+      <Box sx={{ position: "relative", pb: 2.5 }}>
+        {offsetSlider}
+        <NowMarker
+          cycleLength={cycleLength}
+          timeCorrection={timeCorrection}
+          currentTimestamp={currentTimestamp}
+        />
+      </Box>
     </Box>
   )
 }

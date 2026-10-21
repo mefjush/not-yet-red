@@ -138,6 +138,31 @@ export default function Screen({
       <div ref={swipeRef} className="swipe" onScroll={(e) => onScroll(e.currentTarget)}>
         {slides}
       </div>
+      {/* re-mounted whenever the shown phone changes, which restarts its fade */}
+      {active && loop && (
+        <Box
+          key={page}
+          className="phone-label"
+          role="status"
+          sx={{
+            position: "absolute",
+            top: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
+            px: 2,
+            py: 0.75,
+            borderRadius: 99,
+            bgcolor: "rgba(0, 0, 0, 0.65)",
+            color: "#fff",
+            typography: "subtitle1",
+            fontWeight: 700,
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+          }}
+        >
+          Phone {page + 1} of {count}
+        </Box>
+      )}
       {active && soundLight && (
         <Tooltip title={soundOn ? "Mute crossing sounds" : "Play crossing sounds"}>
           <IconButton

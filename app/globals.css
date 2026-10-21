@@ -17,12 +17,17 @@
   scroll-snap-stop: always;
 }
 
-/* AnimatedLogo.tsx */
+/* AnimatedLogo.tsx: one colour per word, shared by the animation and the hover */
+.logo {
+  --logo-green: #4caf50;
+  --logo-yellow: #fbc02d;
+  --logo-red: #f44336;
+}
 @keyframes logo-green {
   0%,
   5%,
   100% {
-    color: #4caf50;
+    color: var(--logo-green);
   }
   6%,
   99% {
@@ -32,7 +37,7 @@
 @keyframes logo-yellow {
   6%,
   11% {
-    color: #ffeb3b;
+    color: var(--logo-yellow);
   }
   0%,
   5%,
@@ -44,7 +49,7 @@
 @keyframes logo-red {
   12%,
   99% {
-    color: #f44336;
+    color: var(--logo-red);
   }
   0%,
   11%,
@@ -65,13 +70,13 @@
   animation: none;
 }
 .logo:hover .logo-green {
-  color: #4caf50;
+  color: var(--logo-green);
 }
 .logo:hover .logo-yellow {
-  color: #fbc02d;
+  color: var(--logo-yellow);
 }
 .logo:hover .logo-red {
-  color: #f44336;
+  color: var(--logo-red);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -104,4 +109,22 @@
 }
 .tl-flashing {
   animation: tl-flash 1s step-end infinite;
+}
+
+/* Screen.tsx: "Phone 2 of 3" pops up after entering fullscreen or swiping, then fades away */
+@keyframes phone-label {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.phone-label {
+  opacity: 0;
+  animation: phone-label 2.5s ease forwards;
 }

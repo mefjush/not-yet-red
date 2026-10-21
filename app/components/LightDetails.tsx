@@ -24,6 +24,7 @@ export default function LightDetails({
   index,
   lightConfig,
   currentTimestamp,
+  timeCorrection,
   light,
   selectedState,
   onClose,
@@ -34,6 +35,7 @@ export default function LightDetails({
   index: number
   lightConfig: LightConfig
   currentTimestamp: number
+  timeCorrection: number
   light: TrafficLight
   selectedState: State
   onClose: () => void
@@ -107,6 +109,7 @@ export default function LightDetails({
           </Typography>
           <Timeline
             currentTimestamp={currentTimestamp}
+            timeCorrection={timeCorrection}
             lightConfig={lightConfig}
             onLightConfigChange={onLightConfigChange}
             selectedState={selectedState}

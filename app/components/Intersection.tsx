@@ -9,7 +9,8 @@ import {
   Alert,
   Button,
   Container,
-  Fab,
+  Box,
+  GlobalStyles,
   IconButton,
   Paper,
   Snackbar,
@@ -18,6 +19,8 @@ import {
 } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
 import AddIcon from "@mui/icons-material/Add"
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import IosShareIcon from "@mui/icons-material/IosShare"
 import { lightConfigParser, IntersectionConfigParser, setupCode } from "../url"
 import IntersectionConfig, { DEFAULT_INTERSECTION_CONFIG } from "../domain/IntersectionConfig"
 import Fullscreen from "./Fullscreen"
@@ -216,6 +219,7 @@ export default function IntersectionComponent({
         return (
           <LightCard
             key={`light-${lightIdx}`}
+            timeCorrection={timeCorrection}
             index={lightIdx}
             phoneIdx={groupIdx}
             phoneCount={fixedLightGroups.length}
@@ -256,7 +260,7 @@ export default function IntersectionComponent({
   )
 
   return (
-    <Container maxWidth="md" sx={{ py: 2, pb: 12 }}>
+    <Container maxWidth="md" sx={{ py: 2 }}>
       <Stack spacing={2}>
         {outOfSync && (
           <Alert
@@ -289,7 +293,18 @@ export default function IntersectionComponent({
           initTimeSync={initTimeSync}
         />
 
-        {lightConfigs.length == 0 ? emptyState : phones}
+        {lightConfigs.length == 0 ? (
+          emptyState
+        ) : (
+          <>
+            {phones}
+            <div>
+              <Button variant="outlined" startIcon={<AddIcon />} onClick={() => onAdd()}>
+                Add phone
+              </Button>
+            </div>
+          </>
+        )}
       </Stack>
 
       <Fullscreen
@@ -316,6 +331,7 @@ export default function IntersectionComponent({
       {expanded != null && lights[expanded] && (
         <LightDetails
           open={expanded != null}
+          timeCorrection={timeCorrection}
           index={expanded}
           currentTimestamp={currentTimestamp}
           light={lights[expanded]}
@@ -330,6 +346,8 @@ export default function IntersectionComponent({
       )}
 
       <Snackbar
+        // above the bottom bar
+        sx={{ bottom: "calc(88px + env(safe-area-inset-bottom)) !important" }}
         open={undo != null}
         autoHideDuration={8000}
         onClose={() => setUndo(null)}
@@ -348,19 +366,54 @@ export default function IntersectionComponent({
         }
       />
 
-      <Fab
-        variant="extended"
-        color="primary"
-        onClick={() => onAdd()}
+      {/* keep the page footer clear of the bottom bar while this screen is shown */}
+      <GlobalStyles
+        styles={{ body: { paddingBottom: "calc(80px + env(safe-area-inset-bottom))" } }}
+      />
+      {/* the next steps, always in reach: share the setup, then start playing.
+          "mui-fixed" lets dialogs pad it like the page when they hide the scrollbar,
+          so the buttons don't jump sideways */}
+      <Box
+        className="mui-fixed"
         sx={{
           position: "fixed",
-          right: "max(20px, env(safe-area-inset-right))",
-          bottom: "max(20px, env(safe-area-inset-bottom))",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: "appBar",
+          borderTop: 1,
+          borderColor: "divider",
+          bgcolor: "rgba(var(--mui-palette-background-defaultChannel) / 0.85)",
+          backdropFilter: "blur(12px)",
+          pt: 1.5,
+          pb: "max(12px, env(safe-area-inset-bottom))",
         }}
       >
-        <AddIcon sx={{ mr: 1 }} />
-        Add phone
-      </Fab>
+        <Container maxWidth="md">
+          <Stack direction="row" spacing={1.5}>
+            <Button
+              fullWidth
+              size="large"
+              variant="outlined"
+              startIcon={<IosShareIcon />}
+              disabled={lightConfigs.length == 0}
+              onClick={() => setUiMode("share")}
+            >
+              Share to phones
+            </Button>
+            <Button
+              fullWidth
+              size="large"
+              variant="contained"
+              startIcon={<PlayArrowIcon />}
+              disabled={lightConfigs.length == 0}
+              onClick={() => setUiMode("fullscreen")}
+            >
+              Start
+            </Button>
+          </Stack>
+        </Container>
+      </Box>
     </Container>
   )
 }

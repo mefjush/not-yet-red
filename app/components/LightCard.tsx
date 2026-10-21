@@ -37,6 +37,7 @@ export default function LightCard({
   canMoveUp,
   canMoveDown,
   currentTimestamp,
+  timeCorrection,
   selectedState,
   setSelectedState,
   onDelete,
@@ -55,6 +56,7 @@ export default function LightCard({
   canMoveUp: boolean
   canMoveDown: boolean
   currentTimestamp: number
+  timeCorrection: number
   selectedState: State
   setSelectedState: (state: State) => void
   onDelete: () => void
@@ -157,6 +159,7 @@ export default function LightCard({
       <CardContent sx={{ pt: 0 }}>
         <Timeline
           currentTimestamp={currentTimestamp}
+          timeCorrection={timeCorrection}
           lightConfig={lightConfig}
           onLightConfigChange={onLightConfigChange}
           selectedState={selectedState}
