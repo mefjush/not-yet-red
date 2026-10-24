@@ -71,4 +71,11 @@ describe("TrafficLight out of order", () => {
 
     expect(statesOver(light)).toEqual(new Set([State.NONE]))
   })
+
+  it("keeps flashing red at a railway crossing, so drivers stop", () => {
+    const crossing = DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.RAILWAY])
+    const light = new TrafficLight(crossing, true)
+
+    expect(statesOver(light)).toEqual(new Set([State.RED_ALTERNATING]))
+  })
 })

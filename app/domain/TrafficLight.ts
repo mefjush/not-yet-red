@@ -4,10 +4,8 @@ import { negativeSafeMod } from "../utils"
 
 const DEFAULT_OFFSET = 0
 
-// out of order: blinking yellow, like a real car light
+// out of order: blinking yellow, like a real car light, unless the light type says otherwise
 const FAILURE_PHASES = [new Phase(State.YELLOW, 1000), new Phase(State.NONE, 1000)]
-// lights whose yellow means something else (a lane signal's "leave the lane" arrow) go dark
-const DARK_FAILURE_PHASES = [new Phase(State.NONE, 1000)]
 
 export default class TrafficLight {
   phases: Phase[]
@@ -18,9 +16,10 @@ export default class TrafficLight {
 
   constructor(lightConfig: LightConfig, failed: boolean) {
     this.lightConfig = lightConfig
+    const { failureState } = lightConfig.preset
     this.phases = failed
-      ? lightConfig.preset.failsDark
-        ? DARK_FAILURE_PHASES
+      ? failureState
+        ? [new Phase(failureState, 1000)]
         : FAILURE_PHASES
       : lightConfig.phases
     this.offset = failed ? 0 : lightConfig.offset || DEFAULT_OFFSET

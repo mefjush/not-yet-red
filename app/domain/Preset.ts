@@ -117,8 +117,8 @@ export class Preset {
   stateNames: Partial<Record<State, string>>
   // one square display showing one symbol at a time, instead of a lamp per symbol
   singleLens: boolean
-  // goes dark when out of order, instead of blinking yellow
-  failsDark: boolean
+  // what it shows when out of order, instead of blinking yellow
+  failureState?: State
 
   constructor(
     preset: PresetId,
@@ -130,7 +130,7 @@ export class Preset {
       horizontal?: boolean
       stateNames?: Partial<Record<State, string>>
       singleLens?: boolean
-      failsDark?: boolean
+      failureState?: State
     } = {},
   ) {
     this.presetId = preset
@@ -141,7 +141,7 @@ export class Preset {
     this.horizontal = options.horizontal ?? false
     this.stateNames = options.stateNames ?? {}
     this.singleLens = options.singleLens ?? false
-    this.failsDark = options.failsDark ?? false
+    this.failureState = options.failureState
   }
 
   phaseName(state: State): string {
@@ -201,7 +201,8 @@ export const PRESETS = Object.fromEntries(
       SymbolId.NONE,
       ["tlRed", "tlRed"],
       RAILWAY_STATE,
-      { horizontal: true },
+      // fail safe: a broken crossing keeps flashing red, so drivers stop when in doubt
+      { horizontal: true, failureState: State.RED_ALTERNATING },
     ),
     // runs like a car light, as for cyclists riding in a traffic lane
     new Preset(PresetId.BICYCLE, "Bicycle", SymbolId.BICYCLE, THREE_COLOR, FOUR_STATE),
@@ -231,7 +232,7 @@ export const PRESETS = Object.fromEntries(
       {
         singleLens: true,
         // a blinking ↘ would tell everyone to leave the lane; a dark signal just says "not working"
-        failsDark: true,
+        failureState: State.NONE,
         stateNames: {
           [State.RED]: "Lane closed (✕)",
           [State.GREEN]: "Lane open (↓)",
