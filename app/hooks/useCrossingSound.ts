@@ -34,8 +34,17 @@ export const unlockAudio = () => {
   audio.resume()
 }
 
+// phones suspend or interrupt audio (screen lock, other apps); try to get it going again
+const wakeAudio = () => {
+  if (audio && audio.state != "running") audio.resume().catch(() => {})
+}
+
 function tone(frequency: number, type: OscillatorType, volume: number, length: number) {
-  if (!audio || audio.state != "running") return
+  if (!audio) return
+  if (audio.state != "running") {
+    wakeAudio()
+    return
+  }
   const t = audio.currentTime
   const oscillator = audio.createOscillator()
   const gain = audio.createGain()
@@ -95,6 +104,7 @@ export default function useCrossingSound(light: TrafficLight | undefined, timeCo
 
   useEffect(() => {
     if (!enabled) return
+    document.addEventListener("visibilitychange", wakeAudio)
     let lastSlot = -Infinity
     let timer: ReturnType<typeof setTimeout>
 
@@ -108,6 +118,9 @@ export default function useCrossingSound(light: TrafficLight | undefined, timeCo
     }
 
     loop()
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener("visibilitychange", wakeAudio)
+    }
   }, [enabled, timeCorrection])
 }

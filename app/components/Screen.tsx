@@ -96,6 +96,18 @@ export default function Screen({
 
   useCrossingSound(active && soundOn ? soundLight : undefined, timeCorrection)
 
+  // browsers only start audio after a tap: while sound is on, any tap or key unlocks it, including
+  // the Start button that opens fullscreen (sound saved as on from an earlier visit needs this too)
+  useEffect(() => {
+    if (!soundOn) return
+    window.addEventListener("pointerdown", unlockAudio)
+    window.addEventListener("keydown", unlockAudio)
+    return () => {
+      window.removeEventListener("pointerdown", unlockAudio)
+      window.removeEventListener("keydown", unlockAudio)
+    }
+  }, [soundOn])
+
   const toggleSound = () => {
     const on = !soundOn
     if (on) unlockAudio()
@@ -130,11 +142,7 @@ export default function Screen({
   })
 
   return (
-    <Box
-      sx={{ position: "relative", height: "100%", width: "100%" }}
-      // a sound setting saved earlier still needs a tap before the browser plays anything
-      onPointerDown={soundOn ? unlockAudio : undefined}
-    >
+    <Box sx={{ position: "relative", height: "100%", width: "100%" }}>
       <div ref={swipeRef} className="swipe" onScroll={(e) => onScroll(e.currentTarget)}>
         {slides}
       </div>
