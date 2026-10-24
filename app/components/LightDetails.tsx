@@ -48,7 +48,7 @@ export default function LightDetails({
   return (
     <Dialog fullScreen={fullScreen} fullWidth maxWidth="md" open={open} onClose={onClose}>
       <AppToolbar>
-        <BackButton />
+        <BackButton onClick={onClose} />
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Light {index + 1}
         </Typography>

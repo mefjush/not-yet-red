@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Clock from "../domain/Clock"
 import TrafficLight from "../domain/TrafficLight"
 import LightConfig, { DEFAULT_LIGHT_CONFIG } from "../domain/LightConfig"
@@ -155,13 +155,68 @@ export default function IntersectionComponent({
     )
   }
 
+  // The editor is a history entry, so the phone's back button closes it. Every other way of
+  // closing it goes back too, so closed editors never pile up in history to be reopened.
+  // A page opened with the editor already open has no entry of ours to go back to.
+  const editorPushed = useRef(false)
+  const openEditor = (lightIdx: number) => {
+    editorPushed.current = true
+    setExpanded(lightIdx)
+  }
+  const closeEditor = () => {
+    if (editorPushed.current) {
+      window.history.back()
+    } else {
+      setExpanded(null, { history: "replace" })
+    }
+  }
+
+  // Edits made in the editor live in its history entry; going back returns to the entry from
+  // before it opened, with the lights from before the edits. Track the lights before and during
+  // the editor, and when it closes and the lights jump back to "before", put the edits back.
+  const lightsQuery = lightGroupsParser.serialize(theLightGroups.raw())
+  const previous = useRef({ expanded, lights: lightsQuery })
+  const editorLights = useRef<{ before: string; latest: string } | null>(null)
+  const pendingRestore = useRef<{ before: string; latest: string } | null>(null)
+  useEffect(() => {
+    const was = previous.current
+    previous.current = { expanded, lights: lightsQuery }
+
+    if (expanded != null) {
+      if (was.expanded == null) {
+        editorLights.current = { before: was.lights, latest: lightsQuery }
+      } else if (editorLights.current && lightsQuery != editorLights.current.before) {
+        // "before" again while still open is the revert arriving early, not an edit
+        editorLights.current.latest = lightsQuery
+      }
+      return
+    }
+
+    if (was.expanded != null && editorLights.current) {
+      const closed = editorLights.current
+      editorLights.current = null
+      editorPushed.current = false
+      pendingRestore.current = closed
+      // the old address may arrive a moment later; give up if it never does
+      setTimeout(() => {
+        if (pendingRestore.current == closed) pendingRestore.current = null
+      }, 1000)
+    }
+
+    const pending = pendingRestore.current
+    if (pending && lightsQuery == pending.before && pending.latest != pending.before) {
+      pendingRestore.current = null
+      setLightGroups(lightGroupsParser.parse(pending.latest))
+    }
+  })
+
   // defaults to adding a new phone
   const onAdd = (groupIdx = fixedLightGroups.length) => {
     const updated = theLightGroups.withLightAdded(DEFAULT_LIGHT_CONFIG, groupIdx)
     const newIdx = updated.idLookup(groupIdx, updated.raw()[groupIdx].length - 1)
     setLightGroups(updated.raw())
     setSelectedStates(selectedStates.toSpliced(newIdx, 0, DEFAULT_LIGHT_CONFIG.phases[0].state))
-    setExpanded(newIdx)
+    openEditor(newIdx)
   }
 
   const onDeleteOne = (lightIdx: number) => {
@@ -170,7 +225,7 @@ export default function IntersectionComponent({
     setLightGroups(theLightGroups.withLightDeleted(lightIdx).raw())
     setSelectedStates([...selectedStates].filter((ls, i) => i != lightIdx))
     setUiMode("none")
-    setExpanded(null)
+    if (expanded != null) closeEditor()
     setUndo(() => () => {
       setLightGroups(previousGroups)
       setSelectedStates(previousStates)
@@ -238,7 +293,7 @@ export default function IntersectionComponent({
             onLightConfigChange={(lightConfig: LightConfig) =>
               updateLightConfig(lightConfig, lightIdx)
             }
-            setExpanded={(expanded: boolean) => setExpanded(expanded ? lightIdx : null)}
+            setExpanded={(open: boolean) => (open ? openEditor(lightIdx) : closeEditor())}
           />
         )
       })}
@@ -337,7 +392,7 @@ export default function IntersectionComponent({
           light={lights[expanded]}
           lightConfig={lightConfigs[expanded]}
           selectedState={selectedStates[expanded]}
-          onClose={() => setExpanded(null)}
+          onClose={closeEditor}
           onLightConfigChange={(lightConfig: LightConfig) =>
             updateLightConfig(lightConfig, expanded)
           }
