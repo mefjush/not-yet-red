@@ -1,6 +1,7 @@
 import { describe, expect, test, it } from "vitest"
 import { State } from "../../app/domain/State"
-import { TEST_LIGHT_CONFIG } from "../../app/domain/LightConfig"
+import { DEFAULT_LIGHT_CONFIG, TEST_LIGHT_CONFIG } from "../../app/domain/LightConfig"
+import { PRESETS, PresetId } from "../../app/domain/Preset"
 import TrafficLight from "../../app/domain/TrafficLight"
 
 const TEST_INTERSECTION_SETTINGS = {
@@ -51,5 +52,23 @@ describe("TrafficLight", () => {
     const trafficLight = new TrafficLight(LIGHT_SETTINGS, false)
 
     expect(trafficLight.currentPhase(60_000).state).toBe(State.RED)
+  })
+})
+
+describe("TrafficLight out of order", () => {
+  const statesOver = (light: TrafficLight) =>
+    new Set(Array.from({ length: 20 }, (_, i) => light.currentPhase(i * 250).state))
+
+  it("blinks yellow on a car light", () => {
+    const light = new TrafficLight(DEFAULT_LIGHT_CONFIG, true)
+
+    expect(statesOver(light)).toEqual(new Set([State.YELLOW, State.NONE]))
+  })
+
+  it("goes dark on a lane signal instead of showing 'leave the lane'", () => {
+    const lane = DEFAULT_LIGHT_CONFIG.withPreset(PRESETS[PresetId.LANE_CONTROL])
+    const light = new TrafficLight(lane, true)
+
+    expect(statesOver(light)).toEqual(new Set([State.NONE]))
   })
 })
