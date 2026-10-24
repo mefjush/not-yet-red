@@ -49,6 +49,21 @@ describe("bicycle, warning and tram presets", () => {
     expect(phasesOf(PresetId.FLASHING_YELLOW)).toEqual([[State.YELLOW_FLASHING, 30_000]])
   })
 
+  it("runs a tram / bus (SB) signal like a car light, with three different white symbols", () => {
+    const sb = PRESETS[PresetId.TRAM_BUS]
+    const symbol = SYMBOLS[sb.symbolId]
+
+    expect(phasesOf(PresetId.TRAM_BUS)).toEqual(phasesOf(PresetId.FOUR_PHASE))
+    expect(symbol.white).toBe(true)
+    expect(new Set(sb.colors.map((c) => symbol.getIcon(c))).size).toBe(3)
+    expect(sb.states.map((s) => sb.phaseName(s))).toEqual([
+      "Stop (—)",
+      "Get ready (— and ··)",
+      "Go (|)",
+      "Stop if you can (··)",
+    ])
+  })
+
   it("shows a tram's bars as stop, go and stop soon, with a 4 s flashing go bar", () => {
     const tram = PRESETS[PresetId.TRAM]
 

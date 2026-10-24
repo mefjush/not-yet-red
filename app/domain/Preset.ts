@@ -24,6 +24,11 @@ const VerticalBarIcon = createSvgIcon(
   createElement("path", { d: "M9.5 2h5v20h-5z" }),
   "VerticalBar",
 )
+// the SB signal's "two dots": two small squares in line with the ends of the bars, as on real signals
+const TwoDotsIcon = createSvgIcon(
+  createElement("path", { d: "M2 9.5h5v5H2zm15 0h5v5h-5z" }),
+  "TwoDots",
+)
 
 const FOUR_STATE = [State.RED, State.RED_YELLOW, State.GREEN, State.YELLOW]
 const THREE_STATE = [State.RED, State.GREEN, State.YELLOW]
@@ -46,6 +51,7 @@ export enum SymbolId {
   BICYCLE = "BICYCLE",
   TRAM = "TRAM",
   LANE = "LANE",
+  TRAM_BUS = "TRAM_BUS",
 }
 
 export class Symbol {
@@ -97,6 +103,10 @@ export const SYMBOLS = Object.fromEntries(
     new Symbol(SymbolId.BICYCLE, false, DirectionsBikeIcon),
     // the "red" lamp is the stop bar, the "green" lamp the go bar
     new Symbol(SymbolId.TRAM, false, HorizontalBarIcon, VerticalBarIcon, true),
+    // SB: stop bar, the two dots in the middle, go bar
+    new Symbol(SymbolId.TRAM_BUS, false, HorizontalBarIcon, VerticalBarIcon, true, {
+      tlYellow: TwoDotsIcon,
+    }),
     new Symbol(SymbolId.LANE, false, CloseIcon, undefined, false, {
       tlRed: CloseIcon,
       tlGreen: ArrowDownwardIcon,
@@ -164,6 +174,7 @@ export enum PresetId {
   FLASHING_YELLOW = "FLASHING_YELLOW",
   TRAM = "TRAM",
   LANE_CONTROL = "LANE_CONTROL",
+  TRAM_BUS = "TRAM_BUS",
 }
 
 export const PRESETS = Object.fromEntries(
@@ -215,11 +226,20 @@ export const PRESETS = Object.fromEntries(
       WARNING_STATE,
     ),
     // Polish ST tram signal: horizontal bar stop, vertical bar go, flashing vertical bar stop soon
-    new Preset(PresetId.TRAM, "Tram", SymbolId.TRAM, TWO_COLOR, PEDESTRIAN_THREE_STATE, {
+    new Preset(PresetId.TRAM, "Tram (ST)", SymbolId.TRAM, TWO_COLOR, PEDESTRIAN_THREE_STATE, {
       stateNames: {
         [State.RED]: "Stop (—)",
         [State.GREEN]: "Go (|)",
         [State.GREEN_FLASHING]: "Stop soon (flashing |)",
+      },
+    }),
+    // Polish SB signal for buses and trams: phases like a car light, drawn as white symbols
+    new Preset(PresetId.TRAM_BUS, "Tram / bus (SB)", SymbolId.TRAM_BUS, THREE_COLOR, FOUR_STATE, {
+      stateNames: {
+        [State.RED]: "Stop (—)",
+        [State.RED_YELLOW]: "Get ready (— and ··)",
+        [State.GREEN]: "Go (|)",
+        [State.YELLOW]: "Stop if you can (··)",
       },
     }),
     // Polish S-4 / S-7 lane signals, as in tunnels: closed, open, then leave the lane before it closes
