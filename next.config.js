@@ -15,7 +15,16 @@ module.exports = async (phase) => {
     swDest: "public/sw.js",
     scope: "/",
     // a fresh revision per build so cached pages are refreshed after each deploy
-    additionalPrecacheEntries: ["/", "/index.txt", "/intersection"].map((url) => ({
+    // everything a visitor can open, so the installed app works fully offline after its first visit
+    additionalPrecacheEntries: [
+      "/",
+      "/index.txt",
+      "/intersection",
+      "/privacy",
+      "/icon.svg",
+      "/favicon.ico",
+      "/manifest.webmanifest",
+    ].map((url) => ({
       url,
       revision: Date.now().toString(),
     })),
